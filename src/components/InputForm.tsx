@@ -1,24 +1,64 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import type { Person, PaymentItem } from '../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus, faPlus, faCheck, faTimes, faPen, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import type { RootState } from '../store/store';
+import {
+  addPerson,
+  updatePersonName,
+  deletePerson,
+  addPayment,
+  updatePayment,
+  deletePayment,
+} from '../store/peopleSlice';
 
 interface InputFormProps {
-  onAddPerson: () => void;
-  onAddPayment: (personId: string, payment: Omit<PaymentItem, 'id'>) => void;
-  onUpdatePersonName: (personId: string, newName: string) => void;
-  onUpdatePayment: (personId: string, paymentId: string, payment: Omit<PaymentItem, 'id'>) => void;
-  onDeletePerson: (personId: string) => void;
-  onDeletePayment: (personId: string, paymentId: string) => void;
-  people: Person[];
+  onShowResult: () => void;
 }
 
-export const InputForm = ({ onAddPerson, onAddPayment, onUpdatePersonName, onUpdatePayment, onDeletePerson, onDeletePayment, people }: InputFormProps) => {
+export const InputForm = ({ onShowResult }: InputFormProps) => {
   const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const dispatch = useDispatch();
+  const people = useSelector((state: RootState) => state.people);
+
+  const handleAddPerson = () => {
+    dispatch(addPerson());
+  };
+
+  const handleDeletePerson = (personId: string) => {
+    if (window.confirm('この人物を削除してもよろしいですか？\n関連する支払い情報もすべて削除されます。')) {
+      dispatch(deletePerson(personId));
+    }
+  };
+
+  const handleAddPayment = (personId: string, payment: Omit<PaymentItem, 'id'>) => {
+    dispatch(addPayment({ personId, payment }));
+  };
+
+  const handleUpdatePersonName = (personId: string, newName: string) => {
+    dispatch(updatePersonName({ personId, newName }));
+  };
+
+  const handleUpdatePayment = (personId: string, paymentId: string, updatedPayment: Omit<PaymentItem, 'id'>) => {
+    dispatch(updatePayment({ personId, paymentId, payment: updatedPayment }));
+  };
+
+  const handleDeletePayment = (personId: string, paymentId: string) => {
+    if (window.confirm('この項目を削除してもよろしいですか？')) {
+      dispatch(deletePayment({ personId, paymentId }));
+    }
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex justify-between items-center">
+        <button
+          onClick={onShowResult}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        >
+          計算結果を見る
+        </button>
         <button
           onClick={() => setIsDeleteMode(!isDeleteMode)}
           className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
@@ -48,18 +88,18 @@ export const InputForm = ({ onAddPerson, onAddPayment, onUpdatePersonName, onUpd
         <div key={person.id} className="p-4 border border-gray-200 rounded-lg shadow-sm bg-white relative">
           <PersonPaymentForm
             person={person}
-            onAddPayment={onAddPayment}
-            onUpdateName={onUpdatePersonName}
-            onUpdatePayment={onUpdatePayment}
-            onDeletePerson={onDeletePerson}
-            onDeletePayment={onDeletePayment}
+            onAddPayment={handleAddPayment}
+            onUpdateName={handleUpdatePersonName}
+            onUpdatePayment={handleUpdatePayment}
+            onDeletePerson={handleDeletePerson}
+            onDeletePayment={handleDeletePayment}
             isDeleteMode={isDeleteMode}
           />
         </div>
       ))}
 
       <button
-        onClick={onAddPerson}
+        onClick={handleAddPerson}
         className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
       >
         <FontAwesomeIcon icon={faUserPlus} className="mr-2" />
