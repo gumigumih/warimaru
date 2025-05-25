@@ -15,8 +15,11 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@reduxjs/toolkit": "^2.8.2",
     "@tailwindcss/vite": "^4.1.7",
+    "@types/cleave.js": "^1.4.12",
+    "cleave.js": "^1.6.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-number-format": "^5.4.4",
     "react-redux": "^9.2.0",
     "tailwindcss": "^4.1.7"
   },

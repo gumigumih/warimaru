@@ -13,6 +13,9 @@ import {
   deletePayment,
   setDetailMode,
 } from '../store/peopleSlice';
+import Cleave from 'cleave.js/react';
+import 'cleave.js/dist/addons/cleave-phone.jp';
+import type { ChangeEvent, KeyboardEvent } from 'react';
 
 interface InputFormProps {
   onShowResult: () => void;
@@ -160,39 +163,31 @@ const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMode }: P
     }
   }, [person.payments, isDetailMode]);
 
-  const handleRowChange = (index: number, field: 'amount' | 'description', value: string) => {
-    const newRows = [...inputRows];
-    newRows[index] = { ...newRows[index], [field]: value };
-    setInputRows(newRows);
-
-    // 行の値を更新（空の値も含む）
-    const row = newRows[index];
+  const handleRowBlur = (index: number, field: 'amount' | 'description', value: string) => {
+    const row = inputRows[index];
     if (row.id) {
+      const amount = field === 'amount' ? Number(value.replace(/,/g, '')) || 0 : Number(row.amount.replace(/,/g, '')) || 0;
+      const description = field === 'description' ? value : row.description;
+      
       dispatch(updatePayment({
         personId: person.id,
         paymentId: row.id,
         payment: {
-          amount: Number(row.amount) || 0,
-          description: row.description || '',
+          amount,
+          description,
         }
       }));
     }
-
-    // 最後の行が入力されたら新しい空の行を追加
-    if (index === inputRows.length - 1 && (row.amount || row.description)) {
-      setInputRows([...newRows, { id: crypto.randomUUID(), amount: '', description: '' }]);
-    }
   };
 
-  const handleSimpleTotalChange = (value: string) => {
-    setSimpleTotal(value);
-    // 既存の支払いをクリアして新しい合計額を設定
+  const handleSimpleTotalBlur = (value: string) => {
     if (value) {
+      const amount = Number(value.replace(/,/g, '')) || 0;
       // 一度に更新するために、既存の支払いをクリアして新しい支払いを追加
       const newPayment = {
         personId: person.id,
         payment: {
-          amount: Number(value),
+          amount,
           description: '',
         }
       };
@@ -212,7 +207,7 @@ const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMode }: P
     setInputRows([...inputRows, { id: crypto.randomUUID(), amount: '', description: '' }]);
   };
 
-  const handleKeyDown = (index: number, field: 'amount' | 'description', e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (index: number, field: 'amount' | 'description', e: KeyboardEvent<HTMLInputElement>) => {
     const currentRow = inputRows[index];
     const isRowEmpty = !currentRow.amount && !currentRow.description;
     const isRowComplete = currentRow.amount && currentRow.description;
@@ -304,22 +299,46 @@ const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMode }: P
   const renderPaymentRow = (row: { id: string; amount: string; description: string }, index: number) => {
     return (
       <div key={row.id} className="flex gap-2 items-center">
-        <input
-          type="number"
-          value={row.amount}
-          onChange={(e) => handleRowChange(index, 'amount', e.target.value)}
-          onKeyDown={(e) => handleKeyDown(index, 'amount', e)}
-          data-row={index}
-          data-field="amount"
-          placeholder="金額"
-          className="w-32 rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          min="0"
-        />
+        <div className="relative">
+          <Cleave
+            value={row.amount}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              const newRows = [...inputRows];
+              newRows[index] = { ...newRows[index], amount: e.target.value };
+              setInputRows(newRows);
+            }}
+            onBlur={(e: ChangeEvent<HTMLInputElement>) => handleRowBlur(index, 'amount', e.target.value)}
+            onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => handleKeyDown(index, 'amount', e)}
+            data-row={index}
+            data-field="amount"
+            placeholder="金額"
+            className="w-32 rounded-md bg-white/80 p-2 pr-8 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            options={{
+              numeral: true,
+              numeralThousandsGroupStyle: 'thousand',
+              numeralDecimalScale: 0,
+              numeralPositiveOnly: true,
+              stripLeadingZeroes: true,
+              numeralIntegerScale: 10,
+              rawValueTrimPrefix: true,
+              numeralDecimalMark: '.',
+              delimiter: ',',
+              prefix: '',
+              noImmediatePrefix: true,
+            }}
+          />
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">円</span>
+        </div>
         <input
           type="text"
           value={row.description}
-          onChange={(e) => handleRowChange(index, 'description', e.target.value)}
-          onKeyDown={(e) => handleKeyDown(index, 'description', e)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            const newRows = [...inputRows];
+            newRows[index] = { ...newRows[index], description: e.target.value };
+            setInputRows(newRows);
+          }}
+          onBlur={(e: ChangeEvent<HTMLInputElement>) => handleRowBlur(index, 'description', e.target.value)}
+          onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => handleKeyDown(index, 'description', e)}
           data-row={index}
           data-field="description"
           placeholder="項目名"
@@ -405,16 +424,31 @@ const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMode }: P
             </button>
           </>
         ) : (
-          <div className="flex gap-2 items-center">
-            <input
-              type="number"
+          <div className="relative">
+            <Cleave
               value={simpleTotal}
-              onChange={(e) => handleSimpleTotalChange(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                setSimpleTotal(e.target.value);
+              }}
+              onBlur={(e: ChangeEvent<HTMLInputElement>) => handleSimpleTotalBlur(e.target.value)}
               data-simple-total
               placeholder="合計支払額"
-              className="w-full rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              min="0"
+              className="w-full rounded-md bg-white/80 p-2 pr-8 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              options={{
+                numeral: true,
+                numeralThousandsGroupStyle: 'thousand',
+                numeralDecimalScale: 0,
+                numeralPositiveOnly: true,
+                stripLeadingZeroes: true,
+                numeralIntegerScale: 10,
+                rawValueTrimPrefix: true,
+                numeralDecimalMark: '.',
+                delimiter: ',',
+                prefix: '',
+                noImmediatePrefix: true,
+              }}
             />
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">円</span>
           </div>
         )}
       </div>
