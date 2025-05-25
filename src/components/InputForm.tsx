@@ -122,7 +122,7 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
 
       <div className="space-y-6 bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-sm">
         {people.map((person) => (
-          <div key={person.id} className="">
+          <div key={person.id} className="pb-6 border-b border-gray-300">
             <PersonPaymentForm
               person={person}
               onAddPayment={handleAddPayment}
@@ -406,7 +406,7 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson,
           </div>
         ) : (
           <div className="flex items-center gap-2 w-full">
-            <h3 className="text-lg font-medium text-gray-900">{person.name}</h3>
+            <h3 className="text-lg font-bold text-gray-900">{person.name}</h3>
             <button
               onClick={() => setIsEditing(true)}
               className="text-gray-400 hover:text-gray-500"
