@@ -22,11 +22,11 @@ export const peopleSlice = createSlice({
     addPerson: (state) => {
       const nextLetter = String.fromCharCode(65 + state.people.length); // 65は'A'のASCIIコード
       if (state.people.length < 6) { // AからFまで（6文字）に制限
-        state.people.push({
-          id: crypto.randomUUID(),
+      state.people.push({
+        id: crypto.randomUUID(),
           name: `${nextLetter}さん`,
-          payments: [],
-        });
+        payments: [],
+      });
       }
     },
     updatePersonName: (state, action: PayloadAction<{ personId: string; newName: string }>) => {

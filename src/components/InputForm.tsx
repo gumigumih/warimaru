@@ -12,6 +12,7 @@ import {
   updatePayment,
   deletePayment,
   setDetailMode,
+  updatePersonName,
 } from '../store/peopleSlice';
 import Cleave from 'cleave.js/react';
 import 'cleave.js/dist/addons/cleave-phone.jp';
@@ -360,13 +361,26 @@ const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMode }: P
               type="text"
               value={editedName.replace(/さん$/, '')}
               onChange={(e) => setEditedName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                  e.preventDefault();
+                  const newName = editedName.endsWith('さん') ? editedName : `${editedName}さん`;
+                  dispatch(updatePersonName({ personId: person.id, newName }));
+                  setIsEditing(false);
+                } else if (e.key === 'Escape') {
+                  e.preventDefault();
+                  setIsEditing(false);
+                  setEditedName(person.name);
+                }
+              }}
               className="text-lg font-medium text-gray-900 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               autoFocus
             />
             <button
               onClick={() => {
+                const newName = editedName.endsWith('さん') ? editedName : `${editedName}さん`;
+                dispatch(updatePersonName({ personId: person.id, newName }));
                 setIsEditing(false);
-                setEditedName(person.name);
               }}
               className="text-blue-600 hover:text-blue-700"
             >
