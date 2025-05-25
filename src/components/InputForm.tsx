@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type { Person, PaymentItem } from '../types';
+import type { Person } from '../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus, faPlus, faCheck, faTimes, faPen, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import type { RootState } from '../store/store';
 import type { AppDispatch } from '../store/store';
 import {
   addPerson,
-  updatePersonName,
   deletePerson,
   addPayment,
   updatePayment,
@@ -39,42 +38,16 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
   };
 
   const handleShowResult = () => {
-    // 入力フォームの値は既にReduxストアに反映されているため、
-    // 追加の状態更新は不要です
     onShowResult();
   };
 
-  const handleAddPayment = (personId: string, payment: Omit<PaymentItem, 'id'>) => {
-    console.log('Adding payment:', { personId, payment });
-    dispatch(addPayment({ personId, payment }));
-  };
-
-  const handleUpdatePersonName = (personId: string, newName: string) => {
-    console.log('Updating person name:', { personId, newName });
-    dispatch(updatePersonName({ personId, newName }));
-  };
-
-  const handleUpdatePayment = (personId: string, paymentId: string, updatedPayment: Omit<PaymentItem, 'id'>) => {
-    console.log('Updating payment:', { personId, paymentId, updatedPayment });
-    dispatch(updatePayment({ personId, paymentId, payment: updatedPayment }));
-  };
-
-  const handleDeletePayment = (personId: string, paymentId: string) => {
-    if (window.confirm('この項目を削除してもよろしいですか？')) {
-      console.log('Deleting payment:', { personId, paymentId });
-      dispatch(deletePayment({ personId, paymentId }));
-    }
-  };
-
   const handleModeChange = () => {
-    // 詳細モードからシンプルモードへの切り替え時
     if (isDetailMode) {
-      // 2行以上入力されているか確認
       const hasMultipleRows = people.some(person => {
         const personForm = document.querySelector(`[data-person-id="${person.id}"]`) as HTMLElement;
         if (personForm) {
           const inputRows = Array.from(personForm.querySelectorAll('input[data-row]')) as HTMLInputElement[];
-          return inputRows.length > 2; // 金額と項目名の2つで1行なので、4つ以上で2行以上
+          return inputRows.length > 2;
         }
         return false;
       });
@@ -112,7 +85,7 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
               ON
             </span>
             <span className={`absolute right-2 text-xs font-medium ${
-              isDetailMode ? 'text-indigo-600' : 'text-gray-600'
+              isDetailMode ? 'text-blue-600' : 'text-gray-600'
             }`}>
               OFF
             </span>
@@ -122,11 +95,9 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
 
       <div className="space-y-6 bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-sm">
         {people.map((person) => (
-          <div key={person.id} className="pb-6 border-b border-gray-300">
+          <div key={person.id} className="">
             <PersonPaymentForm
               person={person}
-              onAddPayment={handleAddPayment}
-              onUpdateName={handleUpdatePersonName}
               onDeletePerson={handleDeletePerson}
               dispatch={dispatch}
               isDetailMode={isDetailMode}
@@ -156,14 +127,12 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
 
 interface PersonPaymentFormProps {
   person: Person;
-  onAddPayment: (personId: string, payment: Omit<PaymentItem, 'id'>) => void;
-  onUpdateName: (personId: string, newName: string) => void;
   onDeletePerson: (personId: string) => void;
   dispatch: AppDispatch;
   isDetailMode: boolean;
 }
 
-const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson, dispatch, isDetailMode }: PersonPaymentFormProps) => {
+const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMode }: PersonPaymentFormProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(person.name);
   const [inputRows, setInputRows] = useState<{ id: string; amount: string; description: string }[]>([]);
@@ -343,7 +312,7 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson,
           data-row={index}
           data-field="amount"
           placeholder="金額"
-          className="w-32 rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="w-32 rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           min="0"
         />
         <input
@@ -354,7 +323,7 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson,
           data-row={index}
           data-field="description"
           placeholder="項目名"
-          className="flex-1 rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="flex-1 rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
         />
         {row.id && (
           <button
@@ -382,7 +351,7 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson,
               type="text"
               value={editedName.replace(/さん$/, '')}
               onChange={(e) => setEditedName(e.target.value)}
-              className="text-lg font-medium text-gray-900 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              className="text-lg font-medium text-gray-900 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               autoFocus
             />
             <button
@@ -390,7 +359,7 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson,
                 setIsEditing(false);
                 setEditedName(person.name);
               }}
-              className="text-indigo-600 hover:text-indigo-700"
+              className="text-blue-600 hover:text-blue-700"
             >
               <FontAwesomeIcon icon={faCheck} />
             </button>
@@ -443,7 +412,7 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson,
               onChange={(e) => handleSimpleTotalChange(e.target.value)}
               data-simple-total
               placeholder="合計支払額"
-              className="w-full rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              className="w-full rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               min="0"
             />
           </div>
