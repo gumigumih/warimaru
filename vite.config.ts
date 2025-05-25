@@ -10,5 +10,6 @@ export default defineConfig({
       usePolling: true,   // ポーリング監視を強制
       interval: 100       // ポーリング間隔（ミリ秒）
     },
-  }
+  },
+  base: '/',  // カスタムドメインの場合はルートパスを使用
 })
