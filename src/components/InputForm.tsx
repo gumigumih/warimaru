@@ -39,67 +39,8 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
   };
 
   const handleShowResult = () => {
-    // 各人物の入力行を保存
-    people.forEach(person => {
-      // 既存の項目をクリア
-      person.payments.forEach(payment => {
-        dispatch(deletePayment({
-          personId: person.id,
-          paymentId: payment.id,
-        }));
-      });
-
-      if (isDetailMode) {
-        const personForm = document.querySelector(`[data-person-id="${person.id}"]`) as HTMLElement;
-        if (personForm) {
-          const inputRows = Array.from(personForm.querySelectorAll('input[data-row]')) as HTMLInputElement[];
-          const rows: { amount: string; description: string }[] = [];
-          
-          // 2つずつ（金額と項目名）グループ化
-          for (let i = 0; i < inputRows.length; i += 2) {
-            const amountInput = inputRows[i];
-            const descriptionInput = inputRows[i + 1];
-            
-            if (amountInput && descriptionInput) {
-              const amount = amountInput.value;
-              const description = descriptionInput.value;
-              
-              // 金額か項目名のどちらかが入力されている場合
-              if (amount || description) {
-                rows.push({
-                  amount: amount || '0',
-                  description: description || '未入力',
-                });
-              }
-            }
-          }
-
-          // 入力された行を保存
-          rows.forEach(row => {
-            dispatch(addPayment({
-              personId: person.id,
-              payment: {
-                amount: Number(row.amount),
-                description: row.description,
-              }
-            }));
-          });
-        }
-      } else {
-        // シンプルモードの場合
-        const totalInput = document.querySelector(`[data-person-id="${person.id}"] input[data-simple-total]`) as HTMLInputElement;
-        if (totalInput && totalInput.value) {
-          dispatch(addPayment({
-            personId: person.id,
-            payment: {
-              amount: Number(totalInput.value),
-              description: '合計支払額',
-            }
-          }));
-        }
-      }
-    });
-
+    // 入力フォームの値は既にReduxストアに反映されているため、
+    // 追加の状態更新は不要です
     onShowResult();
   };
 
@@ -148,7 +89,7 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex justify-end items-center">
         <div className="flex items-center gap-2">
           <span className="text-sm text-white">詳細モード</span>
@@ -156,7 +97,7 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
             onClick={handleModeChange}
             className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
               isDetailMode
-                ? 'bg-indigo-600 focus:ring-indigo-500'
+                ? 'bg-blue-600 focus:ring-blue-500'
                 : 'bg-gray-300 focus:ring-gray-500'
             }`}
           >
@@ -179,35 +120,36 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
         </div>
       </div>
 
-      {people.map((person) => (
-        <div key={person.id} className="bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-sm relative">
-          <PersonPaymentForm
-            person={person}
-            onAddPayment={handleAddPayment}
-            onUpdateName={handleUpdatePersonName}
-            onDeletePerson={handleDeletePerson}
-            dispatch={dispatch}
-            isDetailMode={isDetailMode}
-          />
+      <div className="space-y-6 bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-sm">
+        {people.map((person) => (
+          <div key={person.id} className="">
+            <PersonPaymentForm
+              person={person}
+              onAddPayment={handleAddPayment}
+              onUpdateName={handleUpdatePersonName}
+              onDeletePerson={handleDeletePerson}
+              dispatch={dispatch}
+              isDetailMode={isDetailMode}
+            />
+          </div>
+        ))}
+
+        <div className="space-y-4">
+          <button
+            onClick={handleAddPerson}
+            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          >
+            <FontAwesomeIcon icon={faUserPlus} className="mr-2" />
+            人物追加
+          </button>
         </div>
-      ))}
-
-      <div className="space-y-4">
-        <button
-          onClick={handleAddPerson}
-          className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        >
-          <FontAwesomeIcon icon={faUserPlus} className="mr-2" />
-          人物追加
-        </button>
-
-        <button
-          onClick={handleShowResult}
-          className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        >
-          計算結果を見る
-        </button>
       </div>
+      <button
+        onClick={handleShowResult}
+        className="w-full px-8 py-4 bg-lime-500 text-white rounded-md hover:bg-lime-700 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:ring-offset-2 font- bold text-lg"
+      >
+        計算結果を見る
+      </button>
     </div>
   );
 };
@@ -227,82 +169,27 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson,
   const [inputRows, setInputRows] = useState<{ id: string; amount: string; description: string }[]>([]);
   const [simpleTotal, setSimpleTotal] = useState('');
 
-  // 支払い情報の更新時に実行
+  // ストアの状態と入力フォームの状態を同期
   useEffect(() => {
-    if (person.payments.length > 0) {
-      if (isDetailMode) {
-        // 詳細モードの場合、入力行を設定
-        setInputRows(
-          person.payments.map(payment => ({
-            id: payment.id,
-            amount: String(payment.amount),
-            description: payment.description,
-          }))
-        );
-      } else {
-        // シンプルモードの場合、合計額を設定
-        const total = person.payments.reduce((sum, payment) => sum + payment.amount, 0);
-        setSimpleTotal(String(total));
+    console.log('Syncing with store - person.payments:', person.payments);
+    if (isDetailMode) {
+      // 詳細モードの場合、支払い情報を入力行に反映
+      const newRows = person.payments.map(payment => ({
+        id: payment.id,
+        amount: String(payment.amount),
+        description: payment.description,
+      }));
+      // 空の行が1つもない場合は追加
+      if (newRows.length === 0 || newRows.every(row => row.amount || row.description)) {
+        newRows.push({ id: crypto.randomUUID(), amount: '', description: '' });
       }
+      setInputRows(newRows);
     } else {
-      setInputRows([{ id: crypto.randomUUID(), amount: '', description: '' }]);
-      setSimpleTotal('');
+      // シンプルモードの場合、合計額を反映
+      const total = person.payments.reduce((sum, payment) => sum + payment.amount, 0);
+      setSimpleTotal(String(total));
     }
   }, [person.payments, isDetailMode]);
-
-  // モード切り替え時の処理
-  useEffect(() => {
-    if (isDetailMode && simpleTotal) {
-      // シンプルモードの金額を詳細モードの行に反映
-      setInputRows([{ 
-        id: crypto.randomUUID(), 
-        amount: simpleTotal, 
-        description: '' 
-      }]);
-    } else if (!isDetailMode) {
-      // 詳細モードからシンプルモードへの切り替え時
-      const total = inputRows.reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
-      setSimpleTotal(String(total));
-      // 既存の支払いをクリア
-      person.payments.forEach(payment => {
-        dispatch(deletePayment({
-          personId: person.id,
-          paymentId: payment.id,
-        }));
-      });
-      // 新しい合計額を設定
-      if (total > 0) {
-        dispatch(addPayment({
-          personId: person.id,
-          payment: {
-            amount: total,
-            description: '',
-          }
-        }));
-      }
-    }
-  }, [isDetailMode]);
-
-  const handleSimpleTotalChange = (value: string) => {
-    setSimpleTotal(value);
-    // 既存の支払いをクリア
-    person.payments.forEach(payment => {
-      dispatch(deletePayment({
-        personId: person.id,
-        paymentId: payment.id,
-      }));
-    });
-    // 新しい合計額を設定
-    if (value) {
-      dispatch(addPayment({
-        personId: person.id,
-        payment: {
-          amount: Number(value),
-          description: '',
-        }
-      }));
-    }
-  };
 
   const handleRowChange = (index: number, field: 'amount' | 'description', value: string) => {
     const newRows = [...inputRows];
@@ -320,6 +207,35 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson,
           description: row.description || '',
         }
       }));
+    }
+
+    // 最後の行が入力されたら新しい空の行を追加
+    if (index === inputRows.length - 1 && (row.amount || row.description)) {
+      setInputRows([...newRows, { id: crypto.randomUUID(), amount: '', description: '' }]);
+    }
+  };
+
+  const handleSimpleTotalChange = (value: string) => {
+    setSimpleTotal(value);
+    // 既存の支払いをクリアして新しい合計額を設定
+    if (value) {
+      // 一度に更新するために、既存の支払いをクリアして新しい支払いを追加
+      const newPayment = {
+        personId: person.id,
+        payment: {
+          amount: Number(value),
+          description: '',
+        }
+      };
+      // 既存の支払いをクリア
+      person.payments.forEach(payment => {
+        dispatch(deletePayment({
+          personId: person.id,
+          paymentId: payment.id,
+        }));
+      });
+      // 新しい支払いを追加
+      dispatch(addPayment(newPayment));
     }
   };
 
@@ -459,7 +375,7 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson,
 
   return (
     <div className="space-y-4" data-person-id={person.id}>
-      <div className="flex items-center gap-2 pb-2 border-b border-gray-300">
+      <div className="flex items-center gap-2 pb-2">
         {isEditing ? (
           <div className="flex items-center gap-2">
             <input

@@ -9,8 +9,8 @@ interface PeopleState {
 
 const initialState: PeopleState = {
   people: [
-    { id: '1', name: 'Aさん', payments: [] },
-    { id: '2', name: 'Bさん', payments: [] },
+    { id: crypto.randomUUID(), name: 'Aさん', payments: [] },
+    { id: crypto.randomUUID(), name: 'Bさん', payments: [] },
   ],
   isDetailMode: false,
 };
@@ -20,11 +20,14 @@ export const peopleSlice = createSlice({
   initialState,
   reducers: {
     addPerson: (state) => {
-      state.people.push({
-        id: crypto.randomUUID(),
-        name: '新しい人物',
-        payments: [],
-      });
+      const nextLetter = String.fromCharCode(65 + state.people.length); // 65は'A'のASCIIコード
+      if (state.people.length < 6) { // AからFまで（6文字）に制限
+        state.people.push({
+          id: crypto.randomUUID(),
+          name: `${nextLetter}さん`,
+          payments: [],
+        });
+      }
     },
     updatePersonName: (state, action: PayloadAction<{ personId: string; newName: string }>) => {
       const person = state.people.find(p => p.id === action.payload.personId);
@@ -64,6 +67,14 @@ export const peopleSlice = createSlice({
     },
   },
 });
+
+// ストアの初期化時に実行される関数
+export const initializeStore = (state: PeopleState | undefined) => {
+  if (!state) {
+    return initialState;
+  }
+  return state;
+};
 
 export const {
   addPerson,

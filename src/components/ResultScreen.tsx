@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -19,6 +19,10 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
   const people = useSelector((state: RootState) => state.people.people);
   const isDetailMode = useSelector((state: RootState) => state.people.isDetailMode);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  useEffect(() => {
+    console.log('Redux Store State:', { people, isDetailMode });
+  }, [people, isDetailMode]);
 
   // 合計金額を計算
   const totalAmount = people.reduce((sum, person) => {
@@ -104,13 +108,13 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
   const transfers = calculateTransfers();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
         <button
           onClick={onBack}
           className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
         >
-          戻る
+          修正する
         </button>
       </div>
 
