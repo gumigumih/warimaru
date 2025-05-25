@@ -82,16 +82,6 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
                 isDetailMode ? 'translate-x-9' : 'translate-x-1'
               }`}
             />
-            <span className={`absolute left-2 text-xs font-medium ${
-              isDetailMode ? 'text-white' : 'text-gray-600'
-            }`}>
-              ON
-            </span>
-            <span className={`absolute right-2 text-xs font-medium ${
-              isDetailMode ? 'text-blue-600' : 'text-gray-600'
-            }`}>
-              OFF
-            </span>
           </button>
         </div>
       </div>
