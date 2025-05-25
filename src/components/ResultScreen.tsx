@@ -55,7 +55,7 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
       <div className="space-y-4">
         {paymentStatus.map(({ person, paidAmount, difference }) => (
           <div key={person.id} className="bg-white p-4 rounded-lg shadow-sm">
-            <div className="space-y-2">
+            <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="font-medium">{person.name}</span>
                 <span className={difference >= 0 ? 'text-green-600' : 'text-red-600'}>
@@ -65,6 +65,17 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
               <div className="text-sm text-gray-600">
                 支払い済み: {paidAmount.toLocaleString()}円
               </div>
+              {person.payments.length > 0 && (
+                <div className="space-y-2">
+                  <div className="text-sm font-medium text-gray-600">支払い内訳:</div>
+                  {person.payments.map(payment => (
+                    <div key={`${person.id}-${payment.id}`} className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600">{payment.description}</span>
+                      <span className="font-medium">{payment.amount.toLocaleString()}円</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         ))}

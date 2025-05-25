@@ -13,8 +13,8 @@ export interface Participant {
 
 export interface PaymentItem {
   id: string;
-  amount: number;
   description: string;
+  amount: number;
 }
 
 export interface Person {

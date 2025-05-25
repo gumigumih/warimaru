@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Person, PaymentItem } from '../types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus, faPlus, faCheck, faTimes, faPen, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import type { RootState } from '../store/store';
+import type { AppDispatch } from '../store/store';
 import {
   addPerson,
   updatePersonName,
@@ -19,8 +20,12 @@ interface InputFormProps {
 
 export const InputForm = ({ onShowResult }: InputFormProps) => {
   const [isDeleteMode, setIsDeleteMode] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const people = useSelector((state: RootState) => state.people);
+
+  useEffect(() => {
+    console.log('Redux Store State:', people);
+  }, [people]);
 
   const handleAddPerson = () => {
     dispatch(addPerson());
@@ -32,20 +37,75 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
     }
   };
 
+  const handleShowResult = () => {
+    // 各人物の入力行を保存
+    people.forEach(person => {
+      // 既存の項目をクリア
+      person.payments.forEach(payment => {
+        dispatch(deletePayment({
+          personId: person.id,
+          paymentId: payment.id,
+        }));
+      });
+
+      const personForm = document.querySelector(`[data-person-id="${person.id}"]`) as HTMLElement;
+      if (personForm) {
+        const inputRows = Array.from(personForm.querySelectorAll('input[data-row]')) as HTMLInputElement[];
+        const rows: { amount: string; description: string }[] = [];
+        
+        // 2つずつ（金額と項目名）グループ化
+        for (let i = 0; i < inputRows.length; i += 2) {
+          const amountInput = inputRows[i];
+          const descriptionInput = inputRows[i + 1];
+          
+          if (amountInput && descriptionInput) {
+            const amount = amountInput.value;
+            const description = descriptionInput.value;
+            
+            // 金額か項目名のどちらかが入力されている場合
+            if (amount || description) {
+              rows.push({
+                amount: amount || '0',
+                description: description || '未入力',
+              });
+            }
+          }
+        }
+
+        // 入力された行を保存
+        rows.forEach(row => {
+          dispatch(addPayment({
+            personId: person.id,
+            payment: {
+              amount: Number(row.amount),
+              description: row.description,
+            }
+          }));
+        });
+      }
+    });
+
+    onShowResult();
+  };
+
   const handleAddPayment = (personId: string, payment: Omit<PaymentItem, 'id'>) => {
+    console.log('Adding payment:', { personId, payment });
     dispatch(addPayment({ personId, payment }));
   };
 
   const handleUpdatePersonName = (personId: string, newName: string) => {
+    console.log('Updating person name:', { personId, newName });
     dispatch(updatePersonName({ personId, newName }));
   };
 
   const handleUpdatePayment = (personId: string, paymentId: string, updatedPayment: Omit<PaymentItem, 'id'>) => {
+    console.log('Updating payment:', { personId, paymentId, updatedPayment });
     dispatch(updatePayment({ personId, paymentId, payment: updatedPayment }));
   };
 
   const handleDeletePayment = (personId: string, paymentId: string) => {
     if (window.confirm('この項目を削除してもよろしいですか？')) {
+      console.log('Deleting payment:', { personId, paymentId });
       dispatch(deletePayment({ personId, paymentId }));
     }
   };
@@ -54,7 +114,7 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <button
-          onClick={onShowResult}
+          onClick={handleShowResult}
           className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
           計算結果を見る
@@ -90,10 +150,9 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
             person={person}
             onAddPayment={handleAddPayment}
             onUpdateName={handleUpdatePersonName}
-            onUpdatePayment={handleUpdatePayment}
             onDeletePerson={handleDeletePerson}
-            onDeletePayment={handleDeletePayment}
             isDeleteMode={isDeleteMode}
+            dispatch={dispatch}
           />
         </div>
       ))}
@@ -113,25 +172,63 @@ interface PersonPaymentFormProps {
   person: Person;
   onAddPayment: (personId: string, payment: Omit<PaymentItem, 'id'>) => void;
   onUpdateName: (personId: string, newName: string) => void;
-  onUpdatePayment: (personId: string, paymentId: string, payment: Omit<PaymentItem, 'id'>) => void;
   onDeletePerson: (personId: string) => void;
-  onDeletePayment: (personId: string, paymentId: string) => void;
   isDeleteMode: boolean;
+  dispatch: AppDispatch;
 }
 
-const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onUpdatePayment, onDeletePerson, onDeletePayment, isDeleteMode }: PersonPaymentFormProps) => {
+const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson, isDeleteMode, dispatch }: PersonPaymentFormProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(person.name);
-  const [inputRows, setInputRows] = useState<{ amount: string; description: string }[]>([{ amount: '', description: '' }]);
+  const [inputRows, setInputRows] = useState<{ id: string; amount: string; description: string }[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // 初期化時のみ実行
+  useEffect(() => {
+    if (!isInitialized) {
+      if (person.payments.length > 0) {
+        setInputRows(
+          person.payments.map(payment => ({
+            id: payment.id,
+            amount: String(payment.amount),
+            description: payment.description,
+          }))
+        );
+      } else {
+        setInputRows([{ id: crypto.randomUUID(), amount: '', description: '' }]);
+      }
+      setIsInitialized(true);
+    }
+  }, [isInitialized]);
+
+  // 支払いが削除された場合のみ更新
+  useEffect(() => {
+    if (isInitialized && person.payments.length === 0) {
+      setInputRows([{ id: crypto.randomUUID(), amount: '', description: '' }]);
+    }
+  }, [person.payments.length, isInitialized]);
 
   const handleAddRow = () => {
-    setInputRows([...inputRows, { amount: '', description: '' }]);
+    setInputRows([...inputRows, { id: crypto.randomUUID(), amount: '', description: '' }]);
   };
 
   const handleRowChange = (index: number, field: 'amount' | 'description', value: string) => {
     const newRows = [...inputRows];
     newRows[index] = { ...newRows[index], [field]: value };
     setInputRows(newRows);
+
+    // 行の値を更新（空の値も含む）
+    const row = newRows[index];
+    if (row.id) {
+      dispatch(updatePayment({
+        personId: person.id,
+        paymentId: row.id,
+        payment: {
+          amount: Number(row.amount) || 0,
+          description: row.description || '',
+        }
+      }));
+    }
   };
 
   const handleKeyDown = (index: number, field: 'amount' | 'description', e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -142,14 +239,28 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onUpdatePayment
     if (e.key === 'Enter') {
       e.preventDefault();
       if (isRowComplete) {
-        onAddPayment(person.id, {
-          amount: Number(currentRow.amount),
-          description: currentRow.description,
-        });
-        const newRows = inputRows.filter((_, i) => i !== index);
-        setInputRows(newRows.length > 0 ? newRows : [{ amount: '', description: '' }]);
+        // 新しい支払いを追加
+        const newPaymentId = crypto.randomUUID();
+        dispatch(addPayment({
+          personId: person.id,
+          payment: {
+            amount: Number(currentRow.amount),
+            description: currentRow.description,
+          }
+        }));
+        // 新しい空の行を追加
+        setInputRows([...inputRows, { id: newPaymentId, amount: '', description: '' }]);
+        // 次の行の入力フィールドにフォーカス
+        setTimeout(() => {
+          const nextInput = document.querySelector(`input[data-row="${index + 1}"][data-field="${field}"]`) as HTMLInputElement;
+          if (nextInput) {
+            nextInput.focus();
+          }
+        }, 0);
       } else if (index === inputRows.length - 1 && !isRowEmpty) {
-        handleAddRow();
+        // 新しい空の行を追加
+        const newPaymentId = crypto.randomUUID();
+        setInputRows([...inputRows, { id: newPaymentId, amount: '', description: '' }]);
         setTimeout(() => {
           const nextInput = document.querySelector(`input[data-row="${index + 1}"][data-field="${field}"]`) as HTMLInputElement;
           if (nextInput) {
@@ -209,67 +320,34 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onUpdatePayment
     }
   };
 
-  const handleNameUpdate = () => {
-    if (editedName.trim() && editedName !== person.name) {
-      const nameWithoutSan = editedName.replace(/さん$/, '');
-      onUpdateName(person.id, `${nameWithoutSan}さん`);
-    }
-    setIsEditing(false);
-  };
-
-  const renderPaymentRow = (payment: PaymentItem | { amount: string; description: string }, index: number, isInput: boolean) => {
-    const amount = isInput ? payment.amount : String(payment.amount);
-    const description = payment.description;
-    const id = isInput ? undefined : (payment as PaymentItem).id;
-
+  const renderPaymentRow = (row: { id: string; amount: string; description: string }, index: number) => {
     return (
-      <div key={isInput ? `input-${index}` : id} className="flex gap-2 items-center">
+      <div key={row.id} className="flex gap-2 items-center">
         <input
           type="number"
-          value={amount}
-          onChange={(e) => {
-            if (isInput) {
-              handleRowChange(index, 'amount', e.target.value);
-            } else {
-              onUpdatePayment(person.id, id!, {
-                ...payment as PaymentItem,
-                amount: Number(e.target.value),
-              });
-            }
-          }}
-          onKeyDown={isInput ? (e) => handleKeyDown(index, 'amount', e) : undefined}
-          data-row={isInput ? index : undefined}
-          data-field={isInput ? 'amount' : undefined}
-          placeholder={isInput ? "金額" : undefined}
+          value={row.amount}
+          onChange={(e) => handleRowChange(index, 'amount', e.target.value)}
+          onKeyDown={(e) => handleKeyDown(index, 'amount', e)}
+          data-row={index}
+          data-field="amount"
+          placeholder="金額"
           className="w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           min="0"
         />
         <input
           type="text"
-          value={description}
-          onChange={(e) => {
-            if (isInput) {
-              handleRowChange(index, 'description', e.target.value);
-            } else {
-              onUpdatePayment(person.id, id!, {
-                ...payment as PaymentItem,
-                description: e.target.value,
-              });
-            }
-          }}
-          onKeyDown={isInput ? (e) => handleKeyDown(index, 'description', e) : undefined}
-          data-row={isInput ? index : undefined}
-          data-field={isInput ? 'description' : undefined}
-          placeholder={isInput ? "項目名" : undefined}
+          value={row.description}
+          onChange={(e) => handleRowChange(index, 'description', e.target.value)}
+          onKeyDown={(e) => handleKeyDown(index, 'description', e)}
+          data-row={index}
+          data-field="description"
+          placeholder="項目名"
           className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
         />
-        {isDeleteMode && (
+        {isDeleteMode && row.id && (
           <button
             onClick={() => {
-              onDeletePayment(person.id, id!);
-              if (person.payments.length <= 1) {
-                setInputRows([{ amount: '', description: '' }]);
-              }
+              dispatch(deletePayment({ personId: person.id, paymentId: row.id }));
             }}
             className="ml-2 p-1 text-gray-400 hover:text-red-500 transition-colors"
             title="項目を削除"
@@ -282,7 +360,7 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onUpdatePayment
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-person-id={person.id}>
       <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
         {isEditing ? (
           <div className="flex items-center gap-2">
@@ -294,7 +372,10 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onUpdatePayment
               autoFocus
             />
             <button
-              onClick={handleNameUpdate}
+              onClick={() => {
+                setIsEditing(false);
+                setEditedName(person.name);
+              }}
               className="text-indigo-600 hover:text-indigo-700"
             >
               <FontAwesomeIcon icon={faCheck} />
@@ -331,10 +412,7 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onUpdatePayment
         )}
       </div>
       <div className="space-y-2">
-        {person.payments.map((payment, index) => renderPaymentRow(payment, index, false))}
-      </div>
-      <div className="space-y-2 pt-2 border-gray-200">
-        {inputRows.map((row, index) => renderPaymentRow(row, index, true))}
+        {inputRows.map((row, index) => renderPaymentRow(row, index))}
         <button
           onClick={handleAddRow}
           className="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
