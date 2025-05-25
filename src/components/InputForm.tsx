@@ -12,6 +12,7 @@ import {
   addPayment,
   updatePayment,
   deletePayment,
+  setDetailMode,
 } from '../store/peopleSlice';
 
 interface InputFormProps {
@@ -19,9 +20,9 @@ interface InputFormProps {
 }
 
 export const InputForm = ({ onShowResult }: InputFormProps) => {
-  const [isDeleteMode, setIsDeleteMode] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
-  const people = useSelector((state: RootState) => state.people);
+  const people = useSelector((state: RootState) => state.people.people);
+  const isDetailMode = useSelector((state: RootState) => state.people.isDetailMode);
 
   useEffect(() => {
     console.log('Redux Store State:', people);
@@ -48,40 +49,54 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
         }));
       });
 
-      const personForm = document.querySelector(`[data-person-id="${person.id}"]`) as HTMLElement;
-      if (personForm) {
-        const inputRows = Array.from(personForm.querySelectorAll('input[data-row]')) as HTMLInputElement[];
-        const rows: { amount: string; description: string }[] = [];
-        
-        // 2つずつ（金額と項目名）グループ化
-        for (let i = 0; i < inputRows.length; i += 2) {
-          const amountInput = inputRows[i];
-          const descriptionInput = inputRows[i + 1];
+      if (isDetailMode) {
+        const personForm = document.querySelector(`[data-person-id="${person.id}"]`) as HTMLElement;
+        if (personForm) {
+          const inputRows = Array.from(personForm.querySelectorAll('input[data-row]')) as HTMLInputElement[];
+          const rows: { amount: string; description: string }[] = [];
           
-          if (amountInput && descriptionInput) {
-            const amount = amountInput.value;
-            const description = descriptionInput.value;
+          // 2つずつ（金額と項目名）グループ化
+          for (let i = 0; i < inputRows.length; i += 2) {
+            const amountInput = inputRows[i];
+            const descriptionInput = inputRows[i + 1];
             
-            // 金額か項目名のどちらかが入力されている場合
-            if (amount || description) {
-              rows.push({
-                amount: amount || '0',
-                description: description || '未入力',
-              });
+            if (amountInput && descriptionInput) {
+              const amount = amountInput.value;
+              const description = descriptionInput.value;
+              
+              // 金額か項目名のどちらかが入力されている場合
+              if (amount || description) {
+                rows.push({
+                  amount: amount || '0',
+                  description: description || '未入力',
+                });
+              }
             }
           }
-        }
 
-        // 入力された行を保存
-        rows.forEach(row => {
+          // 入力された行を保存
+          rows.forEach(row => {
+            dispatch(addPayment({
+              personId: person.id,
+              payment: {
+                amount: Number(row.amount),
+                description: row.description,
+              }
+            }));
+          });
+        }
+      } else {
+        // シンプルモードの場合
+        const totalInput = document.querySelector(`[data-person-id="${person.id}"] input[data-simple-total]`) as HTMLInputElement;
+        if (totalInput && totalInput.value) {
           dispatch(addPayment({
             personId: person.id,
             payment: {
-              amount: Number(row.amount),
-              description: row.description,
+              amount: Number(totalInput.value),
+              description: '合計支払額',
             }
           }));
-        });
+        }
       }
     });
 
@@ -110,40 +125,58 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
     }
   };
 
+  const handleModeChange = () => {
+    // 詳細モードからシンプルモードへの切り替え時
+    if (isDetailMode) {
+      // 2行以上入力されているか確認
+      const hasMultipleRows = people.some(person => {
+        const personForm = document.querySelector(`[data-person-id="${person.id}"]`) as HTMLElement;
+        if (personForm) {
+          const inputRows = Array.from(personForm.querySelectorAll('input[data-row]')) as HTMLInputElement[];
+          return inputRows.length > 2; // 金額と項目名の2つで1行なので、4つ以上で2行以上
+        }
+        return false;
+      });
+      
+      if (hasMultipleRows) {
+        if (!window.confirm('シンプルモードに切り替えると、入力した項目の内訳が消えます。\n合計金額のみが保持されます。\n\n続行しますか？')) {
+          return;
+        }
+      }
+    }
+    dispatch(setDetailMode(!isDetailMode));
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <button
-          onClick={handleShowResult}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        >
-          計算結果を見る
-        </button>
-        <button
-          onClick={() => setIsDeleteMode(!isDeleteMode)}
-          className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-            isDeleteMode
-              ? 'bg-red-600 focus:ring-red-500'
-              : 'bg-gray-300 focus:ring-gray-500'
-          }`}
-        >
-          <span
-            className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-transform ${
-              isDeleteMode ? 'translate-x-9' : 'translate-x-1'
+      <div className="flex justify-end items-center">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-white">詳細モード</span>
+          <button
+            onClick={handleModeChange}
+            className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+              isDetailMode
+                ? 'bg-indigo-600 focus:ring-indigo-500'
+                : 'bg-gray-300 focus:ring-gray-500'
             }`}
-          />
-          <FontAwesomeIcon
-            icon={faTrashAlt}
-            className={`absolute left-2 text-sm transition-colors ${
-              isDeleteMode ? 'text-white' : 'text-gray-600'
-            }`}
-          />
-          <span className={`absolute right-2 text-xs font-medium ${
-              isDeleteMode ? 'text-red-600' : 'text-gray-600'
+          >
+            <span
+              className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-transform ${
+                isDetailMode ? 'translate-x-9' : 'translate-x-1'
+              }`}
+            />
+            <span className={`absolute left-2 text-xs font-medium ${
+              isDetailMode ? 'text-white' : 'text-gray-600'
             }`}>
-            {isDeleteMode ? 'ON' : 'OFF'}
-          </span>
-        </button>
+              ON
+            </span>
+            <span className={`absolute right-2 text-xs font-medium ${
+              isDetailMode ? 'text-indigo-600' : 'text-gray-600'
+            }`}>
+              OFF
+            </span>
+          </button>
+        </div>
       </div>
 
       {people.map((person) => (
@@ -153,19 +186,28 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
             onAddPayment={handleAddPayment}
             onUpdateName={handleUpdatePersonName}
             onDeletePerson={handleDeletePerson}
-            isDeleteMode={isDeleteMode}
             dispatch={dispatch}
+            isDetailMode={isDetailMode}
           />
         </div>
       ))}
 
-      <button
-        onClick={handleAddPerson}
-        className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-      >
-        <FontAwesomeIcon icon={faUserPlus} className="mr-2" />
-        人物追加
-      </button>
+      <div className="space-y-4">
+        <button
+          onClick={handleAddPerson}
+          className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        >
+          <FontAwesomeIcon icon={faUserPlus} className="mr-2" />
+          人物追加
+        </button>
+
+        <button
+          onClick={handleShowResult}
+          className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        >
+          計算結果を見る
+        </button>
+      </div>
     </div>
   );
 };
@@ -175,20 +217,21 @@ interface PersonPaymentFormProps {
   onAddPayment: (personId: string, payment: Omit<PaymentItem, 'id'>) => void;
   onUpdateName: (personId: string, newName: string) => void;
   onDeletePerson: (personId: string) => void;
-  isDeleteMode: boolean;
   dispatch: AppDispatch;
+  isDetailMode: boolean;
 }
 
-const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson, isDeleteMode, dispatch }: PersonPaymentFormProps) => {
+const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson, dispatch, isDetailMode }: PersonPaymentFormProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(person.name);
   const [inputRows, setInputRows] = useState<{ id: string; amount: string; description: string }[]>([]);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [simpleTotal, setSimpleTotal] = useState('');
 
-  // 初期化時のみ実行
+  // 支払い情報の更新時に実行
   useEffect(() => {
-    if (!isInitialized) {
-      if (person.payments.length > 0) {
+    if (person.payments.length > 0) {
+      if (isDetailMode) {
+        // 詳細モードの場合、入力行を設定
         setInputRows(
           person.payments.map(payment => ({
             id: payment.id,
@@ -197,21 +240,68 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson,
           }))
         );
       } else {
-        setInputRows([{ id: crypto.randomUUID(), amount: '', description: '' }]);
+        // シンプルモードの場合、合計額を設定
+        const total = person.payments.reduce((sum, payment) => sum + payment.amount, 0);
+        setSimpleTotal(String(total));
       }
-      setIsInitialized(true);
-    }
-  }, [isInitialized]);
-
-  // 支払いが削除された場合のみ更新
-  useEffect(() => {
-    if (isInitialized && person.payments.length === 0) {
+    } else {
       setInputRows([{ id: crypto.randomUUID(), amount: '', description: '' }]);
+      setSimpleTotal('');
     }
-  }, [person.payments.length, isInitialized]);
+  }, [person.payments, isDetailMode]);
 
-  const handleAddRow = () => {
-    setInputRows([...inputRows, { id: crypto.randomUUID(), amount: '', description: '' }]);
+  // モード切り替え時の処理
+  useEffect(() => {
+    if (isDetailMode && simpleTotal) {
+      // シンプルモードの金額を詳細モードの行に反映
+      setInputRows([{ 
+        id: crypto.randomUUID(), 
+        amount: simpleTotal, 
+        description: '' 
+      }]);
+    } else if (!isDetailMode) {
+      // 詳細モードからシンプルモードへの切り替え時
+      const total = inputRows.reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
+      setSimpleTotal(String(total));
+      // 既存の支払いをクリア
+      person.payments.forEach(payment => {
+        dispatch(deletePayment({
+          personId: person.id,
+          paymentId: payment.id,
+        }));
+      });
+      // 新しい合計額を設定
+      if (total > 0) {
+        dispatch(addPayment({
+          personId: person.id,
+          payment: {
+            amount: total,
+            description: '',
+          }
+        }));
+      }
+    }
+  }, [isDetailMode]);
+
+  const handleSimpleTotalChange = (value: string) => {
+    setSimpleTotal(value);
+    // 既存の支払いをクリア
+    person.payments.forEach(payment => {
+      dispatch(deletePayment({
+        personId: person.id,
+        paymentId: payment.id,
+      }));
+    });
+    // 新しい合計額を設定
+    if (value) {
+      dispatch(addPayment({
+        personId: person.id,
+        payment: {
+          amount: Number(value),
+          description: '',
+        }
+      }));
+    }
   };
 
   const handleRowChange = (index: number, field: 'amount' | 'description', value: string) => {
@@ -231,6 +321,10 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson,
         }
       }));
     }
+  };
+
+  const handleAddRow = () => {
+    setInputRows([...inputRows, { id: crypto.randomUUID(), amount: '', description: '' }]);
   };
 
   const handleKeyDown = (index: number, field: 'amount' | 'description', e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -346,7 +440,7 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson,
           placeholder="項目名"
           className="flex-1 rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
         />
-        {isDeleteMode && row.id && (
+        {row.id && (
           <button
             onClick={() => {
               if (window.confirm('この項目を削除してもよろしいですか？')) {
@@ -403,27 +497,41 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson,
             >
               <FontAwesomeIcon icon={faPen} />
             </button>
-            {isDeleteMode && (
-              <button
-                onClick={() => onDeletePerson(person.id)}
-                className="ml-auto text-gray-400 hover:text-red-500 transition-colors"
-                title="人物を削除"
-              >
-                <FontAwesomeIcon icon={faTrashAlt} />
-              </button>
-            )}
+            <button
+              onClick={() => onDeletePerson(person.id)}
+              className="ml-auto text-gray-400 hover:text-red-500 transition-colors"
+              title="人物を削除"
+            >
+              <FontAwesomeIcon icon={faTrashAlt} />
+            </button>
           </div>
         )}
       </div>
       <div className="space-y-2">
-        {inputRows.map((row, index) => renderPaymentRow(row, index))}
-        <button
-          onClick={handleAddRow}
-          className="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-        >
-          <FontAwesomeIcon icon={faPlus} className="mr-2" />
-          行追加
-        </button>
+        {isDetailMode ? (
+          <>
+            {inputRows.map((row, index) => renderPaymentRow(row, index))}
+            <button
+              onClick={handleAddRow}
+              className="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            >
+              <FontAwesomeIcon icon={faPlus} className="mr-2" />
+              行追加
+            </button>
+          </>
+        ) : (
+          <div className="flex gap-2 items-center">
+            <input
+              type="number"
+              value={simpleTotal}
+              onChange={(e) => handleSimpleTotalChange(e.target.value)}
+              data-simple-total
+              placeholder="合計支払額"
+              className="w-full rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              min="0"
+            />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -16,7 +16,8 @@ interface Transfer {
 }
 
 export const ResultScreen = ({ onBack }: ResultScreenProps) => {
-  const people = useSelector((state: RootState) => state.people);
+  const people = useSelector((state: RootState) => state.people.people);
+  const isDetailMode = useSelector((state: RootState) => state.people.isDetailMode);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   // 合計金額を計算
@@ -105,7 +106,6 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">計算結果</h2>
         <button
           onClick={onBack}
           className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
