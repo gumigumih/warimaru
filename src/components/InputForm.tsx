@@ -124,7 +124,7 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
           className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
             isDeleteMode
               ? 'bg-red-600 focus:ring-red-500'
-              : 'bg-gray-200 focus:ring-gray-500'
+              : 'bg-gray-300 focus:ring-gray-500'
           }`}
         >
           <span
@@ -138,14 +138,16 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
               isDeleteMode ? 'text-white' : 'text-gray-600'
             }`}
           />
-          <span className="absolute right-2 text-xs font-medium text-white">
+          <span className={`absolute right-2 text-xs font-medium ${
+              isDeleteMode ? 'text-red-600' : 'text-gray-600'
+            }`}>
             {isDeleteMode ? 'ON' : 'OFF'}
           </span>
         </button>
       </div>
 
       {people.map((person) => (
-        <div key={person.id} className="p-4 border border-gray-200 rounded-lg shadow-sm bg-white relative">
+        <div key={person.id} className="bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-sm relative">
           <PersonPaymentForm
             person={person}
             onAddPayment={handleAddPayment}
@@ -331,7 +333,7 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson,
           data-row={index}
           data-field="amount"
           placeholder="金額"
-          className="w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="w-32 rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           min="0"
         />
         <input
@@ -342,12 +344,14 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson,
           data-row={index}
           data-field="description"
           placeholder="項目名"
-          className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="flex-1 rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
         />
         {isDeleteMode && row.id && (
           <button
             onClick={() => {
-              dispatch(deletePayment({ personId: person.id, paymentId: row.id }));
+              if (window.confirm('この項目を削除してもよろしいですか？')) {
+                dispatch(deletePayment({ personId: person.id, paymentId: row.id }));
+              }
             }}
             className="ml-2 p-1 text-gray-400 hover:text-red-500 transition-colors"
             title="項目を削除"
@@ -361,7 +365,7 @@ const PersonPaymentForm = ({ person, onAddPayment, onUpdateName, onDeletePerson,
 
   return (
     <div className="space-y-4" data-person-id={person.id}>
-      <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
+      <div className="flex items-center gap-2 pb-2 border-b border-gray-300">
         {isEditing ? (
           <div className="flex items-center gap-2">
             <input
