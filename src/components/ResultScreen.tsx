@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faDownload } from '@fortawesome/free-solid-svg-icons';
+import html2canvas from 'html2canvas-pro';
+import warimaruLogo from '../assets/logo-white.png';
 
 interface ResultScreenProps {
   onBack: () => void;
@@ -19,6 +21,7 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
   const people = useSelector((state: RootState) => state.people.people);
   const isDetailMode = useSelector((state: RootState) => state.people.isDetailMode);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     console.log('Redux Store State:', { people, isDetailMode });
@@ -107,9 +110,35 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
 
   const transfers = calculateTransfers();
 
+  const handleDownloadImage = async () => {
+    if (!resultRef.current) return;
+
+    // ロゴを表示
+    const logoElement = document.getElementById('result-logo');
+    if (logoElement) {
+      logoElement.classList.remove('hidden');
+    }
+
+    try {
+      const canvas = await html2canvas(resultRef.current);
+      const image = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = 'わりまる_計算結果.png';
+      link.click();
+    } catch (error) {
+      console.error('画像の生成に失敗しました:', error);
+    }
+
+    // ロゴを非表示に戻す
+    if (logoElement) {
+      logoElement.classList.add('hidden');
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-end items-center">
         <button
           onClick={onBack}
           className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
@@ -118,7 +147,7 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
         </button>
       </div>
 
-      <div className="bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-sm">
+      <div ref={resultRef} className="bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-sm">
         <div className="space-y-4 border-b border-gray-300 pb-4 mb-4">
           <div className="flex justify-between items-center">
             <span className="text-gray-600">合計金額</span>
@@ -194,6 +223,15 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
             </div>
           </div>
         )}
+
+        {/* ロゴを配置（デフォルトで非表示） */}
+        <div className="mt-4 p-4 flex flex-col items-center bg-sky-500 text-white rounded-lg hidden" id="result-logo">
+          <div className="w-24 flex items-center justify-center">
+            <img src={warimaruLogo} alt="わりまる" className="w-full h-full object-contain"/>
+          </div>
+          <p className="mt-1 text-center text-sm">https://warimaru.meggumi.com</p>
+        </div>
+
       </div>
 
       {isDetailMode && (
@@ -233,6 +271,16 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
         )}
       </div>
       )}
+
+      <div className="flex justify-center">
+        <button
+          onClick={handleDownloadImage}
+          className="w-full px-8 py-4 bg-lime-500 text-white rounded-md hover:bg-lime-700 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:ring-offset-2 font- bold text-lg"
+        >
+          <FontAwesomeIcon icon={faDownload} />
+          画像保存
+        </button>
+      </div>
     </div>
   );
 }; 
