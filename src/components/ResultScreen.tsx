@@ -161,21 +161,16 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
 
         <h3 className="text-lg font-bold mb-4">支払い状況</h3>
         <div className="space-y-4 relative">
-          {paymentStatus.map(({ person, paidAmount, difference, color }) => {
+          {paymentStatus.map(({ person, paidAmount, color }) => {
             const percentage = (paidAmount / maxPayment) * 100;
             const perPersonPercentage = (perPersonAmount / maxPayment) * 100;
             return (
               <div key={person.id} className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="font-medium">{person.name}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-600 text-sm font-medium">
-                      {paidAmount.toLocaleString()}円
-                    </span>
-                    <span className={`text-sm font-medium ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {difference >= 0 ? '+' : ''}{difference.toLocaleString()}円
-                    </span>
-                  </div>
+                  <span className="text-gray-600 text-sm font-medium">
+                    {paidAmount.toLocaleString()}円
+                  </span>
                 </div>
                 <div className="h-4 rounded-full overflow-hidden relative flex-1 bar-container">
                   <div className="h-full flex">
