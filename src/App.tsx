@@ -15,8 +15,11 @@ export const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-600 via-sky-400 to-sky-700 py-20 sm:py-12">
-      <div className="max-w-md w-full mx-auto px-4">
+    // 背景画像を追加
+    // https://patternico.com/#QAXtfEV1apVwKHgv
+    <div className="min-h-screen relative py-20 sm:py-12 bg-gradient-to-br from-sky-600 via-sky-400 to-sky-700">
+      <div className="absolute inset-0 bg-[url('./assets/background.png')] bg-cover bg-center opacity-30"></div>
+      <div className="relative max-w-md w-full mx-auto px-4">
         <div className="flex justify-center mb-4">
           <img src={warimaruSvg} alt="わりまる" className="w-1/2" />
         </div>
