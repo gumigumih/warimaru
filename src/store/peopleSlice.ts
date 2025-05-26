@@ -22,11 +22,11 @@ export const peopleSlice = createSlice({
     addPerson: (state) => {
       const nextLetter = String.fromCharCode(65 + state.people.length); // 65は'A'のASCIIコード
       if (state.people.length < 6) { // AからFまで（6文字）に制限
-      state.people.push({
-        id: crypto.randomUUID(),
+        state.people.push({
+          id: crypto.randomUUID(),
           name: `${nextLetter}さん`,
-        payments: [],
-      });
+          payments: [],
+        });
       }
     },
     updatePersonName: (state, action: PayloadAction<{ personId: string; newName: string }>) => {
@@ -65,6 +65,19 @@ export const peopleSlice = createSlice({
     setDetailMode: (state, action: PayloadAction<boolean>) => {
       state.isDetailMode = action.payload;
     },
+    updateSimplePayment: (state, action: PayloadAction<{ personId: string; amount: number }>) => {
+      const person = state.people.find(p => p.id === action.payload.personId);
+      if (person) {
+        // 既存の支払いをクリア
+        person.payments = [];
+        // 新しい支払いを追加
+        person.payments.push({
+          id: crypto.randomUUID(),
+          amount: action.payload.amount,
+          description: '',
+        });
+      }
+    },
   },
 });
 
@@ -84,6 +97,7 @@ export const {
   updatePayment,
   deletePayment,
   setDetailMode,
+  updateSimplePayment,
 } = peopleSlice.actions;
 
 export default peopleSlice.reducer; 

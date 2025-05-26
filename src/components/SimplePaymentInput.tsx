@@ -1,5 +1,5 @@
 import type { AppDispatch } from '../store/store';
-import { addPayment, deletePayment } from '../store/peopleSlice';
+import { updateSimplePayment } from '../store/peopleSlice';
 import Cleave from 'cleave.js/react';
 import type { ChangeEvent } from 'react';
 
@@ -19,21 +19,10 @@ export const SimplePaymentInput = ({
   const handleBlur = (value: string) => {
     if (value) {
       const amount = Number(value.replace(/,/g, '')) || 0;
-      // 一度に更新するために、既存の支払いをクリアして新しい支払いを追加
-      const newPayment = {
+      dispatch(updateSimplePayment({
         personId,
-        payment: {
-          amount,
-          description: '',
-        }
-      };
-      // 既存の支払いをクリア
-      dispatch(deletePayment({
-        personId,
-        paymentId: 'all',
+        amount,
       }));
-      // 新しい支払いを追加
-      dispatch(addPayment(newPayment));
     }
   };
 
