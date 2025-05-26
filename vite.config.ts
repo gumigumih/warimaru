@@ -5,9 +5,6 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  define: {
-    'import.meta.env.VITE_APP_TITLE': JSON.stringify('わりまる - 飲み会や旅行の支払いを簡単に計算できるアプリ')
-  },
   plugins: [
     react(),
     tailwindcss(),
