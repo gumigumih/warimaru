@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import type { Person } from '../types';
 import type { AppDispatch } from '../store/store';
-import { addPayment } from '../store/peopleSlice';
+import { addPayment, updatePayment, updateSimplePayment } from '../store/peopleSlice';
 import type { KeyboardEvent } from 'react';
 import { PersonNameEditor } from './PersonNameEditor';
 import { PaymentRow } from './PaymentRow';
@@ -19,6 +19,44 @@ interface PersonPaymentFormProps {
 export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMode }: PersonPaymentFormProps) => {
   const [inputRows, setInputRows] = useState<{ id: string; amount: string; description: string }[]>([]);
   const [simpleTotal, setSimpleTotal] = useState('');
+  const [isInitialized, setIsInitialized] = useState(false);
+  const nextInputRef = useRef<HTMLInputElement | null>(null);
+
+  // 統一された保存関数
+  const savePayment = (index: number, value: string, description?: string) => {
+    if (isDetailMode) {
+      const amount = Number(value.replace(/,/g, '')) || 0;
+      const currentRow = inputRows[index];
+      
+      dispatch(updatePayment({
+        personId: person.id,
+        paymentId: currentRow.id,
+        payment: {
+          amount,
+          description: description || currentRow.description,
+        }
+      }));
+    } else {
+      if (value) {
+        const amount = Number(value.replace(/,/g, '')) || 0;
+        dispatch(updateSimplePayment({
+          personId: person.id,
+          amount,
+        }));
+      }
+    }
+  };
+
+  const handleSavePayment = (personId: string, paymentId: string, amount: number, description: string) => {
+    dispatch(updatePayment({
+      personId,
+      paymentId,
+      payment: {
+        amount,
+        description,
+      }
+    }));
+  };
 
   // ストアの状態と入力フォームの状態を同期
   useEffect(() => {
@@ -31,7 +69,19 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
       }));
       // 空の行が1つもない場合は追加
       if (newRows.length === 0 || newRows.every(row => row.amount || row.description)) {
-        newRows.push({ id: crypto.randomUUID(), amount: '', description: '' });
+        const newId = crypto.randomUUID();
+        newRows.push({ id: newId, amount: '', description: '' });
+        // 初期化時のみ空の行を追加
+        if (!isInitialized) {
+          dispatch(addPayment({
+            personId: person.id,
+            payment: {
+              amount: 0,
+              description: '',
+            }
+          }));
+          setIsInitialized(true);
+        }
       }
       setInputRows(newRows);
     } else {
@@ -39,98 +89,104 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
       const total = person.payments.reduce((sum, payment) => sum + payment.amount, 0);
       setSimpleTotal(String(total));
     }
-  }, [person.payments, isDetailMode]);
+  }, [person.payments, isDetailMode, person.id, dispatch, isInitialized]);
+
+  // 次の入力フィールドにフォーカスを移動
+  useEffect(() => {
+    if (nextInputRef.current) {
+      nextInputRef.current.focus();
+      nextInputRef.current = null;
+    }
+  });
 
   const handleAddRow = () => {
-    setInputRows([...inputRows, { id: crypto.randomUUID(), amount: '', description: '' }]);
+    const newId = crypto.randomUUID();
+    const newRow = { id: newId, amount: '', description: '' };
+    setInputRows([...inputRows, newRow]);
+    // 新しい行を追加する際にストアにも追加
+    dispatch(addPayment({
+      personId: person.id,
+      payment: {
+        amount: 0,
+        description: '',
+      }
+    }));
+    // 新しい行の入力フィールドにフォーカス
+    nextInputRef.current = document.querySelector(`input[data-row="${inputRows.length}"][data-field="amount"]`) as HTMLInputElement;
   };
 
-  const handleKeyDown = (index: number, field: 'amount' | 'description', e: KeyboardEvent<HTMLInputElement>) => {
+  const handleDetailKeyDown = (index: number, field: 'amount' | 'description', e: KeyboardEvent<HTMLInputElement>) => {
     const currentRow = inputRows[index];
-    const isRowEmpty = !currentRow.amount && !currentRow.description;
-    const isRowComplete = currentRow.amount && currentRow.description;
+
+    // 保存処理
+    savePayment(index, currentRow.amount, currentRow.description);
+
+    // フォーカスを移動する関数
+    const moveFocus = (direction: 'left' | 'right') => {
+      const currentInput = e.currentTarget;
+      const allInputs = Array.from(document.querySelectorAll('input[type="text"], input[type="number"]')) as HTMLInputElement[];
+      const currentIndex = allInputs.indexOf(currentInput);
+      const targetIndex = currentIndex + (direction === 'right' ? 1 : -1);
+
+      if (targetIndex >= 0 && targetIndex < allInputs.length) {
+        allInputs[targetIndex].focus();
+      }
+    };
+
+    // 上下のフォーカスを移動する関数
+    const moveFocusVertical = (direction: 'up' | 'down') => {
+      const currentInput = e.currentTarget;
+      const allInputs = Array.from(document.querySelectorAll('input[type="text"], input[type="number"]')) as HTMLInputElement[];
+      const currentIndex = allInputs.indexOf(currentInput);
+      const targetIndex = currentIndex + (direction === 'down' ? 2 : -2); // 2は1行あたりの入力フィールド数
+
+      if (targetIndex >= 0 && targetIndex < allInputs.length) {
+        allInputs[targetIndex].focus();
+      }
+    };
 
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (isRowComplete) {
-        // 新しい支払いを追加
-        const newPaymentId = crypto.randomUUID();
-        dispatch(addPayment({
-          personId: person.id,
-          payment: {
-            amount: Number(currentRow.amount),
-            description: currentRow.description,
-          }
-        }));
-        // 新しい空の行を追加
-        setInputRows([...inputRows, { id: newPaymentId, amount: '', description: '' }]);
-        // 次の行の入力フィールドにフォーカス
-        setTimeout(() => {
-          const nextInput = document.querySelector(`input[data-row="${index + 1}"][data-field="${field}"]`) as HTMLInputElement;
-          if (nextInput) {
-            nextInput.focus();
-          }
-        }, 0);
-      } else if (index === inputRows.length - 1 && !isRowEmpty) {
-        // 新しい空の行を追加
-        const newPaymentId = crypto.randomUUID();
-        setInputRows([...inputRows, { id: newPaymentId, amount: '', description: '' }]);
-        setTimeout(() => {
-          const nextInput = document.querySelector(`input[data-row="${index + 1}"][data-field="${field}"]`) as HTMLInputElement;
-          if (nextInput) {
-            nextInput.focus();
-          }
-        }, 0);
-      } else if (index < inputRows.length - 1) {
-        const nextInput = document.querySelector(`input[data-row="${index + 1}"][data-field="${field}"]`) as HTMLInputElement;
-        if (nextInput) {
-          nextInput.focus();
-        }
-      }
+      moveFocusVertical('down');
     } else if (e.key === 'ArrowRight') {
       e.preventDefault();
-      const currentInput = e.currentTarget;
-      const allInputs = Array.from(document.querySelectorAll('input[type="text"], input[type="number"]')) as HTMLInputElement[];
-      const currentIndex = allInputs.indexOf(currentInput);
-      if (currentIndex < allInputs.length - 1) {
-        allInputs[currentIndex + 1].focus();
-      }
+      moveFocus('right');
     } else if (e.key === 'ArrowLeft') {
       e.preventDefault();
-      const currentInput = e.currentTarget;
-      const allInputs = Array.from(document.querySelectorAll('input[type="text"], input[type="number"]')) as HTMLInputElement[];
-      const currentIndex = allInputs.indexOf(currentInput);
-      if (currentIndex > 0) {
-        allInputs[currentIndex - 1].focus();
-      }
+      moveFocus('left');
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
-      const currentInput = e.currentTarget;
-      const allInputs = Array.from(document.querySelectorAll('input[type="text"], input[type="number"]')) as HTMLInputElement[];
-      const currentIndex = allInputs.indexOf(currentInput);
-      const inputsPerRow = 2; // 金額と項目名の2つ
-      const nextIndex = currentIndex + inputsPerRow;
-      if (nextIndex < allInputs.length) {
-        allInputs[nextIndex].focus();
-      } else if (index === inputRows.length - 1 && !isRowEmpty) {
-        handleAddRow();
-        setTimeout(() => {
-          const newInput = document.querySelector(`input[data-row="${index + 1}"][data-field="${field}"]`) as HTMLInputElement;
-          if (newInput) {
-            newInput.focus();
-          }
-        }, 0);
-      }
+      moveFocusVertical('down');
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      const currentInput = e.currentTarget;
+      moveFocusVertical('up');
+    }
+  };
+
+  const handleSimpleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    // シンプルモード用のフォーカス移動関数
+    const moveFocusSimple = (direction: 'up' | 'down') => {
       const allInputs = Array.from(document.querySelectorAll('input[type="text"], input[type="number"]')) as HTMLInputElement[];
-      const currentIndex = allInputs.indexOf(currentInput);
-      const inputsPerRow = 2; // 金額と項目名の2つ
-      const prevIndex = currentIndex - inputsPerRow;
-      if (prevIndex >= 0) {
-        allInputs[prevIndex].focus();
+      const currentIndex = allInputs.indexOf(e.currentTarget);
+      const targetIndex = currentIndex + (direction === 'down' ? 1 : -1);
+
+      if (targetIndex >= 0 && targetIndex < allInputs.length) {
+        allInputs[targetIndex].focus();
       }
+    };
+
+    // 保存処理
+    savePayment(0, e.currentTarget.value);
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      moveFocusSimple('down');
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      moveFocusSimple('down');
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      moveFocusSimple('up');
     }
   };
 
@@ -155,16 +211,13 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
                 personId={person.id}
                 dispatch={dispatch}
                 onAmountChange={(index, value) => {
-                  const newRows = [...inputRows];
-                  newRows[index] = { ...newRows[index], amount: value };
-                  setInputRows(newRows);
+                  savePayment(index, value, row.description);
                 }}
                 onDescriptionChange={(index, value) => {
-                  const newRows = [...inputRows];
-                  newRows[index] = { ...newRows[index], description: value };
-                  setInputRows(newRows);
+                  savePayment(index, row.amount, value);
                 }}
-                onKeyDown={handleKeyDown}
+                onKeyDown={handleDetailKeyDown}
+                savePayment={handleSavePayment}
               />
             ))}
             <button
@@ -178,9 +231,9 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
         ) : (
           <SimplePaymentInput
             value={simpleTotal}
-            personId={person.id}
-            dispatch={dispatch}
             onChange={setSimpleTotal}
+            onKeyDown={handleSimpleKeyDown}
+            savePayment={savePayment}
           />
         )}
       </div>

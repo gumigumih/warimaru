@@ -1,37 +1,26 @@
-import type { AppDispatch } from '../store/store';
-import { updateSimplePayment } from '../store/peopleSlice';
 import Cleave from 'cleave.js/react';
-import type { ChangeEvent } from 'react';
+import type { ChangeEvent, KeyboardEvent } from 'react';
 
 interface SimplePaymentInputProps {
   value: string;
-  personId: string;
-  dispatch: AppDispatch;
   onChange: (value: string) => void;
+  onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void;
+  savePayment: (index: number, value: string, description?: string) => void;
 }
 
 export const SimplePaymentInput = ({
   value,
-  personId,
-  dispatch,
   onChange,
+  onKeyDown,
+  savePayment,
 }: SimplePaymentInputProps) => {
-  const handleBlur = (value: string) => {
-    if (value) {
-      const amount = Number(value.replace(/,/g, '')) || 0;
-      dispatch(updateSimplePayment({
-        personId,
-        amount,
-      }));
-    }
-  };
-
   return (
     <div className="relative">
       <Cleave
         value={value}
         onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
-        onBlur={(e: ChangeEvent<HTMLInputElement>) => handleBlur(e.target.value)}
+        onBlur={(e: ChangeEvent<HTMLInputElement>) => savePayment(0, e.target.value)}
+        onKeyDown={onKeyDown}
         data-simple-total
         placeholder="合計支払額"
         className="w-full rounded-md bg-white/80 p-2 pr-8 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"

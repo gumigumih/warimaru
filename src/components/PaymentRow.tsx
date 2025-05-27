@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import type { AppDispatch } from '../store/store';
-import { updatePayment, deletePayment } from '../store/peopleSlice';
+import { deletePayment } from '../store/peopleSlice';
 import Cleave from 'cleave.js/react';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 
@@ -13,6 +13,7 @@ interface PaymentRowProps {
   onAmountChange: (index: number, value: string) => void;
   onDescriptionChange: (index: number, value: string) => void;
   onKeyDown: (index: number, field: 'amount' | 'description', e: KeyboardEvent<HTMLInputElement>) => void;
+  savePayment: (personId: string, paymentId: string, amount: number, description: string) => void;
 }
 
 export const PaymentRow = ({
@@ -24,34 +25,30 @@ export const PaymentRow = ({
   onDescriptionChange,
   onKeyDown,
 }: PaymentRowProps) => {
-  const handleRowBlur = (field: 'amount' | 'description', value: string) => {
-    if (row.id) {
-      const amount = field === 'amount' ? Number(value.replace(/,/g, '')) || 0 : Number(row.amount.replace(/,/g, '')) || 0;
-      const description = field === 'description' ? value : row.description;
-      
-      dispatch(updatePayment({
-        personId,
-        paymentId: row.id,
-        payment: {
-          amount,
-          description,
-        }
-      }));
-    }
-  };
-
   return (
-    <div className="flex gap-2 items-center">
-      <div className="relative">
+    <div className="flex gap-2 items-center w-full">
+      <div className="relative flex-1 min-w-0">
         <Cleave
           value={row.amount}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => onAmountChange(index, e.target.value)}
-          onBlur={(e: ChangeEvent<HTMLInputElement>) => handleRowBlur('amount', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            onAmountChange(index, e.target.value);
+            if (row.id) {
+              const amount = Number(e.target.value.replace(/,/g, '')) || 0;
+              savePayment(personId, row.id, amount, row.description);
+            }
+          }}
+          onBlur={() => {
+            if (row.id) {
+              const amount = Number(row.amount.replace(/,/g, '')) || 0;
+              savePayment(personId, row.id, amount, row.description);
+            }
+          }}
           onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => onKeyDown(index, 'amount', e)}
           data-row={index}
+          data-row-id={row.id}
           data-field="amount"
           placeholder="金額"
-          className="w-32 rounded-md bg-white/80 p-2 pr-8 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          className="w-full rounded-md bg-white/80 p-2 pr-8 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           options={{
             numeral: true,
             numeralThousandsGroupStyle: 'thousand',
@@ -71,13 +68,25 @@ export const PaymentRow = ({
       <input
         type="text"
         value={row.description}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => onDescriptionChange(index, e.target.value)}
-        onBlur={(e: ChangeEvent<HTMLInputElement>) => handleRowBlur('description', e.target.value)}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+          onDescriptionChange(index, e.target.value);
+          if (row.id) {
+            const amount = Number(row.amount.replace(/,/g, '')) || 0;
+            savePayment(personId, row.id, amount, e.target.value);
+          }
+        }}
+        onBlur={() => {
+          if (row.id) {
+            const amount = Number(row.amount.replace(/,/g, '')) || 0;
+            savePayment(personId, row.id, amount, row.description);
+          }
+        }}
         onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => onKeyDown(index, 'description', e)}
         data-row={index}
+        data-row-id={row.id}
         data-field="description"
         placeholder="項目名"
-        className="flex-1 rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+        className="flex-1 min-w-0 rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
       />
       {row.id && (
         <button
@@ -86,7 +95,7 @@ export const PaymentRow = ({
               dispatch(deletePayment({ personId, paymentId: row.id }));
             }
           }}
-          className="ml-2 p-1 text-gray-400 hover:text-red-500 transition-colors"
+          className="text-gray-400 hover:text-red-500 transition-colors"
           title="項目を削除"
         >
           <FontAwesomeIcon icon={faTrashAlt} className="w-4 h-4" />
