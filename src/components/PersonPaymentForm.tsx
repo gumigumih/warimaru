@@ -145,15 +145,24 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
       }
     };
 
+    // フィールドに応じたフォーカス移動
     if (e.key === 'Enter') {
       e.preventDefault();
-      moveFocusVertical('down');
+      if (field === 'amount') {
+        moveFocus('right');
+      } else {
+        moveFocusVertical('down');
+      }
     } else if (e.key === 'ArrowRight') {
       e.preventDefault();
-      moveFocus('right');
+      if (field === 'amount') {
+        moveFocus('right');
+      }
     } else if (e.key === 'ArrowLeft') {
       e.preventDefault();
-      moveFocus('left');
+      if (field === 'description') {
+        moveFocus('left');
+      }
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
       moveFocusVertical('down');
@@ -216,7 +225,7 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
                 onDescriptionChange={(index, value) => {
                   savePayment(index, row.amount, value);
                 }}
-                onKeyDown={handleDetailKeyDown}
+                onKeyDown={(index, field, e) => handleDetailKeyDown(index, field, e)}
                 savePayment={handleSavePayment}
               />
             ))}

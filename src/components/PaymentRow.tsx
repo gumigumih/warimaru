@@ -24,6 +24,7 @@ export const PaymentRow = ({
   onAmountChange,
   onDescriptionChange,
   onKeyDown,
+  savePayment,
 }: PaymentRowProps) => {
   return (
     <div className="flex gap-2 items-center w-full">
