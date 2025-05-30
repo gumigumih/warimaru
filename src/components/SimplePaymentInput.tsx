@@ -5,7 +5,8 @@ interface SimplePaymentInputProps {
   value: string;
   onChange: (value: string) => void;
   onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void;
-  savePayment: (index: number, value: string, description?: string) => void;
+  savePayment: (personId: string, paymentId: string, amount: number | string, description?: string) => void;
+  personId: string;
 }
 
 export const SimplePaymentInput = ({
@@ -13,16 +14,23 @@ export const SimplePaymentInput = ({
   onChange,
   onKeyDown,
   savePayment,
+  personId,
 }: SimplePaymentInputProps) => {
   return (
-    <div className="relative">
+    <div className="relative flex-1 min-w-0">
       <Cleave
         value={value}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
-        onBlur={(e: ChangeEvent<HTMLInputElement>) => savePayment(0, e.target.value)}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+          onChange(e.target.value);
+          const amount = Number(e.target.value.replace(/,/g, '')) || 0;
+          savePayment(personId, '', amount);
+        }}
+        onBlur={() => {
+          const amount = Number(value.replace(/,/g, '')) || 0;
+          savePayment(personId, '', amount);
+        }}
         onKeyDown={onKeyDown}
-        data-simple-total
-        placeholder="合計支払額"
+        placeholder="金額"
         className="w-full rounded-md bg-white/80 p-2 pr-8 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
         options={{
           numeral: true,

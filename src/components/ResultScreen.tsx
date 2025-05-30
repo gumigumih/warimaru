@@ -8,6 +8,7 @@ import warimaruLogo from '../assets/logo-white.png';
 import { PaymentStatus } from './PaymentStatus';
 import { TransferList } from './TransferList';
 import { PaymentDetails } from './PaymentDetails';
+import { COLORS } from '../constants/colors';
 
 interface ResultScreenProps {
   onBack: () => void;
@@ -42,28 +43,12 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
   const paymentStatus = people.map((person, index) => {
     const paidAmount = person.payments.reduce((sum, payment) => sum + payment.amount, 0);
     const difference = paidAmount - perPersonAmount;
-    const colors = [
-      'bg-yellow-400',
-      'bg-green-400',
-      'bg-purple-400',
-      'bg-pink-400',
-      'bg-blue-400',
-      'bg-orange-400',
-    ];
-    const textColors = [
-      'text-yellow-600',
-      'text-green-600',
-      'text-purple-600',
-      'text-pink-600',
-      'text-blue-600',
-      'text-orange-600',
-    ];
     return {
       person,
       paidAmount,
       difference,
-      color: colors[index % colors.length],
-      textColor: textColors[index % textColors.length],
+      color: COLORS.backgrounds[index % COLORS.backgrounds.length],
+      textColor: COLORS.text[index % COLORS.text.length],
     };
   });
 

@@ -8,6 +8,7 @@ import type { KeyboardEvent } from 'react';
 import { PersonNameEditor } from './PersonNameEditor';
 import { PaymentRow } from './PaymentRow';
 import { SimplePaymentInput } from './SimplePaymentInput';
+import { handleDetailKeyDown, handleSimpleKeyDown } from '../utils/keyboardHandlers';
 
 interface PersonPaymentFormProps {
   person: Person;
@@ -23,25 +24,23 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
   const nextInputRef = useRef<HTMLInputElement | null>(null);
 
   // 統一された保存関数
-  const savePayment = (index: number, value: string, description?: string) => {
+  const savePayment = (personId: string, paymentId: string, amount: number | string, description?: string) => {
     if (isDetailMode) {
-      const amount = Number(value.replace(/,/g, '')) || 0;
-      const currentRow = inputRows[index];
-      
+      const numericAmount = typeof amount === 'string' ? Number(amount.replace(/,/g, '')) || 0 : amount;
       dispatch(updatePayment({
-        personId: person.id,
-        paymentId: currentRow.id,
+        personId,
+        paymentId,
         payment: {
-          amount,
-          description: description || currentRow.description,
+          amount: numericAmount,
+          description: description || '',
         }
       }));
     } else {
-      if (value) {
-        const amount = Number(value.replace(/,/g, '')) || 0;
+      if (amount) {
+        const numericAmount = typeof amount === 'string' ? Number(amount.replace(/,/g, '')) || 0 : amount;
         dispatch(updateSimplePayment({
-          personId: person.id,
-          amount,
+          personId,
+          amount: numericAmount,
         }));
       }
     }
@@ -115,88 +114,12 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
     nextInputRef.current = document.querySelector(`input[data-row="${inputRows.length}"][data-field="amount"]`) as HTMLInputElement;
   };
 
-  const handleDetailKeyDown = (index: number, field: 'amount' | 'description', e: KeyboardEvent<HTMLInputElement>) => {
-    const currentRow = inputRows[index];
-
-    // 保存処理
-    savePayment(index, currentRow.amount, currentRow.description);
-
-    // フォーカスを移動する関数
-    const moveFocus = (direction: 'left' | 'right') => {
-      const currentInput = e.currentTarget;
-      const allInputs = Array.from(document.querySelectorAll('input[type="text"], input[type="number"]')) as HTMLInputElement[];
-      const currentIndex = allInputs.indexOf(currentInput);
-      const targetIndex = currentIndex + (direction === 'right' ? 1 : -1);
-
-      if (targetIndex >= 0 && targetIndex < allInputs.length) {
-        allInputs[targetIndex].focus();
-      }
-    };
-
-    // 上下のフォーカスを移動する関数
-    const moveFocusVertical = (direction: 'up' | 'down') => {
-      const currentInput = e.currentTarget;
-      const allInputs = Array.from(document.querySelectorAll('input[type="text"], input[type="number"]')) as HTMLInputElement[];
-      const currentIndex = allInputs.indexOf(currentInput);
-      const targetIndex = currentIndex + (direction === 'down' ? 2 : -2); // 2は1行あたりの入力フィールド数
-
-      if (targetIndex >= 0 && targetIndex < allInputs.length) {
-        allInputs[targetIndex].focus();
-      }
-    };
-
-    // フィールドに応じたフォーカス移動
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (field === 'amount') {
-        moveFocus('right');
-      } else {
-        moveFocusVertical('down');
-      }
-    } else if (e.key === 'ArrowRight') {
-      e.preventDefault();
-      if (field === 'amount') {
-        moveFocus('right');
-      }
-    } else if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      if (field === 'description') {
-        moveFocus('left');
-      }
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      moveFocusVertical('down');
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      moveFocusVertical('up');
-    }
+  const handleDetailKeyDownWrapper = (index: number, field: 'amount' | 'description', e: KeyboardEvent<HTMLInputElement>) => {
+    handleDetailKeyDown(index, field, e, inputRows, savePayment, person.id);
   };
 
-  const handleSimpleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    // シンプルモード用のフォーカス移動関数
-    const moveFocusSimple = (direction: 'up' | 'down') => {
-      const allInputs = Array.from(document.querySelectorAll('input[type="text"], input[type="number"]')) as HTMLInputElement[];
-      const currentIndex = allInputs.indexOf(e.currentTarget);
-      const targetIndex = currentIndex + (direction === 'down' ? 1 : -1);
-
-      if (targetIndex >= 0 && targetIndex < allInputs.length) {
-        allInputs[targetIndex].focus();
-      }
-    };
-
-    // 保存処理
-    savePayment(0, e.currentTarget.value);
-
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      moveFocusSimple('down');
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      moveFocusSimple('down');
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      moveFocusSimple('up');
-    }
+  const handleSimpleKeyDownWrapper = (e: KeyboardEvent<HTMLInputElement>) => {
+    handleSimpleKeyDown(e, savePayment);
   };
 
   return (
@@ -220,12 +143,14 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
                 personId={person.id}
                 dispatch={dispatch}
                 onAmountChange={(index, value) => {
-                  savePayment(index, value, row.description);
+                  const amount = Number(value.replace(/,/g, '')) || 0;
+                  savePayment(person.id, row.id, amount, row.description);
                 }}
                 onDescriptionChange={(index, value) => {
-                  savePayment(index, row.amount, value);
+                  const amount = Number(row.amount.replace(/,/g, '')) || 0;
+                  savePayment(person.id, row.id, amount, value);
                 }}
-                onKeyDown={(index, field, e) => handleDetailKeyDown(index, field, e)}
+                onKeyDown={(index, field, e) => handleDetailKeyDownWrapper(index, field, e)}
                 savePayment={handleSavePayment}
               />
             ))}
@@ -241,8 +166,9 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
           <SimplePaymentInput
             value={simpleTotal}
             onChange={setSimpleTotal}
-            onKeyDown={handleSimpleKeyDown}
+            onKeyDown={handleSimpleKeyDownWrapper}
             savePayment={savePayment}
+            personId={person.id}
           />
         )}
       </div>
