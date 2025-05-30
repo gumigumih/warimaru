@@ -102,8 +102,16 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
       logoElement.classList.remove('hidden');
     }
 
+    // 背景を不透明に変更
+    const resultElement = resultRef.current;
+    const originalBackground = resultElement.style.background;
+    resultElement.style.background = 'white';
+
     try {
-      const canvas = await html2canvas(resultRef.current);
+      const canvas = await html2canvas(resultRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2, // より高品質な画像を生成
+      });
       const image = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.href = image;
@@ -111,11 +119,14 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
       link.click();
     } catch (error) {
       console.error('画像の生成に失敗しました:', error);
-    }
-
-    // ロゴを非表示に戻す
-    if (logoElement) {
-      logoElement.classList.add('hidden');
+    } finally {
+      // 背景を元に戻す
+      resultElement.style.background = originalBackground;
+      
+      // ロゴを非表示に戻す
+      if (logoElement) {
+        logoElement.classList.add('hidden');
+      }
     }
   };
 
