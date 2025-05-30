@@ -1,13 +1,13 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus } from '@fortawesome/free-solid-svg-icons';
-import type { RootState } from '../store/store';
-import type { AppDispatch } from '../store/store';
+import type { RootState } from '../../store/store';
+import type { AppDispatch } from '../../store/store';
 import {
   addPerson,
   deletePerson,
   setDetailMode,
-} from '../store/peopleSlice';
+} from '../../store/peopleSlice';
 import { PersonPaymentForm } from './PersonPaymentForm';
 
 interface InputFormProps {

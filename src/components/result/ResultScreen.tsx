@@ -1,14 +1,14 @@
 import { useRef } from 'react';
 import { useSelector } from 'react-redux';
-import type { RootState } from '../store/store';
+import type { RootState } from '../../store/store';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import html2canvas from 'html2canvas-pro';
-import warimaruLogo from '../assets/logo-white.png';
+import warimaruLogo from '../../assets/logo-white.png';
 import { PaymentStatus } from './PaymentStatus';
 import { TransferList } from './TransferList';
 import { PaymentDetails } from './PaymentDetails';
-import { COLORS } from '../constants/colors';
+import { COLORS } from '../../constants/colors';
 
 interface ResultScreenProps {
   onBack: () => void;

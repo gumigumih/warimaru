@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
-import type { AppDispatch } from '../store/store';
-import { deletePayment } from '../store/peopleSlice';
+import type { AppDispatch } from '../../store/store';
+import { deletePayment } from '../../store/peopleSlice';
 import Cleave from 'cleave.js/react';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 

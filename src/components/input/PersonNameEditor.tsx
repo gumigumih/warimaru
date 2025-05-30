@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faTimes, faPen, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
-import type { AppDispatch } from '../store/store';
-import { updatePersonName } from '../store/peopleSlice';
+import type { AppDispatch } from '../../store/store';
+import { updatePersonName } from '../../store/peopleSlice';
 
 interface PersonNameEditorProps {
   personId: string;

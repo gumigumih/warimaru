@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import type { Person } from '../types';
-import type { AppDispatch } from '../store/store';
-import { addPayment, updatePayment, updateSimplePayment } from '../store/peopleSlice';
+import type { Person } from '../../types';
+import type { AppDispatch } from '../../store/store';
+import { addPayment, updatePayment, updateSimplePayment } from '../../store/peopleSlice';
 import type { KeyboardEvent } from 'react';
 import { PersonNameEditor } from './PersonNameEditor';
 import { PaymentRow } from './PaymentRow';
 import { SimplePaymentInput } from './SimplePaymentInput';
-import { handleDetailKeyDown, handleSimpleKeyDown } from '../utils/keyboardHandlers';
+import { handleDetailKeyDown, handleSimpleKeyDown } from '../../utils/keyboardHandlers';
 
 interface PersonPaymentFormProps {
   person: Person;
