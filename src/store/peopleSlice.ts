@@ -20,14 +20,25 @@ export const peopleSlice = createSlice({
   initialState,
   reducers: {
     addPerson: (state) => {
-      const nextLetter = String.fromCharCode(65 + state.people.length); // 65は'A'のASCIIコード
-      if (state.people.length < 6) { // AからFまで（6文字）に制限
-        state.people.push({
-          id: crypto.randomUUID(),
-          name: `${nextLetter}さん`,
-          payments: [],
-        });
+      // 文字生成ロジックを改善（A, B, C... Z, AA, AB... のように拡張）
+      let nextName = '';
+      const currentCount = state.people.length;
+      
+      if (currentCount < 26) {
+        // A-Z（26文字）
+        nextName = String.fromCharCode(65 + currentCount) + 'さん';
+      } else {
+        // 27文字目以降は AA, AB, AC... のように2文字で表現
+        const firstChar = String.fromCharCode(65 + Math.floor((currentCount - 26) / 26));
+        const secondChar = String.fromCharCode(65 + ((currentCount - 26) % 26));
+        nextName = firstChar + secondChar + 'さん';
       }
+      
+      state.people.push({
+        id: crypto.randomUUID(),
+        name: nextName,
+        payments: [],
+      });
     },
     updatePersonName: (state, action: PayloadAction<{ personId: string; newName: string }>) => {
       const person = state.people.find(p => p.id === action.payload.personId);
