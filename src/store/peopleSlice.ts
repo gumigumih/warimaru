@@ -1,11 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { Person, PaymentItem } from '../types';
-
-interface PeopleState {
-  people: Person[];
-  isDetailMode: boolean;
-}
+import type { Person, PaymentItem, PeopleState } from '../types';
 
 const initialState: PeopleState = {
   people: [
@@ -13,6 +8,7 @@ const initialState: PeopleState = {
     { id: crypto.randomUUID(), name: 'Bさん', payments: [] },
   ],
   isDetailMode: false,
+  nonPayingParticipants: 0,
 };
 
 export const peopleSlice = createSlice({
@@ -76,6 +72,9 @@ export const peopleSlice = createSlice({
     setDetailMode: (state, action: PayloadAction<boolean>) => {
       state.isDetailMode = action.payload;
     },
+    setNonPayingParticipants: (state, action: PayloadAction<number>) => {
+      state.nonPayingParticipants = action.payload;
+    },
     updateSimplePayment: (state, action: PayloadAction<{ personId: string; amount: number }>) => {
       const person = state.people.find(p => p.id === action.payload.personId);
       if (person) {
@@ -108,6 +107,7 @@ export const {
   updatePayment,
   deletePayment,
   setDetailMode,
+  setNonPayingParticipants,
   updateSimplePayment,
 } = peopleSlice.actions;
 

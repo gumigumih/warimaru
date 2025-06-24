@@ -24,6 +24,7 @@ interface Transfer {
 export const ResultScreen = ({ onBack }: ResultScreenProps) => {
   const people = useSelector((state: RootState) => state.people.people);
   const isDetailMode = useSelector((state: RootState) => state.people.isDetailMode);
+  const nonPayingParticipants = useSelector((state: RootState) => state.people.nonPayingParticipants);
   const resultRef = useRef<HTMLDivElement>(null);
 
   // 合計金額を計算
@@ -31,8 +32,11 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
     return sum + person.payments.reduce((personSum, payment) => personSum + payment.amount, 0);
   }, 0);
 
-  // 1人あたりの金額を計算
-  const perPersonAmount = Math.ceil(totalAmount / people.length);
+  // 総参加者数を計算（支払いをした人 + 支払いをしていない人）
+  const totalParticipants = people.length + nonPayingParticipants;
+
+  // 1人あたりの金額を計算（総参加者数で割る）
+  const perPersonAmount = Math.ceil(totalAmount / totalParticipants);
 
   // 最大支払金額を計算
   const maxPayment = Math.max(...people.map(person => 
@@ -55,15 +59,30 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
   // 最適な送金方法を計算
   const calculateTransfers = (): Transfer[] => {
     const transfers: Transfer[] = [];
-    const balances = paymentStatus.map(status => ({
+    
+    // 支払いをした人の残高を計算
+    const payingBalances = paymentStatus.map(status => ({
       name: status.person.name,
       balance: status.difference,
       textColor: status.textColor,
     }));
 
+    // 支払いをしていない人の残高を計算（全員が1人あたりの金額を支払う必要がある）
+    const nonPayingBalances = [];
+    for (let i = 0; i < nonPayingParticipants; i++) {
+      nonPayingBalances.push({
+        name: `参加者${i + 1}`,
+        balance: -perPersonAmount, // 1人あたりの金額を支払う必要がある
+        textColor: COLORS.text[(people.length + i) % COLORS.text.length],
+      });
+    }
+
+    // 全員の残高を結合
+    const allBalances = [...payingBalances, ...nonPayingBalances];
+
     // プラスの残高を持つ人とマイナスの残高を持つ人を分ける
-    const creditors = balances.filter(b => b.balance > 0).sort((a, b) => b.balance - a.balance);
-    const debtors = balances.filter(b => b.balance < 0).sort((a, b) => a.balance - b.balance);
+    const creditors = allBalances.filter(b => b.balance > 0).sort((a, b) => b.balance - a.balance);
+    const debtors = allBalances.filter(b => b.balance < 0).sort((a, b) => a.balance - b.balance);
 
     // 送金を計算
     for (const debtor of debtors) {
@@ -146,6 +165,18 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
           <div className="flex justify-between items-center">
             <span className="text-gray-600">合計金額</span>
             <span className="text-lg font-bold">{totalAmount.toLocaleString()}円</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">総参加者数</span>
+            <span className="text-lg font-bold">{totalParticipants}人</span>
+          </div>
+          <div className="flex justify-between items-center pl-4">
+            <span className="text-sm text-gray-500">支払いをした人数</span>
+            <span className="text-sm font-medium">{people.length}人</span>
+          </div>
+          <div className="flex justify-between items-center pl-4">
+            <span className="text-sm text-gray-500">支払いをしていない人数</span>
+            <span className="text-sm font-medium">{nonPayingParticipants}人</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-gray-600">1人あたり</span>

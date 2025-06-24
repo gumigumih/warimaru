@@ -7,6 +7,7 @@ import {
   addPerson,
   deletePerson,
   setDetailMode,
+  setNonPayingParticipants,
 } from '../../store/peopleSlice';
 import { PersonPaymentForm } from './PersonPaymentForm';
 
@@ -18,6 +19,7 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const people = useSelector((state: RootState) => state.people.people);
   const isDetailMode = useSelector((state: RootState) => state.people.isDetailMode);
+  const nonPayingParticipants = useSelector((state: RootState) => state.people.nonPayingParticipants);
 
   const handleAddPerson = () => {
     dispatch(addPerson());
@@ -53,9 +55,30 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
     dispatch(setDetailMode(!isDetailMode));
   };
 
+  const handleNonPayingParticipantsChange = (value: number) => {
+    dispatch(setNonPayingParticipants(value));
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-end items-center">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <label htmlFor="nonPayingParticipants" className="text-sm text-white font-medium">
+              支払いをしていない人数:
+            </label>
+            <input
+              id="nonPayingParticipants"
+              type="number"
+              min="0"
+              max="100"
+              value={nonPayingParticipants}
+              onChange={(e) => handleNonPayingParticipantsChange(parseInt(e.target.value) || 0)}
+              className="w-16 px-2 py-1 text-sm bg-white/80 rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+            />
+            <span className="text-sm text-white">人</span>
+          </div>
+        </div>
         <div className="flex items-center gap-2">
           <span className="text-sm text-white">詳細モード</span>
           <button
