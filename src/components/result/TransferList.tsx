@@ -41,7 +41,7 @@ export const TransferList = ({ transfers }: TransferListProps) => {
   });
 
   return (
-    <div className="bg-white-50/80 backdrop-blur-sm mt-4 p-4 rounded-lg">
+    <div className="bg-white-50/80 backdrop-blur-sm mt-4 p-4 rounded-md">
       <h3 className="text-lg font-bold mb-4">精算金額</h3>
       <div className="space-y-3">
         {sortedGroups.map((group, index) => {

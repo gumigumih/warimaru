@@ -61,24 +61,7 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <label htmlFor="nonPayingParticipants" className="text-sm text-white font-medium">
-              支払いをしていない人数:
-            </label>
-            <input
-              id="nonPayingParticipants"
-              type="number"
-              min="0"
-              max="100"
-              value={nonPayingParticipants}
-              onChange={(e) => handleNonPayingParticipantsChange(parseInt(e.target.value) || 0)}
-              className="w-16 px-2 py-1 text-sm bg-white/80 rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-            />
-            <span className="text-sm text-white">人</span>
-          </div>
-        </div>
+      <div className="flex justify-end items-center">
         <div className="flex items-center gap-2">
           <span className="text-sm text-white">詳細モード</span>
           <button
@@ -120,6 +103,25 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
           </button>
         </div>
       </div>
+
+      <div className="bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-sm">
+        <div className="flex items-center gap-2">
+          <label htmlFor="nonPayingParticipants" className="text-sm text-gray-700 font-medium">
+            支払いをしていない人数:
+          </label>
+          <input
+            id="nonPayingParticipants"
+            type="number"
+            min="0"
+            max="100"
+            value={nonPayingParticipants}
+            onChange={(e) => handleNonPayingParticipantsChange(parseInt(e.target.value) || 0)}
+            className="w-20 rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+          <span className="text-sm text-gray-700">人</span>
+        </div>
+      </div>
+
       <button
         onClick={handleShowResult}
         className="w-full px-8 py-4 bg-lime-500 text-white rounded-md hover:bg-lime-700 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:ring-offset-2 font-bold text-lg"

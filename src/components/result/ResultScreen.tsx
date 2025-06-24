@@ -121,6 +121,12 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
       logoElement.classList.remove('hidden');
     }
 
+    // 精算金額のボックスにボーダーを追加
+    const transferListElement = resultRef.current.querySelector('.bg-white-50\\/80') as HTMLElement;
+    if (transferListElement) {
+      transferListElement.classList.add('border-2', 'border-sky-500');
+    }
+
     // 背景を不透明に変更
     const resultElement = resultRef.current;
     const originalBackground = resultElement.style.background;
@@ -132,15 +138,30 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
         scale: 2, // より高品質な画像を生成
       });
       const image = canvas.toDataURL('image/png');
+      
+      // タイムスタンプを生成
+      const now = new Date();
+      const timestamp = now.getFullYear() +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        String(now.getDate()).padStart(2, '0') + '_' +
+        String(now.getHours()).padStart(2, '0') +
+        String(now.getMinutes()).padStart(2, '0') +
+        String(now.getSeconds()).padStart(2, '0');
+      
       const link = document.createElement('a');
       link.href = image;
-      link.download = 'わりまる_計算結果.png';
+      link.download = `わりまる_計算結果_${timestamp}.png`;
       link.click();
     } catch (error) {
       console.error('画像の生成に失敗しました:', error);
     } finally {
       // 背景を元に戻す
       resultElement.style.background = originalBackground;
+      
+      // 精算金額のボックスのボーダーを元に戻す
+      if (transferListElement) {
+        transferListElement.classList.remove('border-2', 'border-sky-500');
+      }
       
       // ロゴを非表示に戻す
       if (logoElement) {
