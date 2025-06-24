@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { InputForm } from './components/input/InputForm'
 import { ResultScreen } from './components/result/ResultScreen'
 import { Header } from './components/layout/Header'
+import { Footer } from './components/layout/Footer'
 import { Background } from './components/layout/Background'
 
 export const App = () => {
@@ -27,6 +28,7 @@ export const App = () => {
           onShowResult={handleShowResult}
         />
       )}
+      <Footer />
     </Background>
   )
 }
