@@ -119,7 +119,7 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
   };
 
   const handleSimpleKeyDownWrapper = (e: KeyboardEvent<HTMLInputElement>) => {
-    handleSimpleKeyDown(e, savePayment);
+    handleSimpleKeyDown(e, savePayment, person.id);
   };
 
   return (
@@ -142,11 +142,11 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
                 index={index}
                 personId={person.id}
                 dispatch={dispatch}
-                onAmountChange={(index, value) => {
+                onAmountChange={(_index, value) => {
                   const amount = Number(value.replace(/,/g, '')) || 0;
                   savePayment(person.id, row.id, amount, row.description);
                 }}
-                onDescriptionChange={(index, value) => {
+                onDescriptionChange={(_index, value) => {
                   const amount = Number(row.amount.replace(/,/g, '')) || 0;
                   savePayment(person.id, row.id, amount, value);
                 }}

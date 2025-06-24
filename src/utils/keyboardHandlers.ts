@@ -77,7 +77,8 @@ export const handleDetailKeyDown = (
 
 export const handleSimpleKeyDown = (
   e: KeyboardEvent<HTMLInputElement>,
-  savePayment: SavePaymentFunction
+  savePayment: SavePaymentFunction,
+  personId: string
 ) => {
   // シンプルモード用のフォーカス移動関数
   const moveFocusSimple = (direction: 'up' | 'down') => {
@@ -91,7 +92,8 @@ export const handleSimpleKeyDown = (
   };
 
   // 保存処理
-  savePayment(0, e.currentTarget.value);
+  const amount = Number(e.currentTarget.value.replace(/,/g, '')) || 0;
+  savePayment(personId, '', amount, '');
 
   if (e.key === 'Enter') {
     e.preventDefault();

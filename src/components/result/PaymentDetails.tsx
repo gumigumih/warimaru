@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
-import type { Person } from '../types';
+import type { Person } from '../../types';
 
 interface PaymentDetailsProps {
   paymentStatus: {
@@ -38,7 +38,7 @@ export const PaymentDetails = ({ paymentStatus }: PaymentDetailsProps) => {
                 </div>
                 {person.payments.length > 0 && (
                   <div className="space-y-2">
-                    {person.payments.map(payment => (
+                    {person.payments.map((payment: { id: string; amount: number; description: string }) => (
                       <div key={`${person.id}-${payment.id}`} className="flex justify-between items-center text-sm">
                         <span className="text-gray-600">{payment.description}</span>
                         <span className="font-medium">{payment.amount.toLocaleString()}円</span>

@@ -4,8 +4,8 @@ import type { Person, PaymentItem, PeopleState } from '../types';
 
 const initialState: PeopleState = {
   people: [
-    { id: crypto.randomUUID(), name: 'Aさん', payments: [] },
-    { id: crypto.randomUUID(), name: 'Bさん', payments: [] },
+    { id: crypto.randomUUID(), name: 'Aさん', payments: [] } as Person,
+    { id: crypto.randomUUID(), name: 'Bさん', payments: [] } as Person,
   ],
   isDetailMode: false,
   nonPayingParticipants: 0,
