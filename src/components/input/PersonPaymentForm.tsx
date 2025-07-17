@@ -70,19 +70,6 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
     }
   }, [person.payments, isDetailMode, person.id]);
 
-  // 初期化時に0円の支払いを追加
-  useEffect(() => {
-    if (person.payments.length === 0) {
-      dispatch(addPayment({
-        personId: person.id,
-        payment: {
-          amount: 0,
-          description: '',
-        }
-      }));
-    }
-  }, [person.id, person.payments.length, dispatch]);
-
 
 
   const handleAddRow = () => {

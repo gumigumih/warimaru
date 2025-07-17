@@ -4,8 +4,24 @@ import type { Person, PaymentItem, PeopleState } from '../types';
 
 const initialState: PeopleState = {
   people: [
-    { id: crypto.randomUUID(), name: 'Aさん', payments: [] } as Person,
-    { id: crypto.randomUUID(), name: 'Bさん', payments: [] } as Person,
+    {
+      id: crypto.randomUUID(),
+      name: 'Aさん',
+      payments: [{
+        id: crypto.randomUUID(),
+        amount: 0,
+        description: '',
+      }],
+    } as Person,
+    {
+      id: crypto.randomUUID(),
+      name: 'Bさん',
+      payments: [{
+        id: crypto.randomUUID(),
+        amount: 0,
+        description: '',
+      }],
+    } as Person,
   ],
   isDetailMode: false,
   nonPayingParticipants: 0,
@@ -33,7 +49,11 @@ export const peopleSlice = createSlice({
       state.people.push({
         id: crypto.randomUUID(),
         name: nextName,
-        payments: [],
+        payments: [{
+          id: crypto.randomUUID(),
+          amount: 0,
+          description: '',
+        }],
       });
     },
     updatePersonName: (state, action: PayloadAction<{ personId: string; newName: string }>) => {
