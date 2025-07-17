@@ -1,14 +1,14 @@
-import { useRef } from 'react';
-import { useSelector } from 'react-redux';
-import type { RootState } from '../../store/store';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload } from '@fortawesome/free-solid-svg-icons';
-import html2canvas from 'html2canvas-pro';
-import warimaruLogo from '../../assets/logo-white.png';
-import { PaymentStatus } from './PaymentStatus';
-import { TransferList } from './TransferList';
-import { PaymentDetails } from './PaymentDetails';
-import { COLORS } from '../../constants/colors';
+import { useRef } from "react";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store/store";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
+import html2canvas from "html2canvas-pro";
+import warimaruLogo from "../../assets/logo-white.svg";
+import { PaymentStatus } from "../organisms/PaymentStatus";
+import { TransferList } from "../organisms/TransferList";
+import { PaymentDetails } from "../organisms/PaymentDetails";
+import { COLORS } from "../../constants/colors";
 
 interface ResultScreenProps {
   onBack: () => void;
@@ -23,13 +23,23 @@ interface Transfer {
 
 export const ResultScreen = ({ onBack }: ResultScreenProps) => {
   const people = useSelector((state: RootState) => state.people.people);
-  const isDetailMode = useSelector((state: RootState) => state.people.isDetailMode);
-  const nonPayingParticipants = useSelector((state: RootState) => state.people.nonPayingParticipants);
+  const isDetailMode = useSelector(
+    (state: RootState) => state.people.isDetailMode
+  );
+  const nonPayingParticipants = useSelector(
+    (state: RootState) => state.people.nonPayingParticipants
+  );
   const resultRef = useRef<HTMLDivElement>(null);
 
   // 合計金額を計算
   const totalAmount = people.reduce((sum, person) => {
-    return sum + person.payments.reduce((personSum, payment) => personSum + payment.amount, 0);
+    return (
+      sum +
+      person.payments.reduce(
+        (personSum, payment) => personSum + payment.amount,
+        0
+      )
+    );
   }, 0);
 
   // 総参加者数を計算（支払いをした人 + 支払いをしていない人）
@@ -39,13 +49,18 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
   const perPersonAmount = Math.ceil(totalAmount / totalParticipants);
 
   // 最大支払金額を計算
-  const maxPayment = Math.max(...people.map(person => 
-    person.payments.reduce((sum, payment) => sum + payment.amount, 0)
-  ));
+  const maxPayment = Math.max(
+    ...people.map((person) =>
+      person.payments.reduce((sum, payment) => sum + payment.amount, 0)
+    )
+  );
 
   // 各人の支払い状況を計算
   const paymentStatus = people.map((person, index) => {
-    const paidAmount = person.payments.reduce((sum, payment) => sum + payment.amount, 0);
+    const paidAmount = person.payments.reduce(
+      (sum, payment) => sum + payment.amount,
+      0
+    );
     const difference = paidAmount - perPersonAmount;
     return {
       person,
@@ -59,9 +74,9 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
   // 最適な送金方法を計算
   const calculateTransfers = (): Transfer[] => {
     const transfers: Transfer[] = [];
-    
+
     // 支払いをした人の残高を計算
-    const payingBalances = paymentStatus.map(status => ({
+    const payingBalances = paymentStatus.map((status) => ({
       name: status.person.name,
       balance: status.difference,
       textColor: status.textColor,
@@ -81,8 +96,12 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
     const allBalances = [...payingBalances, ...nonPayingBalances];
 
     // プラスの残高を持つ人とマイナスの残高を持つ人を分ける
-    const creditors = allBalances.filter(b => b.balance > 0).sort((a, b) => b.balance - a.balance);
-    const debtors = allBalances.filter(b => b.balance < 0).sort((a, b) => a.balance - b.balance);
+    const creditors = allBalances
+      .filter((b) => b.balance > 0)
+      .sort((a, b) => b.balance - a.balance);
+    const debtors = allBalances
+      .filter((b) => b.balance < 0)
+      .sort((a, b) => a.balance - b.balance);
 
     // 送金を計算
     for (const debtor of debtors) {
@@ -116,56 +135,60 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
     if (!resultRef.current) return;
 
     // ロゴを表示
-    const logoElement = document.getElementById('result-logo');
+    const logoElement = document.getElementById("result-logo");
     if (logoElement) {
-      logoElement.classList.remove('hidden');
+      logoElement.classList.remove("hidden");
     }
 
     // 精算金額のボックスにボーダーを追加
-    const transferListElement = resultRef.current.querySelector('.bg-white-50\\/80') as HTMLElement;
+    const transferListElement = resultRef.current.querySelector(
+      ".bg-white-50\\/80"
+    ) as HTMLElement;
     if (transferListElement) {
-      transferListElement.classList.add('border-2', 'border-sky-500');
+      transferListElement.classList.add("border-2", "border-sky-500");
     }
 
     // 背景を不透明に変更
     const resultElement = resultRef.current;
     const originalBackground = resultElement.style.background;
-    resultElement.style.background = 'white';
+    resultElement.style.background = "white";
 
     try {
       const canvas = await html2canvas(resultRef.current, {
-        backgroundColor: '#ffffff',
+        backgroundColor: "#ffffff",
         scale: 2, // より高品質な画像を生成
       });
-      const image = canvas.toDataURL('image/png');
-      
+      const image = canvas.toDataURL("image/png");
+
       // タイムスタンプを生成
       const now = new Date();
-      const timestamp = now.getFullYear() +
-        String(now.getMonth() + 1).padStart(2, '0') +
-        String(now.getDate()).padStart(2, '0') + '_' +
-        String(now.getHours()).padStart(2, '0') +
-        String(now.getMinutes()).padStart(2, '0') +
-        String(now.getSeconds()).padStart(2, '0');
-      
-      const link = document.createElement('a');
+      const timestamp =
+        now.getFullYear() +
+        String(now.getMonth() + 1).padStart(2, "0") +
+        String(now.getDate()).padStart(2, "0") +
+        "_" +
+        String(now.getHours()).padStart(2, "0") +
+        String(now.getMinutes()).padStart(2, "0") +
+        String(now.getSeconds()).padStart(2, "0");
+
+      const link = document.createElement("a");
       link.href = image;
       link.download = `わりまる_計算結果_${timestamp}.png`;
       link.click();
     } catch (error) {
-      console.error('画像の生成に失敗しました:', error);
+      console.error("画像の生成に失敗しました:", error);
     } finally {
       // 背景を元に戻す
       resultElement.style.background = originalBackground;
-      
+
       // 精算金額のボックスのボーダーを元に戻す
       if (transferListElement) {
-        transferListElement.classList.remove('border-2', 'border-sky-500');
+        transferListElement.classList.remove("border-2", "border-sky-500");
       }
-      
+
       // ロゴを非表示に戻す
       if (logoElement) {
-        logoElement.classList.add('hidden');
+        logoElement.classList.add("hidden");
       }
     }
   };
@@ -181,11 +204,16 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
         </button>
       </div>
 
-      <div ref={resultRef} className="bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-sm">
+      <div
+        ref={resultRef}
+        className="bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-sm"
+      >
         <div className="space-y-4 border-b border-gray-300 pb-4 mb-4">
           <div className="flex justify-between items-center">
             <span className="text-gray-600">合計金額</span>
-            <span className="text-lg font-bold">{totalAmount.toLocaleString()}円</span>
+            <span className="text-lg font-bold">
+              {totalAmount.toLocaleString()}円
+            </span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-gray-600">総参加者数</span>
@@ -196,12 +224,18 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
             <span className="text-sm font-medium">{people.length}人</span>
           </div>
           <div className="flex justify-between items-center pl-4">
-            <span className="text-sm text-gray-500">支払いをしていない人数</span>
-            <span className="text-sm font-medium">{nonPayingParticipants}人</span>
+            <span className="text-sm text-gray-500">
+              支払いをしていない人数
+            </span>
+            <span className="text-sm font-medium">
+              {nonPayingParticipants}人
+            </span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-gray-600">1人あたり</span>
-            <span className="text-lg font-bold">{perPersonAmount.toLocaleString()}円</span>
+            <span className="text-lg font-bold">
+              {perPersonAmount.toLocaleString()}円
+            </span>
           </div>
         </div>
 
@@ -214,17 +248,24 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
         <TransferList transfers={transfers} />
 
         {/* ロゴを配置（デフォルトで非表示） */}
-        <div className="mt-4 p-4 flex flex-col items-center bg-sky-500 text-white rounded-lg hidden" id="result-logo">
+        <div
+          className="mt-4 p-4 flex flex-col items-center bg-sky-500 text-white rounded-lg hidden"
+          id="result-logo"
+        >
           <div className="w-24 flex items-center justify-center">
-            <img src={warimaruLogo} alt="わりまる" className="w-full h-full object-contain"/>
+            <img
+              src={warimaruLogo}
+              alt="わりまる"
+              className="w-full h-full object-contain"
+            />
           </div>
-          <p className="mt-1 text-center text-sm">https://warimaru.meggumi.com</p>
+          <p className="mt-1 text-center text-sm">
+            https://warimaru.meggumi.com
+          </p>
         </div>
       </div>
 
-      {isDetailMode && (
-        <PaymentDetails paymentStatus={paymentStatus} />
-      )}
+      {isDetailMode && <PaymentDetails paymentStatus={paymentStatus} />}
 
       <div className="flex justify-center">
         <button
@@ -237,4 +278,4 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
       </div>
     </div>
   );
-}; 
+};

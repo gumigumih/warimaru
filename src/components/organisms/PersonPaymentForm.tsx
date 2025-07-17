@@ -4,9 +4,9 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import type { Person } from '../../types';
 import type { AppDispatch } from '../../store/store';
 import { addPayment, updatePayment, updateSimplePayment } from '../../store/peopleSlice';
-import { PersonNameEditor } from './PersonNameEditor';
-import { PaymentRow } from './PaymentRow';
-import { SimplePaymentInput } from './SimplePaymentInput';
+import { PersonNameEditor } from '../molecules/PersonNameEditor';
+import { PaymentRow } from '../molecules/PaymentRow';
+import { SimplePaymentInput } from '../molecules/SimplePaymentInput';
 
 interface PersonPaymentFormProps {
   person: Person;

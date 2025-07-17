@@ -1,24 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faBackspace } from '@fortawesome/free-solid-svg-icons';
 import { createPortal } from 'react-dom';
+import { Icon } from '../atoms/Icon';
+import { CalculatorDisplay } from '../molecules/CalculatorDisplay';
+import { CalculatorKeypad } from '../molecules/CalculatorKeypad';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
 interface CalculatorProps {
   isOpen: boolean;
   onClose: () => void;
-  onCalculate: (value: string | { amount: string; description: string }) => void;
+  onCalculate: (value: string) => void;
   initialValue?: string;
   initialDescription?: string;
   personName?: string;
   isDetailMode?: boolean;
 }
-
-const BUTTONS = [
-  ['7', '8', '9', '÷'],
-  ['4', '5', '6', '×'],
-  ['1', '2', '3', '-'],
-  ['0', 'C', '←', '+'],
-];
 
 function formatNumber(value: string) {
   if (!value) return '';
@@ -114,11 +109,7 @@ export const Calculator = ({
       return;
     }
     const result = calculateExpression(input);
-    if (isDetailMode) {
-      onCalculate({ amount: result, description });
-    } else {
-      onCalculate(result);
-    }
+    onCalculate(result);
     onClose();
   };
 
@@ -133,7 +124,7 @@ export const Calculator = ({
             {personName ? `${personName}さんの金額` : '金額入力'}
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-            <FontAwesomeIcon icon={faTimes} className="w-5 h-5" />
+            <Icon icon={faTimes} className="w-5 h-5" />
           </button>
         </div>
         {/* Description input（ディスプレイの上） */}
@@ -150,41 +141,16 @@ export const Calculator = ({
           </div>
         )}
         {/* Display */}
-        <div className="p-4 bg-gray-50 min-h-[56px] text-right text-2xl font-mono select-none rounded-t">
-          <div ref={inputRef} className="truncate">
-            {input ? formatNumber(input) : <span className="text-gray-400">金額を入力</span>}
-          </div>
-        </div>
-        {/* Error */}
-        {error && <div className="text-red-500 text-xs px-4 pt-1">{error}</div>}
+        <CalculatorDisplay value={formatNumber(input)} error={error} inputRef={inputRef} />
         {/* Buttons */}
-        <div className="grid grid-cols-4 gap-2 p-4">
-          {BUTTONS.flat().map((btn, i) => (
-            <button
-              key={btn + i}
-              className="py-3 rounded-md bg-gray-100 hover:bg-blue-100 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onClick={() => handleButtonClick(btn)}
-              tabIndex={0}
-            >
-              {btn === '←' ? <FontAwesomeIcon icon={faBackspace} /> : btn}
-            </button>
-          ))}
-          <button
-            className="col-span-2 py-3 rounded-md bg-blue-500 hover:bg-blue-600 text-white text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onClick={handleEqual}
-          >
-            =
-          </button>
-          <button
-            className="col-span-2 py-3 rounded-md bg-lime-500 hover:bg-lime-600 text-white text-lg font-bold focus:outline-none focus:ring-2 focus:ring-lime-500"
-            onClick={handleDecide}
-          >
-            決定
-          </button>
-        </div>
+        <CalculatorKeypad
+          onButtonClick={handleButtonClick}
+          onEqual={handleEqual}
+          onDecide={handleDecide}
+        />
       </div>
     </div>
   );
 
   return createPortal(modal, document.body);
-} 
+}; 

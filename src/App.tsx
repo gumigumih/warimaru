@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { InputForm } from './components/input/InputForm'
-import { ResultScreen } from './components/result/ResultScreen'
-import { Header } from './components/layout/Header'
-import { Footer } from './components/layout/Footer'
-import { Background } from './components/layout/Background'
+import { InputForm } from './components/organisms/InputForm'
+import { ResultScreen } from './components/templates/ResultScreen'
+import { Header } from './components/templates/Header'
+import { Footer } from './components/templates/Footer'
+import { Background } from './components/templates/Background'
 
 export const App = () => {
   const [showResult, setShowResult] = useState(false);

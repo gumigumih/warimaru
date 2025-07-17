@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import type { AppDispatch } from '../../store/store';
 import { deletePayment } from '../../store/peopleSlice';
-import { Calculator } from '../Calculator';
+import { Calculator } from '../organisms/Calculator';
 import { useState } from 'react';
 
 interface PaymentRowProps {

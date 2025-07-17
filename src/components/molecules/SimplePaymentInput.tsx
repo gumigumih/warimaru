@@ -1,4 +1,4 @@
-import { Calculator } from '../Calculator';
+import { Calculator } from '../organisms/Calculator';
 import { useState } from 'react';
 
 interface SimplePaymentInputProps {
