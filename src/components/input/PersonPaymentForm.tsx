@@ -1,14 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import type { Person } from '../../types';
 import type { AppDispatch } from '../../store/store';
 import { addPayment, updatePayment, updateSimplePayment } from '../../store/peopleSlice';
-import type { KeyboardEvent } from 'react';
 import { PersonNameEditor } from './PersonNameEditor';
 import { PaymentRow } from './PaymentRow';
 import { SimplePaymentInput } from './SimplePaymentInput';
-import { handleDetailKeyDown, handleSimpleKeyDown } from '../../utils/keyboardHandlers';
 
 interface PersonPaymentFormProps {
   person: Person;
@@ -20,8 +18,6 @@ interface PersonPaymentFormProps {
 export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMode }: PersonPaymentFormProps) => {
   const [inputRows, setInputRows] = useState<{ id: string; amount: string; description: string }[]>([]);
   const [simpleTotal, setSimpleTotal] = useState('');
-  const [isInitialized, setIsInitialized] = useState(false);
-  const nextInputRef = useRef<HTMLInputElement | null>(null);
 
   // 統一された保存関数
   const savePayment = (personId: string, paymentId: string, amount: number | string, description?: string) => {
@@ -66,37 +62,28 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
         amount: String(payment.amount),
         description: payment.description,
       }));
-      // 空の行が1つもない場合は追加
-      if (newRows.length === 0 || newRows.every(row => row.amount || row.description)) {
-        const newId = crypto.randomUUID();
-        newRows.push({ id: newId, amount: '', description: '' });
-        // 初期化時のみ空の行を追加
-        if (!isInitialized) {
-          dispatch(addPayment({
-            personId: person.id,
-            payment: {
-              amount: 0,
-              description: '',
-            }
-          }));
-          setIsInitialized(true);
-        }
-      }
       setInputRows(newRows);
     } else {
       // シンプルモードの場合、合計額を反映
       const total = person.payments.reduce((sum, payment) => sum + payment.amount, 0);
       setSimpleTotal(String(total));
     }
-  }, [person.payments, isDetailMode, person.id, dispatch, isInitialized]);
+  }, [person.payments, isDetailMode, person.id]);
 
-  // 次の入力フィールドにフォーカスを移動
+  // 初期化時に0円の支払いを追加
   useEffect(() => {
-    if (nextInputRef.current) {
-      nextInputRef.current.focus();
-      nextInputRef.current = null;
+    if (person.payments.length === 0) {
+      dispatch(addPayment({
+        personId: person.id,
+        payment: {
+          amount: 0,
+          description: '',
+        }
+      }));
     }
-  });
+  }, [person.id, person.payments.length, dispatch]);
+
+
 
   const handleAddRow = () => {
     const newId = crypto.randomUUID();
@@ -110,17 +97,9 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
         description: '',
       }
     }));
-    // 新しい行の入力フィールドにフォーカス
-    nextInputRef.current = document.querySelector(`input[data-row="${inputRows.length}"][data-field="amount"]`) as HTMLInputElement;
   };
 
-  const handleDetailKeyDownWrapper = (index: number, field: 'amount' | 'description', e: KeyboardEvent<HTMLInputElement>) => {
-    handleDetailKeyDown(index, field, e, inputRows, savePayment, person.id);
-  };
 
-  const handleSimpleKeyDownWrapper = (e: KeyboardEvent<HTMLInputElement>) => {
-    handleSimpleKeyDown(e, savePayment, person.id);
-  };
 
   return (
     <div className="space-y-4" data-person-id={person.id}>
@@ -141,6 +120,7 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
                 row={row}
                 index={index}
                 personId={person.id}
+                personName={person.name}
                 dispatch={dispatch}
                 onAmountChange={(_index, value) => {
                   const amount = Number(value.replace(/,/g, '')) || 0;
@@ -150,7 +130,7 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
                   const amount = Number(row.amount.replace(/,/g, '')) || 0;
                   savePayment(person.id, row.id, amount, value);
                 }}
-                onKeyDown={(index, field, e) => handleDetailKeyDownWrapper(index, field, e)}
+
                 savePayment={handleSavePayment}
               />
             ))}
@@ -166,9 +146,9 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
           <SimplePaymentInput
             value={simpleTotal}
             onChange={setSimpleTotal}
-            onKeyDown={handleSimpleKeyDownWrapper}
             savePayment={savePayment}
             personId={person.id}
+            personName={person.name}
           />
         )}
       </div>
