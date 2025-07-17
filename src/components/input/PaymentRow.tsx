@@ -2,8 +2,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import type { AppDispatch } from '../../store/store';
 import { deletePayment } from '../../store/peopleSlice';
-import Cleave from 'cleave.js/react';
-import type { ChangeEvent, KeyboardEvent } from 'react';
+import { Calculator } from '../Calculator';
+import { useState } from 'react';
 
 interface PaymentRowProps {
   row: { id: string; amount: string; description: string };
@@ -12,8 +12,8 @@ interface PaymentRowProps {
   dispatch: AppDispatch;
   onAmountChange: (index: number, value: string) => void;
   onDescriptionChange: (index: number, value: string) => void;
-  onKeyDown: (index: number, field: 'amount' | 'description', e: KeyboardEvent<HTMLInputElement>) => void;
   savePayment: (personId: string, paymentId: string, amount: number, description: string) => void;
+  personName?: string;
 }
 
 export const PaymentRow = ({
@@ -23,72 +23,70 @@ export const PaymentRow = ({
   dispatch,
   onAmountChange,
   onDescriptionChange,
-  onKeyDown,
   savePayment,
+  personName,
 }: PaymentRowProps) => {
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
+
+  const handleCalculatorResult = (result: string | { amount: string; description: string }) => {
+    if (typeof result === 'string') {
+      onAmountChange(index, result);
+      if (row.id) {
+        const amount = Number(result.replace(/,/g, '')) || 0;
+        savePayment(personId, row.id, amount, row.description);
+      }
+    } else {
+      onAmountChange(index, result.amount);
+      onDescriptionChange(index, result.description);
+      if (row.id) {
+        const amount = Number(result.amount.replace(/,/g, '')) || 0;
+        savePayment(personId, row.id, amount, result.description);
+      }
+    }
+  };
+
   return (
     <div className="flex gap-2 items-center w-full">
       <div className="relative flex-1 min-w-0">
-        <Cleave
-          value={row.amount}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => {
-            onAmountChange(index, e.target.value);
-            if (row.id) {
-              const amount = Number(e.target.value.replace(/,/g, '')) || 0;
-              savePayment(personId, row.id, amount, row.description);
-            }
-          }}
-          onBlur={() => {
-            if (row.id) {
-              const amount = Number(row.amount.replace(/,/g, '')) || 0;
-              savePayment(personId, row.id, amount, row.description);
-            }
-          }}
-          onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => onKeyDown(index, 'amount', e)}
-          data-row={index}
-          data-row-id={row.id}
-          data-field="amount"
-          placeholder="金額"
-          className="w-full rounded-md bg-white/80 p-2 pr-8 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          options={{
-            numeral: true,
-            numeralThousandsGroupStyle: 'thousand',
-            numeralDecimalScale: 0,
-            numeralPositiveOnly: true,
-            stripLeadingZeroes: true,
-            numeralIntegerScale: 10,
-            rawValueTrimPrefix: true,
-            numeralDecimalMark: '.',
-            delimiter: ',',
-            prefix: '',
-            noImmediatePrefix: true,
-          }}
-        />
+        <div
+          className="w-full rounded-md bg-white/80 p-2 pr-8 border-gray-300 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
+          onClick={() => setIsCalculatorOpen(true)}
+          title="クリックして電卓を開く"
+        >
+          <div className="text-left">
+            {row.amount ? (
+              <span className="text-gray-900">{row.amount.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</span>
+            ) : (
+              <span className="text-gray-400">金額</span>
+            )}
+          </div>
+        </div>
         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">円</span>
+        <Calculator
+          isOpen={isCalculatorOpen}
+          onClose={() => setIsCalculatorOpen(false)}
+          onCalculate={handleCalculatorResult}
+          initialValue={row.amount}
+          initialDescription={row.description}
+          personName={personName}
+          isDetailMode={true}
+        />
       </div>
-      <input
-        type="text"
-        value={row.description}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-          onDescriptionChange(index, e.target.value);
-          if (row.id) {
-            const amount = Number(row.amount.replace(/,/g, '')) || 0;
-            savePayment(personId, row.id, amount, e.target.value);
-          }
-        }}
-        onBlur={() => {
-          if (row.id) {
-            const amount = Number(row.amount.replace(/,/g, '')) || 0;
-            savePayment(personId, row.id, amount, row.description);
-          }
-        }}
-        onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => onKeyDown(index, 'description', e)}
-        data-row={index}
-        data-row-id={row.id}
-        data-field="description"
-        placeholder="項目名"
-        className="flex-1 min-w-0 rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      />
+      <div className="relative flex-1 min-w-0">
+        <div
+          className="w-full rounded-md bg-white/80 p-2 border-gray-300 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
+          onClick={() => setIsCalculatorOpen(true)}
+          title="クリックして電卓を開く"
+        >
+          <div className="text-left truncate">
+            {row.description ? (
+              <span className="text-gray-900">{row.description}</span>
+            ) : (
+              <span className="text-gray-400">項目名</span>
+            )}
+          </div>
+        </div>
+      </div>
       {row.id && (
         <button
           onClick={() => {

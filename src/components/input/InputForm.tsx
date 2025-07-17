@@ -114,8 +114,13 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
             type="number"
             min="0"
             max="100"
-            value={nonPayingParticipants}
-            onChange={(e) => handleNonPayingParticipantsChange(parseInt(e.target.value) || 0)}
+            value={nonPayingParticipants === 0 ? '' : nonPayingParticipants}
+            onChange={e => {
+              const v = e.target.value;
+              if (v === '') return; // 空欄のときはdispatchしない
+              const num = Number(v);
+              if (!isNaN(num)) handleNonPayingParticipantsChange(num);
+            }}
             className="w-20 rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           />
           <span className="text-sm text-gray-700">人</span>
