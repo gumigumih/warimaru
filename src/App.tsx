@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { InputForm } from './components/organisms/InputForm'
-import { ResultScreen } from './components/templates/ResultScreen'
+import { PaymentResult } from './components/organisms/PaymentResult'
 import { Header } from './components/templates/Header'
 import { Footer } from './components/templates/Footer'
 import { Background } from './components/templates/Background'
@@ -20,7 +20,7 @@ export const App = () => {
     <Background>
       <Header />
       {showResult ? (
-        <ResultScreen
+        <PaymentResult
           onBack={handleBack}
         />
       ) : (

@@ -4,7 +4,7 @@ import type { RootState } from "../../store/store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { captureElementToImage } from "../../infrastructure/html2canvas";
-import warimaruLogo from "../../assets/logo-white.svg";
+import warimaruLogoSrc from "../../assets/logo-white.png";
 import { PaymentStatus } from "../organisms/PaymentStatus";
 import { TransferList } from "../organisms/TransferList";
 import { PaymentDetails } from "../organisms/PaymentDetails";
@@ -18,11 +18,11 @@ import {
   calculateTransfers,
 } from "../../domain/usecases/calculatePayments";
 
-interface ResultScreenProps {
+interface PaymentResultProps {
   onBack: () => void;
 }
 
-export const ResultScreen = ({ onBack }: ResultScreenProps) => {
+export const PaymentResult = ({ onBack }: PaymentResultProps) => {
   const people = useSelector((state: RootState) => state.people.people);
   const isDetailMode = useSelector(
     (state: RootState) => state.people.isDetailMode
@@ -54,10 +54,31 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
 
   const handleDownloadImage = async () => {
     if (!resultRef.current) return;
+    // ロゴを一時的に表示
+    const logo = document.getElementById("result-logo");
+    if (logo) logo.classList.remove("hidden");
+
+    // 画像生成
     const canvas = await captureElementToImage(resultRef.current);
+
+    // ロゴを再び非表示
+    if (logo) logo.classList.add("hidden");
+
+    // タイムスタンプを生成
+    const now = new Date();
+    const timestamp =
+      now.getFullYear() +
+      String(now.getMonth() + 1).padStart(2, "0") +
+      String(now.getDate()).padStart(2, "0") +
+      "_" +
+      String(now.getHours()).padStart(2, "0") +
+      String(now.getMinutes()).padStart(2, "0") +
+      String(now.getSeconds()).padStart(2, "0");
+
+    // ダウンロード処理
     const link = document.createElement("a");
     link.href = canvas.toDataURL("image/png");
-    link.download = "warimaru-result.png";
+    link.download = `わけまる_計算結果_${timestamp}.png`;
     link.click();
   };
 
@@ -122,7 +143,7 @@ export const ResultScreen = ({ onBack }: ResultScreenProps) => {
         >
           <div className="w-24 flex items-center justify-center">
             <img
-              src={warimaruLogo}
+              src={warimaruLogoSrc}
               alt="わりまる"
               className="w-full h-full object-contain"
             />
