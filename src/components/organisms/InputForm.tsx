@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus } from '@fortawesome/free-solid-svg-icons';
 import type { RootState } from '../../store/store';
@@ -8,6 +9,7 @@ import {
   deletePerson,
   setDetailMode,
   setNonPayingParticipants,
+  setPeople,
 } from '../../store/peopleSlice';
 import { PersonPaymentForm } from './PersonPaymentForm';
 
@@ -20,6 +22,20 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
   const people = useSelector((state: RootState) => state.people.people);
   const isDetailMode = useSelector((state: RootState) => state.people.isDetailMode);
   const nonPayingParticipants = useSelector((state: RootState) => state.people.nonPayingParticipants);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const encoded = params.get('data');
+    if (encoded) {
+      try {
+        const decoded = JSON.parse(decodeURIComponent(atob(encoded)));
+        dispatch(setPeople(decoded.people));
+        dispatch(setNonPayingParticipants(decoded.nonPayingParticipants));
+      } catch {
+        // データ不正時は何もしない
+      }
+    }
+  }, []);
 
   const handleAddPerson = () => {
     dispatch(addPerson());

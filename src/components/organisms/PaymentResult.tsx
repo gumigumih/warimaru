@@ -1,8 +1,8 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDownload } from "@fortawesome/free-solid-svg-icons";
+import { faDownload, faShareAlt } from "@fortawesome/free-solid-svg-icons";
 import { captureElementToImage } from "../../infrastructure/html2canvas";
 import warimaruLogoSrc from "../../assets/logo-white.png";
 import { PaymentStatus } from "../organisms/PaymentStatus";
@@ -31,6 +31,7 @@ export const PaymentResult = ({ onBack }: PaymentResultProps) => {
     (state: RootState) => state.people.nonPayingParticipants
   );
   const resultRef = useRef<HTMLDivElement>(null);
+  const [copied, setCopied] = useState(false);
 
   // 計算ロジックをusecaseから呼び出し
   const totalAmount = calculateTotalAmount(people);
@@ -80,6 +81,31 @@ export const PaymentResult = ({ onBack }: PaymentResultProps) => {
     link.href = canvas.toDataURL("image/png");
     link.download = `わけまる_計算結果_${timestamp}.png`;
     link.click();
+  };
+
+  // シェアボタン
+  const handleShare = () => {
+    const shareData = {
+      people: people.map(p => ({
+        name: p.name,
+        payments: p.payments.map(pay => ({ amount: pay.amount }))
+      })),
+      nonPayingParticipants
+    };
+    const encoded = btoa(encodeURIComponent(JSON.stringify(shareData)));
+    const shareUrl = `${window.location.origin}/?data=${encoded}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: 'わりまる 計算結果',
+        text: 'この割り勘結果をシェアします！',
+        url: shareUrl,
+      });
+    } else {
+      navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
@@ -156,7 +182,7 @@ export const PaymentResult = ({ onBack }: PaymentResultProps) => {
 
       {isDetailMode && <PaymentDetails paymentStatus={paymentStatus} />}
 
-      <div className="flex justify-center">
+      <div className="flex justify-center flex-col items-center space-y-2">
         <button
           onClick={handleDownloadImage}
           className="w-full px-8 py-4 bg-lime-500 text-white rounded-md hover:bg-lime-700 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:ring-offset-2 font-bold text-lg"
@@ -164,6 +190,14 @@ export const PaymentResult = ({ onBack }: PaymentResultProps) => {
           <FontAwesomeIcon icon={faDownload} />
           画像保存
         </button>
+        <button
+          onClick={handleShare}
+          className="w-full px-8 py-4 bg-blue-500 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-bold text-lg"
+        >
+          <FontAwesomeIcon icon={faShareAlt} className="mr-2" />
+          シェア
+        </button>
+        {copied && <div className="text-green-600 text-center mt-1">URLをコピーしました！</div>}
       </div>
     </div>
   );

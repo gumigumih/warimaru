@@ -111,6 +111,17 @@ export const peopleSlice = createSlice({
         });
       }
     },
+    setPeople: (state, action: PayloadAction<{ name: string; payments: { amount: number }[] }[]>) => {
+      state.people = action.payload.map(person => ({
+        id: crypto.randomUUID(),
+        name: person.name,
+        payments: person.payments.map(pay => ({
+          id: crypto.randomUUID(),
+          amount: pay.amount,
+          description: '',
+        })),
+      }));
+    },
   },
 });
 
@@ -132,6 +143,7 @@ export const {
   setDetailMode,
   setNonPayingParticipants,
   updateSimplePayment,
+  setPeople,
 } = peopleSlice.actions;
 
 export default peopleSlice.reducer; 
