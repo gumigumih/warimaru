@@ -39,6 +39,21 @@ export const Footer = () => {
             >
               プライバシー
             </button>
+            <span>•</span>
+            <a
+              href="https://waketabe.meggumi.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors flex items-center space-x-1"
+              title="わけたべ"
+            >
+              <img
+                src="https://waketabe.meggumi.com/ogp.png"
+                alt="わけたべ"
+                style={{ width: "1.2em", height: "1.2em", borderRadius: "4px" }}
+              />
+              <span>わけたべ</span>
+            </a>
           </div>
 
           {/* Version & License */}
