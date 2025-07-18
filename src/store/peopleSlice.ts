@@ -1,6 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { Person, PaymentItem, PeopleState } from '../types';
+import type { PaymentItem } from '../domain/entities/PaymentItem';
+import type { PeopleState } from '../domain/entities/PeopleState';
+
+
 
 const initialState: PeopleState = {
   people: [
@@ -12,7 +15,7 @@ const initialState: PeopleState = {
         amount: 0,
         description: '',
       }],
-    } as Person,
+    },
     {
       id: crypto.randomUUID(),
       name: 'Bさん',
@@ -21,7 +24,7 @@ const initialState: PeopleState = {
         amount: 0,
         description: '',
       }],
-    } as Person,
+    },
   ],
   isDetailMode: false,
   nonPayingParticipants: 0,

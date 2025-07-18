@@ -1,8 +1,8 @@
-import type { Person } from '../../types';
+import type { PersonInterface } from '../../domain/entities/Person';
 
 interface PaymentStatusProps {
   paymentStatus: {
-    person: Person;
+    person: PersonInterface;
     paidAmount: number;
     difference: number;
     color: string;

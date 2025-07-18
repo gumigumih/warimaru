@@ -1,7 +1,7 @@
-import type { Person } from './Person';
+import type { PersonInterface } from './Person';
 
 export interface PeopleState {
-  people: Person[];
+  people: PersonInterface[];
   isDetailMode: boolean;
   nonPayingParticipants: number;
 } 

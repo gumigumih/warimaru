@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
-import type { Person } from '../../types';
+import type { PersonInterface } from '../../domain/entities/Person';
 
 interface PaymentDetailsProps {
   paymentStatus: {
-    person: Person;
+    person: PersonInterface;
     paidAmount: number;
     difference: number;
     color: string;

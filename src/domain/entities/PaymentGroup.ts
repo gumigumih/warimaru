@@ -1,28 +1,36 @@
-import { Person } from './Person';
+import type { PersonInterface } from './Person';
+import {
+  calculateTotalAmount,
+  calculateTotalParticipants,
+  calculatePerPersonAmount
+} from '../usecases/calculatePayments';
 
 export class PaymentGroup {
   constructor(
-    public people: Person[],
+    public people: PersonInterface[],
     public nonPayingParticipants: number = 0,
     public isDetailMode: boolean = false
   ) {}
 
   get totalAmount(): number {
-    return this.people.reduce((sum, person) => sum + person.totalAmount, 0);
+    return calculateTotalAmount(this.people);
   }
 
   get totalParticipants(): number {
-    return this.people.length + this.nonPayingParticipants;
+    return calculateTotalParticipants(this.people, this.nonPayingParticipants);
   }
 
   get averageAmount(): number {
-    if (this.totalParticipants === 0) return 0;
-    return this.totalAmount / this.totalParticipants;
+    return calculatePerPersonAmount(this.totalAmount, this.totalParticipants);
   }
 
-  addPerson(): Person {
+  addPerson(): PersonInterface {
     const nextName = this.generateNextName();
-    const person = new Person(crypto.randomUUID(), nextName, []);
+    const person: PersonInterface = {
+      id: crypto.randomUUID(),
+      name: nextName,
+      payments: []
+    };
     this.people.push(person);
     return person;
   }

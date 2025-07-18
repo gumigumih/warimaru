@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import type { Person } from '../../types';
+import type { PersonInterface } from '../../domain/entities/Person';
 import type { AppDispatch } from '../../store/store';
 import { addPayment, updatePayment, updateSimplePayment } from '../../store/peopleSlice';
 import { PersonNameEditor } from '../molecules/PersonNameEditor';
 import { PaymentRow } from '../molecules/PaymentRow';
 import { SimplePaymentInput } from '../molecules/SimplePaymentInput';
+import { calculateTotalAmount } from '../../domain/usecases/calculatePayments';
 
 interface PersonPaymentFormProps {
-  person: Person;
+  person: PersonInterface;
   onDeletePerson: (personId: string) => void;
   dispatch: AppDispatch;
   isDetailMode: boolean;
@@ -65,12 +66,10 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
       setInputRows(newRows);
     } else {
       // シンプルモードの場合、合計額を反映
-      const total = person.payments.reduce((sum, payment) => sum + payment.amount, 0);
+      const total = calculateTotalAmount([person]);
       setSimpleTotal(String(total));
     }
   }, [person.payments, isDetailMode, person.id]);
-
-
 
   const handleAddRow = () => {
     const newId = crypto.randomUUID();
@@ -85,8 +84,6 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
       }
     }));
   };
-
-
 
   return (
     <div className="space-y-4" data-person-id={person.id}>
@@ -117,7 +114,6 @@ export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMo
                   const amount = Number(row.amount.replace(/,/g, '')) || 0;
                   savePayment(person.id, row.id, amount, value);
                 }}
-
                 savePayment={handleSavePayment}
               />
             ))}
