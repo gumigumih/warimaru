@@ -1,8 +1,8 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDownload, faShareAlt } from "@fortawesome/free-solid-svg-icons";
+import { faDownload, faShareAlt, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { captureElementToImage } from "../../infrastructure/html2canvas";
 import warimaruLogoSrc from "../../assets/logo-white.png";
 import { PaymentStatus } from "../organisms/PaymentStatus";
@@ -31,7 +31,6 @@ export const PaymentResult = ({ onBack }: PaymentResultProps) => {
     (state: RootState) => state.people.nonPayingParticipants
   );
   const resultRef = useRef<HTMLDivElement>(null);
-  const [copied, setCopied] = useState(false);
 
   // 計算ロジックをusecaseから呼び出し
   const totalAmount = calculateTotalAmount(people);
@@ -83,6 +82,8 @@ export const PaymentResult = ({ onBack }: PaymentResultProps) => {
     link.click();
   };
 
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
   // シェアボタン
   const handleShare = () => {
     const shareData = {
@@ -93,9 +94,9 @@ export const PaymentResult = ({ onBack }: PaymentResultProps) => {
       nonPayingParticipants
     };
     const encoded = btoa(encodeURIComponent(JSON.stringify(shareData)));
-    const shareUrl = `${window.location.origin}/?data=${encoded}`;
+    const shareUrl = `${window.location.origin}/result?data=${encoded}`;
 
-    if (navigator.share) {
+    if (isMobile && navigator.share) {
       navigator.share({
         title: 'わりまる 計算結果',
         text: 'この割り勘結果をシェアします！',
@@ -103,18 +104,18 @@ export const PaymentResult = ({ onBack }: PaymentResultProps) => {
       });
     } else {
       navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      alert('URLをコピーしました！');
     }
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end items-center">
+      <div className="flex justify-start items-center">
         <button
           onClick={onBack}
-          className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 flex items-center"
         >
+          <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
           修正する
         </button>
       </div>
@@ -197,7 +198,6 @@ export const PaymentResult = ({ onBack }: PaymentResultProps) => {
           <FontAwesomeIcon icon={faShareAlt} className="mr-2" />
           シェア
         </button>
-        {copied && <div className="text-green-600 text-center mt-1">URLをコピーしました！</div>}
       </div>
     </div>
   );

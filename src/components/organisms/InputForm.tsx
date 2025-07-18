@@ -14,7 +14,7 @@ import {
 import { PersonPaymentForm } from './PersonPaymentForm';
 
 interface InputFormProps {
-  onShowResult: () => void;
+  onShowResult: (shareData: { people: { name: string; payments: { amount: number }[] }[]; nonPayingParticipants: number }) => void;
 }
 
 export const InputForm = ({ onShowResult }: InputFormProps) => {
@@ -48,7 +48,14 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
   };
 
   const handleShowResult = () => {
-    onShowResult();
+    const shareData = {
+      people: people.map(p => ({
+        name: p.name,
+        payments: p.payments.map(pay => ({ amount: pay.amount }))
+      })),
+      nonPayingParticipants
+    };
+    onShowResult(shareData);
   };
 
   const handleModeChange = () => {

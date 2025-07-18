@@ -23,6 +23,7 @@
     "react-dom": "^19.1.0",
     "react-number-format": "^5.4.4",
     "react-redux": "^9.2.0",
+    "react-router-dom": "^7.7.0",
     "tailwindcss": "^4.1.7"
   },
   "devDependencies": {
