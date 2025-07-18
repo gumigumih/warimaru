@@ -26,15 +26,11 @@
 ### 1. ディレクトリ構造
 ```
 src/
-├── components/           # Reactコンポーネント
-│   ├── input/           # 入力関連コンポーネント
-│   ├── result/          # 結果表示関連コンポーネント
-│   └── layout/          # レイアウト関連コンポーネント
+├── domain/              # 計算や集計など、UIに依存しない純粋なロジック
+├── infrastructure/      # API通信やlocalStorageなど
 ├── store/               # Reduxストア
-│   ├── store.ts         # ストア設定
-│   └── peopleSlice.ts   # 人物管理スライス
+├── components/          # Reactコンポーネント
 ├── assets/              # 静的ファイル
-├── types.ts             # 型定義
 ├── main.tsx            # エントリーポイント
 └── index.css           # グローバルスタイル
 ```
@@ -106,6 +102,7 @@ space-8: 2rem;       /* 32px */
 
 ### 1. データ構造
 ```typescript
+// domain/entities/ 配下で定義
 interface Person {
   id: string;
   name: string;
@@ -118,6 +115,7 @@ interface Payment {
   description: string;
 }
 
+// store/ 配下で定義
 interface AppState {
   people: Person[];
   nonPayingCount: number;
@@ -131,21 +129,21 @@ interface AppState {
 - **Optimistic Updates**: 楽観的更新
 
 ### 3. データ永続化
-- **LocalStorage**: ユーザー設定の保存
-- **SessionStorage**: 一時的なデータ保存
-- **IndexedDB**: 大量データの保存（将来対応）
+- **LocalStorage**: ユーザー設定の保存（infrastructure/配下で実装）
+- **SessionStorage**: 一時的なデータ保存（infrastructure/配下で実装）
+- **IndexedDB**: 大量データの保存（将来対応、infrastructure/配下で実装）
 
 ## 外部API統合
 
 ### 1. 現在の統合
-- **FontAwesome**: アイコン表示
-- **html2canvas**: 画像生成
-- **GitHub API**: イシュー管理
+- **FontAwesome**: アイコン表示（components/配下で使用）
+- **html2canvas**: 画像生成（infrastructure/配下で実装）
+- **GitHub API**: イシュー管理（infrastructure/配下で実装）
 
 ### 2. 将来の統合予定
-- **Analytics**: ユーザー行動分析
-- **Error Tracking**: エラー監視
-- **Performance Monitoring**: パフォーマンス監視
+- **Analytics**: ユーザー行動分析（infrastructure/配下で実装）
+- **Error Tracking**: エラー監視（infrastructure/配下で実装）
+- **Performance Monitoring**: パフォーマンス監視（infrastructure/配下で実装）
 
 ### 3. API設計原則
 - **RESTful**: RESTful API設計
