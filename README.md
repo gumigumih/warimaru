@@ -114,6 +114,7 @@ npm run preview
 - UIとロジックの分離（domain/usecases）
 - 外部依存の分離（infrastructure）
 - 型定義の整理（domain/entities）
+- 電卓入力機能の改善（キーボード操作、数式計算対応）
 - 開発ルールの整備（.cursor/rules/）
 - レビュープロセスの改善（ビルドチェック追加）
 - 保守性・拡張性の大幅向上
