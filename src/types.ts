@@ -1,1 +1,0 @@
-// 型定義は domain/entities/ 配下に移動しました。 
