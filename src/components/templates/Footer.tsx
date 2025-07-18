@@ -43,7 +43,12 @@ export const Footer = () => {
 
           {/* Version & License */}
           <div className="flex justify-center items-center space-x-4">
-            <span>v1.2.0</span>
+            <span>
+              v
+              {typeof __APP_VERSION__ !== "undefined"
+                ? __APP_VERSION__
+                : "1.0.0"}
+            </span>
             <span>•</span>
             <a
               href="https://github.com/gumigumih/warimaru/blob/main/LICENSE"
