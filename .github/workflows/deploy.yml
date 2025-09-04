@@ -175,17 +175,13 @@ jobs:
           tag_name: ${{ steps.get_version.outputs.tag }}
           release_name: わりまる v${{ steps.get_version.outputs.version }}
           body_path: release_notes.md
-          draft: true # ドラフトモードで作成（手動編集後に公開）
+          draft: false # リリースを即座に公開
           prerelease: false
 
       - name: Success message
         run: |
           echo "🎉 GitHubリリース v${{ steps.get_version.outputs.version }} が正常に作成されました！"
-          echo "📖 ドラフトリリース: https://github.com/gumigumih/warimaru/releases/tag/${{ steps.get_version.outputs.tag }}"
+          echo "📖 公開リリース: https://github.com/gumigumih/warimaru/releases/tag/${{ steps.get_version.outputs.tag }}"
           echo ""
-          echo "📝 次のステップ:"
-          echo "1. 上記のリンクからドラフトリリースを開く"
-          echo "2. リリースノートを手動で編集"
-          echo "3. 編集完了後「Publish release」で公開"
-          echo ""
-          echo "💡 ヒント: コミット履歴が参考用に含まれています"
+          echo "✅ リリースは自動的に公開されました"
+          echo "💡 ヒント: 必要に応じてリリースノートを後から編集できます"
