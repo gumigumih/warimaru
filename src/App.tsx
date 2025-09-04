@@ -3,7 +3,7 @@ import { PaymentResult } from './components/organisms/PaymentResult';
 import { Header } from './components/templates/Header';
 import { Footer } from './components/templates/Footer';
 import { Background } from './components/templates/Background';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { setPeople, setNonPayingParticipants } from './store/peopleSlice';
@@ -52,9 +52,9 @@ export const App = () => {
   }, [dispatch]);
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AppRoutes />
-    </BrowserRouter>
+    </HashRouter>
   );
 };
 
