@@ -1,8 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { CalculatorInputForm } from '@gumigumih/react-calculator-input-form';
 import type { AppDispatch } from '../../store/store';
 import { deletePayment } from '../../store/peopleSlice';
-import { Calculator } from '../organisms/Calculator';
 import { useState } from 'react';
 
 interface PaymentRowProps {
@@ -26,66 +26,91 @@ export const PaymentRow = ({
   savePayment,
   personName,
 }: PaymentRowProps) => {
-  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [tempDescription, setTempDescription] = useState(row.description);
 
-  const handleCalculatorResult = (result: string | { amount: string; description: string }) => {
-    if (typeof result === 'string') {
-      onAmountChange(index, result);
+  const handleCalculatorInputFormChange = (newValue: string) => {
+    onAmountChange(index, newValue);
+    if (row.id) {
+      const amount = Number(newValue.replace(/,/g, '')) || 0;
+      savePayment(personId, row.id, amount, row.description);
+    }
+  };
+
+  const handleDescriptionChange = (newValue: string) => {
+    setTempDescription(newValue);
+  };
+
+  const handleDescriptionBlur = () => {
+    setIsEditingDescription(false);
+    if (tempDescription !== row.description) {
+      onDescriptionChange(index, tempDescription);
       if (row.id) {
-        const amount = Number(result.replace(/,/g, '')) || 0;
-        savePayment(personId, row.id, amount, row.description);
-      }
-    } else {
-      onAmountChange(index, result.amount);
-      onDescriptionChange(index, result.description);
-      if (row.id) {
-        const amount = Number(result.amount.replace(/,/g, '')) || 0;
-        savePayment(personId, row.id, amount, result.description);
+        const amount = Number(row.amount.replace(/,/g, '')) || 0;
+        savePayment(personId, row.id, amount, tempDescription);
       }
     }
+  };
+
+  const handleDescriptionKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleDescriptionBlur();
+    } else if (e.key === 'Escape') {
+      setTempDescription(row.description);
+      setIsEditingDescription(false);
+    }
+  };
+
+  // タイトルを動的に生成
+  const getTitle = () => {
+    const person = personName || 'この人';
+    const item = row.description || '項目';
+    return `${person}さんの${item}の金額`;
   };
 
   return (
     <div className="flex gap-2 items-center w-full">
       <div className="relative flex-1 min-w-0">
-        <div
-          className="w-full rounded-md bg-white/80 p-2 pr-8 border-gray-300 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
-          onClick={() => setIsCalculatorOpen(true)}
-          title="クリックして電卓を開く"
-        >
-          <div className="text-left">
-            {row.amount ? (
-              <span className="text-gray-900">{row.amount.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</span>
-            ) : (
-              <span className="text-gray-400">金額</span>
-            )}
-          </div>
+        <div className="w-full rounded-md bg-white/80 border-gray-300 shadow-sm overflow-hidden hover:bg-gray-50 transition-colors cursor-pointer calculator-input-form">
+          <CalculatorInputForm
+            value={row.amount}
+            onChange={handleCalculatorInputFormChange}
+            className="w-full p-2 pr-8"
+            placeholder="金額を入力"
+            title={getTitle()}
+            description="金額を計算して入力できます（税込・税抜対応）"
+            enableTaxCalculation={true}
+          />
         </div>
         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">円</span>
-        <Calculator
-          isOpen={isCalculatorOpen}
-          onClose={() => setIsCalculatorOpen(false)}
-          onCalculate={handleCalculatorResult}
-          initialValue={row.amount}
-          initialDescription={row.description}
-          personName={personName}
-          isDetailMode={true}
-        />
       </div>
       <div className="relative flex-1 min-w-0">
-        <div
-          className="w-full rounded-md bg-white/80 p-2 border-gray-300 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
-          onClick={() => setIsCalculatorOpen(true)}
-          title="クリックして電卓を開く"
-        >
-          <div className="text-left truncate">
-            {row.description ? (
-              <span className="text-gray-900">{row.description}</span>
-            ) : (
-              <span className="text-gray-400">項目名</span>
-            )}
+        {isEditingDescription ? (
+          <input
+            type="text"
+            value={tempDescription}
+            onChange={(e) => handleDescriptionChange(e.target.value)}
+            onBlur={handleDescriptionBlur}
+            onKeyDown={handleDescriptionKeyDown}
+            className="w-full rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
+            placeholder="項目名を入力"
+            autoFocus
+          />
+        ) : (
+          <div
+            className="w-full rounded-md bg-white/80 p-2 border-gray-300 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => setIsEditingDescription(true)}
+            title="クリックして項目名を編集"
+          >
+            <div className="text-left truncate">
+              {row.description ? (
+                <span className="text-gray-900">{row.description}</span>
+              ) : (
+                <span className="text-gray-400">項目名</span>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
       {row.id && (
         <button
