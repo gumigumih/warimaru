@@ -35,7 +35,7 @@ jobs:
         id: version-check
         run: |
           CURRENT_VERSION="${{ steps.current-version.outputs.current_version }}"
-          LATEST_TAG="${{ steps.latest-tag.outputs.latest_tag }}"
+          LATEST_TAG="${{ steps.current-version.outputs.latest_tag }}"
 
           # タグからvプレフィックスを除去
           LATEST_VERSION=${LATEST_TAG#v}
@@ -46,6 +46,7 @@ jobs:
             exit 1
           else
             echo "✅ Version updated! Current: $CURRENT_VERSION, Latest tag: $LATEST_VERSION"
+            echo "should_create_tag=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Validate semantic versioning
@@ -97,31 +98,46 @@ jobs:
           branch: gh-pages
           clean: false
 
-  create-release:
+  create-tag-and-release:
     runs-on: ubuntu-latest
-    needs: build-and-deploy # ビルドとデプロイが成功した後に実行
-    if: startsWith(github.ref, 'refs/tags/v') # タグがプッシュされた場合のみ実行
+    needs: [version-check, build-and-deploy] # バージョンチェックとビルドが成功した後に実行
+    if: needs.version-check.outputs.should_create_tag == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # 全履歴を取得
+          token: ${{ secrets.GITHUB_TOKEN }} # タグ作成に必要な権限
 
-      - name: Get version from tag
+      - name: Get version from package.json
         id: get_version
         run: |
-          # タグからバージョンを抽出 (v1.2.0 → 1.2.0)
-          VERSION=${GITHUB_REF#refs/tags/}
-          VERSION=${VERSION#v}
+          VERSION=$(node -p "require('./package.json').version")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
-          echo "Tag: ${GITHUB_REF#refs/tags/}"
+          echo "Tag: v$VERSION"
+
+      - name: Create and push tag
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+          TAG="v$VERSION"
+
+          # タグが既に存在するかチェック
+          if git tag -l "$TAG" | grep -q "$TAG"; then
+            echo "Tag $TAG already exists, skipping tag creation"
+          else
+            echo "Creating tag $TAG"
+            git tag "$TAG"
+            git push origin "$TAG"
+            echo "Tag $TAG created and pushed successfully"
+          fi
 
       - name: Generate release notes
         id: generate_notes
         run: |
-          TAG="${{ steps.get_version.outputs.tag }}"
+          VERSION="${{ steps.get_version.outputs.version }}"
+          TAG="v$VERSION"
 
           # 前回のタグを取得
           PREVIOUS_TAG=$(git describe --tags --abbrev=0 $TAG^ 2>/dev/null || echo "")
@@ -137,7 +153,7 @@ jobs:
           fi
 
           # リリースノートテンプレートを生成
-          echo "# わりまる v${{ steps.get_version.outputs.version }} リリース" > release_notes.md
+          echo "# わりまる v$VERSION リリース" > release_notes.md
           echo "" >> release_notes.md
           echo "## 🎯 概要" >> release_notes.md
           echo "このリリースでは、以下の改善と新機能が追加されました。Webブラウザからすぐにご利用いただけます。" >> release_notes.md
@@ -157,7 +173,7 @@ jobs:
           echo "$CHANGES" >> release_notes.md
           echo "" >> release_notes.md
           echo "## 🌐 アクセス" >> release_notes.md
-          echo "[わりまる v${{ steps.get_version.outputs.version }}](https://warimaru.meggumi.com)" >> release_notes.md
+          echo "[わりまる v$VERSION](https://warimaru.meggumi.com)" >> release_notes.md
           echo "" >> release_notes.md
           echo "## 📋 フィードバック" >> release_notes.md
           echo "[GitHub Issues](https://github.com/gumigumih/warimaru/issues) でフィードバックをお待ちしています。" >> release_notes.md
