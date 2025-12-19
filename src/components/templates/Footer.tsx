@@ -8,40 +8,9 @@ export const Footer = () => {
 
   return (
     <>
-      <footer className="mt-8 pt-4 border-t border-white/20">
-        <div className="flex flex-col items-center space-y-3 text-white/80 text-sm">
-          {/* Sister App Section */}
-          <div className="pt-2 w-full max-w-md mx-auto">
-            <div className="text-center text-xs text-white/60 mb-2 tracking-widest">
-              姉妹アプリ
-            </div>
-            <div className="flex justify-center">
-              <a
-                href="https://waketabe.meggumi.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 px-4 py-2 rounded-lg bg-white/80 border border-gray-200 hover:bg-white transition-colors shadow-sm w-full max-w-xs"
-                title="わけたべ"
-              >
-                <img
-                  src="https://waketabe.meggumi.com/ogp.png"
-                  alt="わけたべOGP"
-                  className="h-10 w-auto rounded-md object-cover flex-shrink-0"
-                  style={{ aspectRatio: "16/9", minWidth: 56 }}
-                />
-                <div className="flex flex-col min-w-0">
-                  <span className="font-semibold text-gray-900 leading-tight truncate">
-                    わけたべ
-                  </span>
-                  <span className="text-xs text-gray-600 leading-tight truncate">
-                    外食の“食べた分だけ”を
-                    <br />
-                    簡単に割り勘できるアプリ
-                  </span>
-                </div>
-              </a>
-            </div>
-          </div>
+      <footer className="mt-8 pt-4 border-t border-slate-200">
+        <div className="flex flex-col items-center space-y-3 text-slate-600 text-sm">
+          
 
           {/* GitHub & Links */}
           <div className="flex justify-center items-center space-x-4">
@@ -49,7 +18,7 @@ export const Footer = () => {
               href="https://github.com/gumigumih/warimaru"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
+              className="hover:text-slate-900 transition-colors"
               title="GitHubリポジトリ"
             >
               <FontAwesomeIcon icon={faGithub} className="w-5 h-5" />
@@ -59,7 +28,7 @@ export const Footer = () => {
               href="https://github.com/gumigumih/warimaru/issues"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
+              className="hover:text-slate-900 transition-colors"
               title="バグ報告・フィードバック"
             >
               バグ報告
@@ -67,7 +36,7 @@ export const Footer = () => {
             <span>•</span>
             <button
               onClick={() => setIsPrivacyModalOpen(true)}
-              className="hover:text-white transition-colors"
+              className="hover:text-slate-900 transition-colors"
               title="プライバシーポリシー"
             >
               プライバシー
@@ -87,7 +56,7 @@ export const Footer = () => {
               href="https://github.com/gumigumih/warimaru/blob/main/LICENSE"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
+              className="hover:text-slate-900 transition-colors"
               title="MITライセンス"
             >
               MIT License
@@ -95,7 +64,7 @@ export const Footer = () => {
           </div>
 
           {/* Copyright */}
-          <div className="text-center">
+          <div className="text-center text-slate-700">
             © 2024 わりまる. All rights reserved.
           </div>
         </div>

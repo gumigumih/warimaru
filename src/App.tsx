@@ -1,38 +1,27 @@
-import { InputForm } from './components/organisms/InputForm';
-import { PaymentResult } from './components/organisms/PaymentResult';
-import { Header } from './components/templates/Header';
 import { Footer } from './components/templates/Footer';
 import { Background } from './components/templates/Background';
-import { HashRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { setPeople, setNonPayingParticipants } from './store/peopleSlice';
+import { setPeople, setNonPayingParticipants } from './warimaru/store/peopleSlice';
+import { Landing } from './pages/Landing';
+import { WaketabeRoutes } from './waketabe/Routes';
+import { WarimaruRoutes } from './warimaru/Routes';
 
-function AppRoutes() {
-  const navigate = useNavigate();
-
-  // 入力画面→結果画面への遷移
-  const handleShowResult = (shareData: { people: { name: string; payments: { amount: number }[] }[]; nonPayingParticipants: number }) => {
-    const encoded = btoa(encodeURIComponent(JSON.stringify(shareData)));
-    navigate(`/result?data=${encoded}`);
-  };
-
-  // 結果画面→入力画面への遷移
-  const handleBack = () => {
-    navigate('/');
-  };
-
-  return (
-    <Background>
-      <Header />
-      <Routes>
-        <Route path="/" element={<InputForm onShowResult={handleShowResult} />} />
-        <Route path="/result" element={<PaymentResult onBack={handleBack} />} />
-      </Routes>
-      <Footer />
-    </Background>
-  );
-}
+const AppRoutes = () => (
+  <Background>
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/warimaru/*" element={<WarimaruRoutes />} />
+      {/* 旧リンク互換 */}
+      <Route path="/result" element={<Navigate to="/warimaru/result" replace />} />
+      {/* わけたべ */}
+      <Route path="/waketabe" element={<Navigate to="/waketabe/participants" replace />} />
+      <Route path="/waketabe/*" element={<WaketabeRoutes />} />
+    </Routes>
+    <Footer />
+  </Background>
+);
 
 export const App = () => {
   const dispatch = useDispatch();
