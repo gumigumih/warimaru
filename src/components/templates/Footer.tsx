@@ -8,8 +8,8 @@ export const Footer = () => {
 
   return (
     <>
-      <footer className="mt-8 pt-4 border-t border-white/20">
-        <div className="flex flex-col items-center space-y-3 text-white/80 text-sm">
+      <footer className="mt-8 pt-4 border-t border-slate-200">
+        <div className="flex flex-col items-center space-y-3 text-slate-600 text-sm">
           
 
           {/* GitHub & Links */}
@@ -18,7 +18,7 @@ export const Footer = () => {
               href="https://github.com/gumigumih/warimaru"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
+              className="hover:text-slate-900 transition-colors"
               title="GitHubリポジトリ"
             >
               <FontAwesomeIcon icon={faGithub} className="w-5 h-5" />
@@ -28,7 +28,7 @@ export const Footer = () => {
               href="https://github.com/gumigumih/warimaru/issues"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
+              className="hover:text-slate-900 transition-colors"
               title="バグ報告・フィードバック"
             >
               バグ報告
@@ -36,7 +36,7 @@ export const Footer = () => {
             <span>•</span>
             <button
               onClick={() => setIsPrivacyModalOpen(true)}
-              className="hover:text-white transition-colors"
+              className="hover:text-slate-900 transition-colors"
               title="プライバシーポリシー"
             >
               プライバシー
@@ -56,7 +56,7 @@ export const Footer = () => {
               href="https://github.com/gumigumih/warimaru/blob/main/LICENSE"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
+              className="hover:text-slate-900 transition-colors"
               title="MITライセンス"
             >
               MIT License
@@ -64,7 +64,7 @@ export const Footer = () => {
           </div>
 
           {/* Copyright */}
-          <div className="text-center">
+          <div className="text-center text-slate-700">
             © 2024 わりまる. All rights reserved.
           </div>
         </div>
