@@ -40,17 +40,6 @@ export const Landing = () => {
           <span className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1">💾 画像保存</span>
           <span className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1">📱 レスポンシブ</span>
         </div>
-        <div className="mt-6 flex flex-wrap gap-3">
-          <button className="btn btn-primary" onClick={() => navigate('/warimaru')}>
-            わりまるを使う
-          </button>
-          <button
-            className="btn btn-secondary"
-            onClick={() => navigate('/waketabe/participants')}
-          >
-            わけたべを使う
-          </button>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
