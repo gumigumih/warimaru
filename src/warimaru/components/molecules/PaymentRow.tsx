@@ -69,21 +69,21 @@ export const PaymentRow = ({
 
   return (
     <div className="flex gap-2 items-center w-full">
-      <div className="relative flex-1 min-w-0">
-        <div className="w-full rounded-md bg-white/80 border-gray-300 shadow-sm overflow-hidden hover:bg-gray-50 transition-colors cursor-pointer calculator-input-form">
+      <div className="relative flex-1 min-w-0 h-12">
+        <div className="w-full h-full rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden hover:bg-gray-50 transition-colors cursor-pointer calculator-input-form flex items-center">
           <CalculatorInputForm
             value={row.amount}
             onChange={handleCalculatorInputFormChange}
-            className="w-full p-2 pr-8"
+            className="w-full h-12 px-3 py-2.5 pr-10 text-base"
             placeholder="金額を入力"
             title={getTitle()}
             description="金額を計算して入力できます（税込・税抜対応）"
             enableTaxCalculation={true}
           />
         </div>
-        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">円</span>
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">円</span>
       </div>
-      <div className="relative flex-1 min-w-0">
+      <div className="relative flex-1 min-w-0 h-12">
         {isEditingDescription ? (
           <input
             type="text"
@@ -91,13 +91,13 @@ export const PaymentRow = ({
             onChange={(e) => handleDescriptionChange(e.target.value)}
             onBlur={handleDescriptionBlur}
             onKeyDown={handleDescriptionKeyDown}
-            className="w-full rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
+            className="w-full h-full rounded-lg bg-white p-2.5 border border-slate-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
             placeholder="項目名を入力"
             autoFocus
           />
         ) : (
           <div
-            className="w-full rounded-md bg-white/80 p-2 border-gray-300 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
+            className="w-full h-full rounded-lg bg-white p-2.5 border border-slate-200 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors flex items-center"
             onClick={() => setIsEditingDescription(true)}
             title="クリックして項目名を編集"
           >
@@ -127,4 +127,3 @@ export const PaymentRow = ({
     </div>
   );
 };
-

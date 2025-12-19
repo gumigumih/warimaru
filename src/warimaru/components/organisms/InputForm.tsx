@@ -1,16 +1,9 @@
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus } from '@fortawesome/free-solid-svg-icons';
-import type { RootState } from '../../store/store';
-import type { AppDispatch } from '../../store/store';
-import {
-  addPerson,
-  deletePerson,
-  setDetailMode,
-  setNonPayingParticipants,
-  setPeople,
-} from '../../store/peopleSlice';
+import type { RootState, AppDispatch } from '../../store/store';
+import { addPerson, deletePerson, setDetailMode, setNonPayingParticipants, setPeople } from '../../store/peopleSlice';
 import { PersonPaymentForm } from './PersonPaymentForm';
 
 interface InputFormProps {
@@ -20,10 +13,12 @@ interface InputFormProps {
 export const InputForm = ({ onShowResult }: InputFormProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const people = useSelector((state: RootState) => state.people.people);
-  const isDetailMode = useSelector((state: RootState) => state.people.isDetailMode);
   const nonPayingParticipants = useSelector((state: RootState) => state.people.nonPayingParticipants);
+  const [totalParticipants, setTotalParticipants] = useState(Math.max(people.length, 2));
 
+  // シンプル入力のみ（各人の合計だけ）を使う
   useEffect(() => {
+    dispatch(setDetailMode(false));
     const params = new URLSearchParams(window.location.search);
     const encoded = params.get('data');
     if (encoded) {
@@ -32,10 +27,17 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
         dispatch(setPeople(decoded.people));
         dispatch(setNonPayingParticipants(decoded.nonPayingParticipants));
       } catch {
-        // データ不正時は何もしない
+        // 不正データは無視
       }
     }
-  }, []);
+  }, [dispatch]);
+
+  // 人数が減ったときも総人数の下限を合わせる
+  useEffect(() => {
+    setTotalParticipants((prev) => Math.max(prev, people.length));
+    const nonPaying = Math.max(0, totalParticipants - people.length);
+    dispatch(setNonPayingParticipants(nonPaying));
+  }, [people.length, totalParticipants, dispatch]);
 
   const handleAddPerson = () => {
     dispatch(addPerson());
@@ -58,60 +60,34 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
     onShowResult(shareData);
   };
 
-  const handleModeChange = () => {
-    if (isDetailMode) {
-      const hasMultipleRows = people.some(person => {
-        const personForm = document.querySelector(`[data-person-id="${person.id}"]`) as HTMLElement;
-        if (personForm) {
-          const inputRows = Array.from(personForm.querySelectorAll('input[data-row]')) as HTMLInputElement[];
-          return inputRows.length > 2;
-        }
-        return false;
-      });
-      
-      if (hasMultipleRows) {
-        if (!window.confirm('シンプルモードに切り替えると、入力した項目の内訳が消えます。\n合計金額のみが保持されます。\n\n続行しますか？')) {
-          return;
-        }
-      }
+  const handleTotalParticipantsChange = (value: number) => {
+    const num = Number(value);
+    if (Number.isNaN(num) || num < people.length) {
+      return;
     }
-    dispatch(setDetailMode(!isDetailMode));
-  };
-
-  const handleNonPayingParticipantsChange = (value: number) => {
-    dispatch(setNonPayingParticipants(value));
+    setTotalParticipants(num);
+    dispatch(setNonPayingParticipants(Math.max(0, num - people.length)));
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end items-center">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-slate-700">詳細モード</span>
-          <button
-            onClick={handleModeChange}
-            className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-              isDetailMode
-                ? 'bg-blue-600 focus:ring-blue-500'
-                : 'bg-gray-300 focus:ring-gray-500'
-            }`}
-          >
-            <span
-              className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-transform ${
-                isDetailMode ? 'translate-x-9' : 'translate-x-1'
-              }`}
-            />
-          </button>
-        </div>
+      <div className="glass-card p-3 bg-white/90">
+        <p className="text-sm text-slate-600">
+          立て替えた人ごとの支払合計だけを入力してください。必要な人数を追加し、合計入力後に結果へ進めます。
+        </p>
       </div>
 
       <div className="space-y-6 glass-card p-4">
+        <div className="flex flex-col gap-1 text-lg font-semibold text-slate-900 w-full">
+          支払い
+        </div>
         {people.map((person) => (
-          <div key={person.id} className="">
+          <div key={person.id}>
             <PersonPaymentForm
               person={person}
               onDeletePerson={handleDeletePerson}
               dispatch={dispatch}
-              isDetailMode={isDetailMode}
+              isDetailMode={false}
             />
           </div>
         ))}
@@ -127,35 +103,39 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
         </div>
       </div>
 
-      <div className="glass-card p-4">
-        <div className="flex items-center gap-2">
-          <label htmlFor="nonPayingParticipants" className="text-sm text-gray-700 font-medium">
-            支払いをしていない人数:
-          </label>
-          <input
-            id="nonPayingParticipants"
-            type="number"
-            min="0"
-            max="100"
-            value={nonPayingParticipants === 0 ? '' : nonPayingParticipants}
-            onChange={e => {
-              const v = e.target.value;
-              if (v === '') return;
-              const num = Number(v);
-              if (!isNaN(num)) handleNonPayingParticipantsChange(num);
-            }}
-            className="w-20 rounded-md bg-white/80 p-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
-          <span className="text-sm text-gray-700">人</span>
-        </div>
+      <div className="glass-card p-4 space-y-3">
+        <label className="flex flex-col gap-1 text-lg font-semibold text-slate-900 w-full">
+          総人数
+          <div className="flex items-center gap-2">
+            <input
+              id="totalParticipants"
+              type="number"
+              min={people.length}
+              max="300"
+              value={totalParticipants}
+              onChange={e => {
+                if (e.target.value === '') return;
+                handleTotalParticipantsChange(Number(e.target.value));
+              }}
+              className="flex-1 rounded-xl bg-white p-3 border border-slate-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400"
+              placeholder={String(people.length)}
+            />
+            <span className="text-sm text-slate-600">人</span>
+          </div>
+        </label>
+        <p className="text-xs text-slate-500">
+          参加者の総人数を入力すると、自動で「支払いをしていない人数」に反映されます（現在 {Math.max(0, totalParticipants - people.length)} 人除外）。
+        </p>
       </div>
 
-      <button
-        onClick={handleShowResult}
-        className="btn btn-warimaru w-full text-lg"
-      >
-        計算結果を見る
-      </button>
+      <div className="sticky bottom-4 z-10">
+        <button
+          onClick={handleShowResult}
+          className="btn btn-warimaru w-full text-lg shadow-lg"
+        >
+          計算結果を見る
+        </button>
+      </div>
     </div>
   );
 };

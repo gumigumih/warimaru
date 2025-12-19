@@ -27,20 +27,19 @@ export const SimplePaymentInput = ({
   };
 
   return (
-    <div className="relative flex-1 min-w-0">
-      <div className="w-full rounded-md bg-white/80 border-gray-300 shadow-sm overflow-hidden hover:bg-gray-50 transition-colors cursor-pointer calculator-input-form">
+    <div className="relative flex-1 min-w-0 h-full">
+      <div className="w-full h-full rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden hover:bg-gray-50 transition-colors cursor-pointer calculator-input-form flex items-center">
         <CalculatorInputForm
           value={value}
           onChange={handleCalculatorInputFormChange}
-          className="w-full p-2 pr-8"
+          className="w-full h-full px-3 py-2.5 pr-10 text-base"
           placeholder="金額を入力"
           title={getTitle()}
           description="金額を計算して入力できます（税込・税抜対応）"
           enableTaxCalculation={true}
         />
       </div>
-      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">円</span>
+      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">円</span>
     </div>
   );
 };
-

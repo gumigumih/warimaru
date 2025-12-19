@@ -7,8 +7,8 @@ export const Header = () => {
       logoSrc={warimaruSvg}
       alt="わりまる"
       tag="warimaru"
-      title="総額をフェアに、シンプルに"
-      subtitle="人数無制限・画像保存で迷わず割り勘"
+      title="総額割り勘をすぐに"
+      subtitle="人数はそのまま、計算結果は画像でシェア"
       accent="bg-gradient-to-r from-blue-500 via-sky-400 to-cyan-300"
     />
   );

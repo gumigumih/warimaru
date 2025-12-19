@@ -13,16 +13,7 @@ const initialState: PeopleState = {
         amount: 0,
         description: '',
       }],
-    },
-    {
-      id: crypto.randomUUID(),
-      name: 'Bさん',
-      payments: [{
-        id: crypto.randomUUID(),
-        amount: 0,
-        description: '',
-      }],
-    },
+    }
   ],
   isDetailMode: false,
   nonPayingParticipants: 0,
@@ -139,4 +130,3 @@ export const {
 } = peopleSlice.actions;
 
 export default peopleSlice.reducer;
-
