@@ -4,7 +4,7 @@ import type { RootState } from "../../store/store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload, faShareAlt, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { captureElementToImage } from "../../../infrastructure/html2canvas";
-import warimaruLogoSrc from "../../../assets/logo-white.png";
+import warimaruLogoSrc from "../../../assets/warimaru-logo-white.png";
 import { PaymentStatus } from "../organisms/PaymentStatus";
 import { TransferList } from "../organisms/TransferList";
 import { PaymentDetails } from "../organisms/PaymentDetails";
@@ -192,4 +192,3 @@ export const PaymentResult = ({ onBack }: PaymentResultProps) => {
     </div>
   );
 };
-

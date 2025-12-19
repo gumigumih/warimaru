@@ -1,13 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { Provider, useDispatch, useSelector } from 'react-redux';
 import { ParticipantInput } from './components/organisms/ParticipantInput';
 import { DishInput } from './components/organisms/DishInput';
 import { CalculationResultScreen } from './components/organisms/CalculationResult';
 import type { Participant, Dish } from './domain/entities';
+import { waketabeStore, type WaketabeRootState } from './store/store';
+import { setParticipants, setDishes } from './store/waketabeSlice';
 
-export const WaketabeRoutes = () => {
-  const [participants, setParticipants] = useState<Participant[]>([]);
-  const [dishes, setDishes] = useState<Dish[]>([]);
+const WaketabeRoutesInner = () => {
+  const dispatch = useDispatch();
+  const participants = useSelector((state: WaketabeRootState) => state.waketabe.participants);
+  const dishes = useSelector((state: WaketabeRootState) => state.waketabe.dishes);
   const [restoring, setRestoring] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -21,23 +25,23 @@ export const WaketabeRoutes = () => {
         const decoded = decodeURIComponent(atob(dataParam));
         const parsed = JSON.parse(decoded);
         if (parsed.participants && Array.isArray(parsed.participants)) {
-          setParticipants(parsed.participants);
+          dispatch(setParticipants(parsed.participants));
         }
         if (parsed.dishes && Array.isArray(parsed.dishes)) {
-          setDishes(parsed.dishes);
+          dispatch(setDishes(parsed.dishes));
         }
       } catch {}
       setTimeout(() => setRestoring(false), 0);
     }
-  }, [location.search]);
+  }, [location.search, dispatch]);
 
   const handleParticipantsComplete = (newParticipants: Participant[]) => {
-    setParticipants(newParticipants);
+    dispatch(setParticipants(newParticipants));
     navigate('/waketabe/dishes');
   };
 
   const handleDishesComplete = (newDishes: Dish[]) => {
-    setDishes(newDishes);
+    dispatch(setDishes(newDishes));
     navigate('/waketabe/result');
   };
 
@@ -67,3 +71,8 @@ export const WaketabeRoutes = () => {
   );
 };
 
+export const WaketabeRoutes = () => (
+  <Provider store={waketabeStore}>
+    <WaketabeRoutesInner />
+  </Provider>
+);

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload, faArrowLeft, faShareAlt } from "@fortawesome/free-solid-svg-icons";
-const WAKETABE_LOGO_URL = "https://waketabe.meggumi.com/ogp.png";
+import waketabeLogoSrc from "../../../assets/waketabe-logo-white.png";
 import type { Dish, Participant, DishContribution } from "../../domain/entities";
 import { calculatePayments, calculateTransfers } from "../../domain/usecases";
 import { formatCurrency } from "../../domain/usecases/formatCurrency";
@@ -165,7 +165,7 @@ export const CalculationResultScreen = ({ participants, dishes, onBack }: Calcul
 
         <div className="mt-6 p-6 flex flex-col items-center bg-orange-500 text-white rounded-lg hidden" id="result-logo">
           <div className="w-48 h-12 flex items-center justify-center mb-2">
-            <img src={WAKETABE_LOGO_URL} alt="わけたべ" className="w-full h-full object-contain" style={{ maxWidth: '100%', maxHeight: '100%' }} />
+            <img src={waketabeLogoSrc} alt="わけたべ" className="w-full h-full object-contain" style={{ maxWidth: '100%', maxHeight: '100%' }} />
           </div>
           <p className="text-center text-sm font-medium">https://waketabe.meggumi.com</p>
         </div>
