@@ -86,7 +86,7 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
     <div className="space-y-4">
       <div className="flex justify-end items-center">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-white">詳細モード</span>
+          <span className="text-sm text-slate-700">詳細モード</span>
           <button
             onClick={handleModeChange}
             className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
@@ -119,7 +119,7 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
         <div className="space-y-4">
           <button
             onClick={handleAddPerson}
-            className="btn btn-secondary w-full"
+            className="btn btn-warimaru w-full"
           >
             <FontAwesomeIcon icon={faUserPlus} className="mr-2" />
             人物追加
@@ -152,11 +152,10 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
 
       <button
         onClick={handleShowResult}
-        className="btn btn-primary w-full text-lg"
+        className="btn btn-warimaru w-full text-lg"
       >
         計算結果を見る
       </button>
     </div>
   );
 };
-

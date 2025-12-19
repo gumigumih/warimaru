@@ -4,6 +4,7 @@ import { Provider, useDispatch, useSelector } from 'react-redux';
 import { ParticipantInput } from './components/organisms/ParticipantInput';
 import { DishInput } from './components/organisms/DishInput';
 import { CalculationResultScreen } from './components/organisms/CalculationResult';
+import { WaketabeHeader } from './components/organisms/WaketabeHeader';
 import type { Participant, Dish } from './domain/entities';
 import { waketabeStore, type WaketabeRootState } from './store/store';
 import { setParticipants, setDishes } from './store/waketabeSlice';
@@ -59,12 +60,23 @@ const WaketabeRoutesInner = () => {
 
   return (
     <Routes>
-      <Route path="/participants" element={<ParticipantInput onComplete={handleParticipantsComplete} initialParticipants={participants} />} />
+      <Route path="/participants" element={
+        <div className="space-y-4">
+          <WaketabeHeader />
+          <ParticipantInput onComplete={handleParticipantsComplete} initialParticipants={participants} />
+        </div>
+      } />
       <Route path="/dishes" element={participants.length === 0 && !location.search.includes('data=') ? <Navigate to="/waketabe/participants" /> : (
-        <DishInput participants={participants} onComplete={handleDishesComplete} onBack={handleBackToParticipantInput} initialDishes={dishes} />
+        <div className="space-y-4">
+          <WaketabeHeader />
+          <DishInput participants={participants} onComplete={handleDishesComplete} onBack={handleBackToParticipantInput} initialDishes={dishes} />
+        </div>
       )} />
       <Route path="/result" element={(participants.length === 0 || dishes.length === 0) && !location.search.includes('data=') ? <Navigate to="/waketabe/participants" /> : (
-        <CalculationResultScreen participants={participants} dishes={dishes} onBack={handleBackToDishInput} />
+        <div className="space-y-4">
+          <WaketabeHeader />
+          <CalculationResultScreen participants={participants} dishes={dishes} onBack={handleBackToDishInput} />
+        </div>
       )} />
       <Route path="*" element={<Navigate to="/waketabe/participants" replace />} />
     </Routes>

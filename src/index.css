@@ -79,6 +79,28 @@ body {
   color: var(--wm-primary-strong);
 }
 
+.btn-warimaru {
+  background: linear-gradient(135deg, #3b82f6, #22d3ee);
+  color: #fff;
+  border: none;
+  box-shadow: 0 12px 30px rgba(59, 130, 246, 0.3);
+}
+
+.btn-warimaru:hover {
+  filter: brightness(1.05);
+}
+
+.btn-waketabe {
+  background: linear-gradient(135deg, #f97316, #fbbf24);
+  color: #fff;
+  border: none;
+  box-shadow: 0 12px 30px rgba(249, 115, 22, 0.3);
+}
+
+.btn-waketabe:hover {
+  filter: brightness(1.05);
+}
+
 .btn-neutral {
   background: rgba(255, 255, 255, 0.85);
   color: #0f172a;

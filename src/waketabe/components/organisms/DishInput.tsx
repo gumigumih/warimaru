@@ -130,7 +130,7 @@ export const DishInput = ({ participants, onComplete, onBack, initialDishes = []
       </div>
       {onComplete && (
         <button
-          className="btn btn-primary mt-6 w-full text-lg"
+          className="btn btn-waketabe mt-6 w-full text-lg"
           onClick={() => onComplete(dishes)}
           disabled={dishes.length === 0}
         >
@@ -140,4 +140,3 @@ export const DishInput = ({ participants, onComplete, onBack, initialDishes = []
     </>
   );
 };
-

@@ -111,7 +111,7 @@ export const CalculationResultScreen = ({ participants, dishes, onBack }: Calcul
       </div>
 
       <div ref={resultRef} className="glass-card p-0 overflow-hidden shadow-2xl">
-        <div className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-400 text-white px-5 py-4 sm:px-6 sm:py-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="bg-gradient-to-r from-orange-400 via-amber-400 to-amber-500 text-white px-5 py-4 sm:px-6 sm:py-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <p className="text-xs uppercase tracking-[0.08em] opacity-90">waketabe report</p>
             <h2 className="text-xl sm:text-2xl font-bold leading-tight">計算結果を共有しましょう</h2>
@@ -222,11 +222,11 @@ export const CalculationResultScreen = ({ participants, dishes, onBack }: Calcul
 
       <div className="flex flex-col gap-3 justify-center items-center bg-white/80 border border-slate-200 rounded-2xl p-4 shadow-sm">
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <button onClick={handleDownloadImage} className="btn btn-primary w-full text-base sm:text-lg">
+          <button onClick={handleDownloadImage} className="btn btn-waketabe w-full text-base sm:text-lg">
             <FontAwesomeIcon icon={faDownload} className="mr-2" />
             画像保存
           </button>
-          <button onClick={handleShareUrl} className="btn btn-secondary w-full text-base sm:text-lg">
+          <button onClick={handleShareUrl} className="btn btn-waketabe w-full text-base sm:text-lg">
             <FontAwesomeIcon icon={faShareAlt} className="mr-2" />
             {isWebShareSupported ? 'シェア' : 'URLコピー'}
           </button>

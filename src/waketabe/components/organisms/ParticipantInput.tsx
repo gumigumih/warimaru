@@ -68,7 +68,7 @@ export const ParticipantInput = ({ onComplete, initialParticipants = [] }: {
       </div>
       {onComplete && (
         <button
-          className="btn btn-primary mt-6 w-full text-lg"
+          className="btn btn-waketabe mt-6 w-full text-lg"
           onClick={() => onComplete(participants)}
           disabled={participants.length === 0}
         >
@@ -78,4 +78,3 @@ export const ParticipantInput = ({ onComplete, initialParticipants = [] }: {
     </>
   );
 };
-

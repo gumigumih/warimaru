@@ -176,14 +176,14 @@ export const PaymentResult = ({ onBack }: PaymentResultProps) => {
       <div className="flex justify-center flex-col items-center space-y-2">
         <button
           onClick={handleDownloadImage}
-          className="btn btn-primary w-full text-lg"
+          className="btn btn-warimaru w-full text-lg"
         >
           <FontAwesomeIcon icon={faDownload} />
           画像保存
         </button>
         <button
           onClick={handleShare}
-          className="btn btn-secondary w-full text-lg"
+          className="btn btn-warimaru w-full text-lg"
         >
           <FontAwesomeIcon icon={faShareAlt} className="mr-2" />
           シェア

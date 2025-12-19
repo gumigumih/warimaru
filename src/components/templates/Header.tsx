@@ -1,15 +1,15 @@
 import warimaruSvg from "../../assets/warimaru-logo-white.svg";
+import { BrandHeader } from "./BrandHeader";
 
 export const Header = () => {
   return (
-    <>
-      <div className="flex justify-center mb-6">
-        <img src={warimaruSvg} alt="わりまる" className="w-40 drop-shadow-xl" />
-      </div>
-      <div className="glass-card p-5 text-center mb-8 text-shadow-2xl">
-        <p className="text-sm text-slate-700">みんなが納得する、フェアな割り勘を最短で。</p>
-        <p className="mt-2 text-lg font-semibold text-[#0f1f3a]">支払い入力 → 自動計算 → 高品質な共有画像を保存</p>
-      </div>
-    </>
+    <BrandHeader
+      logoSrc={warimaruSvg}
+      alt="わりまる"
+      tag="warimaru"
+      title="総額をフェアに、シンプルに"
+      subtitle="人数無制限・画像保存で迷わず割り勘"
+      accent="bg-gradient-to-r from-blue-500 via-sky-400 to-cyan-300"
+    />
   );
 };
