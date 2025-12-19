@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Button } from '../atoms/Button';
-import { TextInput } from '../atoms/TextInput';
-import { PersonNameEditor } from '../molecules/PersonNameEditor';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUserPlus, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import type { Participant } from '../../domain/entities';
 
 export const ParticipantInput = ({ onComplete, initialParticipants = [] }: { 
@@ -9,15 +8,12 @@ export const ParticipantInput = ({ onComplete, initialParticipants = [] }: {
   initialParticipants?: Participant[];
 }) => {
   const [participants, setParticipants] = useState<Participant[]>(initialParticipants);
-  const [inputName, setInputName] = useState('');
 
   const handleAdd = () => {
-    if (!inputName.trim()) return;
     setParticipants([
       ...participants,
-      { id: crypto.randomUUID(), name: inputName.trim() },
+      { id: crypto.randomUUID(), name: '' },
     ]);
-    setInputName('');
   };
 
   const handleDelete = (id: string) => {
@@ -29,52 +25,58 @@ export const ParticipantInput = ({ onComplete, initialParticipants = [] }: {
   };
 
   return (
-    <>
-      <div className="max-w-md mx-auto glass-card p-6 mt-4">
-        <div className="text-center mb-4">
-          <div className="text-lg font-semibold text-gray-800">参加者を登録してください</div>
-          <div className="text-sm text-gray-500 mt-1">（ニックネームや本名どちらでもOK）</div>
+    <div className="space-y-4">
+      <div className="glass-card p-3 bg-white/90">
+        <p className="text-sm text-slate-600">
+          食べた人を登録してください。次の画面で料理ごとに食べた人を選ぶと、自動で計算されます。
+        </p>
+      </div>
+
+      <div className="glass-card p-4 sm:p-5 bg-white/95 border border-slate-100 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div>
+            <div className="text-lg font-semibold text-slate-900">参加者を登録してください</div>
+            <div className="text-sm text-slate-600 mt-1">ニックネームでも本名でもOKです。</div>
+          </div>
         </div>
-        <form
-          className="flex gap-2 mb-4"
-          onSubmit={e => {
-            e.preventDefault();
-            handleAdd();
-          }}
-        >
-          <TextInput
-            type="text"
-            className="flex-1"
-            placeholder="名前を入力"
-            value={inputName}
-            onChange={e => setInputName(e.target.value)}
-          />
-          <Button type="submit">
-            追加
-          </Button>
-        </form>
-        <ul className="space-y-2">
+
+        <div className="space-y-2">
           {participants.map(p => (
-            <li key={p.id} className="bg-white rounded p-2 shadow-sm">
-              <PersonNameEditor
-                personId={p.id}
-                name={p.name}
-                onUpdateName={handleUpdateName}
-                onDeletePerson={handleDelete}
+            <div key={p.id} className="flex items-center gap-2">
+              <input
+                type="text"
+                value={p.name}
+                onChange={(e) => handleUpdateName(p.id, e.target.value)}
+                className="h-12 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm focus:border-amber-400 focus:ring-amber-200"
+                placeholder="参加者名"
               />
-            </li>
+              <button
+                onClick={() => handleDelete(p.id)}
+                className="h-12 w-12 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-gray-400 hover:text-red-500 transition-colors shadow-sm"
+                title="この参加者を削除"
+              >
+                <FontAwesomeIcon icon={faTrashAlt} />
+              </button>
+            </div>
           ))}
-        </ul>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-2">
+          <button type="button" onClick={handleAdd} className="btn btn-waketabe w-full">
+            <FontAwesomeIcon icon={faUserPlus} className="mr-2" />
+            人物追加
+          </button>
+        </div>
       </div>
       {onComplete && (
         <button
-          className="btn btn-waketabe mt-6 w-full text-lg"
+          className="btn btn-waketabe w-full text-lg"
           onClick={() => onComplete(participants)}
           disabled={participants.length === 0}
         >
           次へ
         </button>
       )}
-    </>
+    </div>
   );
 };

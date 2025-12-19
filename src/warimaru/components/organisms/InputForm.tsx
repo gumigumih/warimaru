@@ -77,9 +77,10 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
         </p>
       </div>
 
-      <div className="space-y-6 glass-card p-4">
-        <div className="flex flex-col gap-1 text-lg font-semibold text-slate-900 w-full">
-          支払い
+      <div className="space-y-4 glass-card p-4">
+        <div className="flex flex-col gap-2 text-lg font-semibold text-slate-900 w-full">
+          <span>支払い</span>
+          <span className="text-sm font-normal text-slate-500">立て替えた人の合計金額を入力してください。</span>
         </div>
         {people.map((person) => (
           <div key={person.id}>
@@ -104,9 +105,9 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
       </div>
 
       <div className="glass-card p-4 space-y-3">
-        <label className="flex flex-col gap-1 text-lg font-semibold text-slate-900 w-full">
+        <label className="flex flex-col gap-2 text-lg font-semibold text-slate-900 w-full">
           総人数
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <input
               id="totalParticipants"
               type="number"
@@ -117,14 +118,14 @@ export const InputForm = ({ onShowResult }: InputFormProps) => {
                 if (e.target.value === '') return;
                 handleTotalParticipantsChange(Number(e.target.value));
               }}
-              className="flex-1 rounded-xl bg-white p-3 border border-slate-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400"
+              className="w-full h-12 rounded-xl bg-white px-3 py-2.5 border border-slate-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400"
               placeholder={String(people.length)}
             />
-            <span className="text-sm text-slate-600">人</span>
+            <span className="text-sm text-slate-600 whitespace-nowrap">人</span>
           </div>
         </label>
         <p className="text-xs text-slate-500">
-          参加者の総人数を入力すると、自動で「支払いをしていない人数」に反映されます（現在 {Math.max(0, totalParticipants - people.length)} 人除外）。
+          参加者の総人数を入れると、未払い人数が自動で計算されます（現在 {Math.max(0, totalParticipants - people.length)} 人除外）。
         </p>
       </div>
 

@@ -157,19 +157,11 @@ export const CalculationResultScreen = ({ participants, dishes, onBack }: Calcul
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-base font-semibold text-slate-900">{participant.participantName}</p>
-                      <p className="text-xs text-slate-500">合計 {formatCurrency(participant.dishes.reduce((sum, dish) => sum + dish.contribution, 0))}</p>
                     </div>
                     <span
-                      className={`rounded-full px-3 py-1 text-sm font-bold ${
-                        participant.netAmount > 0
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : participant.netAmount < 0
-                          ? 'bg-rose-50 text-rose-700'
-                          : 'bg-slate-100 text-slate-700'
-                      }`}
+                      className="rounded-full px-3 py-1 text-sm font-bold bg-slate-100 text-slate-800"
                     >
-                      {participant.netAmount > 0 ? '+' : ''}
-                      {formatCurrency(participant.netAmount)}
+                      合計 {formatCurrency(participant.dishes.reduce((sum, dish) => sum + dish.contribution, 0))}
                     </span>
                   </div>
                   {participant.dishes.length > 0 && (
@@ -215,7 +207,7 @@ export const CalculationResultScreen = ({ participants, dishes, onBack }: Calcul
             <div className="w-48 h-12 flex items-center justify-center mb-2">
               <img src={waketabeLogoSrc} alt="わけたべ" className="w-full h-full object-contain" style={{ maxWidth: '100%', maxHeight: '100%' }} />
             </div>
-            <p className="text-center text-sm font-medium">https://waketabe.meggumi.com</p>
+            <p className="text-center text-sm font-medium">https://wakemaru.meggumi.com</p>
           </div>
         </div>
       </div>
