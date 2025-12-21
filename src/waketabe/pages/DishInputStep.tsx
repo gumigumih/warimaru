@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faPlus, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
-import type { Participant, Dish } from '../../domain/entities';
+import type { Participant, Dish } from '../domain/entities';
 
-export const DishInput = ({ participants, onComplete, onBack, initialDishes = [] }: { 
+export const DishInputStep = ({ participants, onComplete, onBack, initialDishes = [] }: { 
   participants: Participant[]; 
   onComplete?: (dishes: Dish[]) => void;
   onBack?: () => void;
@@ -50,23 +50,30 @@ export const DishInput = ({ participants, onComplete, onBack, initialDishes = []
 
   return (
     <div className="space-y-4">
-      {onBack && (
-        <div className="flex justify-start mb-2">
-          <button
-            onClick={onBack}
-            className="btn btn-neutral"
-          >
-            <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
-            戻る
-          </button>
+      <div className="flex justify-start mb-2">
+        <button
+          onClick={onBack}
+          className="btn btn-neutral h-9 px-4 text-sm font-semibold"
+        >
+          <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
+          戻る
+        </button>
+      </div>
+
+      <div className="glass-card p-4 bg-white/90 space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-sm text-slate-500">フェーズ 2 / 2</p>
+            <h2 className="text-xl font-semibold text-slate-900 mt-1">料理を入力</h2>
+            <p className="text-base text-slate-700 mt-1">
+              料理名・金額・食べた人を順番に埋めてください。
+            </p>
+          </div>
         </div>
-      )}
+      </div>
 
       <div className="glass-card p-4 sm:p-5 bg-white/95 border border-slate-100 space-y-4">
-        <div>
-          <div className="text-lg font-semibold text-slate-900">料理の行を追加して入力してください</div>
-          <div className="text-sm text-slate-600 mt-1">料理名・金額・食べた人を順番に埋めてください。</div>
-        </div>
+        <div className="text-lg font-semibold text-slate-900">料理の行を追加して入力してください</div>
 
         <div className="space-y-4">
           {dishes.map((dish) => (

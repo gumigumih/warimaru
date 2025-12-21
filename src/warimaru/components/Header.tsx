@@ -1,5 +1,5 @@
 import warimaruSvg from "../../assets/warimaru-logo-white.svg";
-import { BrandHeader } from "./BrandHeader";
+import { BrandHeader } from "../../components/templates/BrandHeader";
 
 export const Header = () => {
   return (

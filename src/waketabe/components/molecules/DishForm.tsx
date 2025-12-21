@@ -1,6 +1,6 @@
-import { TextInput } from '../atoms/TextInput';
-import { Checkbox } from '../atoms/Checkbox';
-import { AmountInput } from '../atoms/AmountInput';
+import { TextInput } from '../../../components/atoms/TextInput';
+import { Checkbox } from '../../../components/atoms/Checkbox';
+import { AmountInput } from '../../../components/atoms/AmountInput';
 import type { Participant } from '../../domain/entities';
 
 interface DishFormProps {
@@ -65,4 +65,3 @@ export const DishForm = ({
     </div>
   );
 };
-

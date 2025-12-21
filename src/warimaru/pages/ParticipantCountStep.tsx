@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type { RootState, AppDispatch } from '../../store/store';
-import { setTotalParticipants } from '../../store/peopleSlice';
+import type { RootState, AppDispatch } from '../store/store';
+import { setTotalParticipants } from '../store/peopleSlice';
 
 interface ParticipantCountStepProps {
   onNext: () => void;

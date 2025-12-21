@@ -1,10 +1,10 @@
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { PaymentInputStep } from './components/organisms/PaymentInputStep';
-import { SettlementResult } from './components/organisms/SettlementResult';
-import { Header } from '../components/templates/Header';
-import { ParticipantCountStep } from './components/organisms/ParticipantCountStep';
+import { PaymentInputStep } from './pages/PaymentInputStep';
+import { SettlementResult } from './pages/SettlementResult';
+import { Header } from './components/Header';
+import { ParticipantCountStep } from './pages/ParticipantCountStep';
 import { setNonPayingParticipants, setPeople, setTotalParticipants } from './store/peopleSlice';
 import type { AppDispatch } from './store/store';
 

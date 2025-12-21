@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { Provider, useDispatch, useSelector } from 'react-redux';
-import { ParticipantInput } from './components/organisms/ParticipantInput';
-import { DishInput } from './components/organisms/DishInput';
-import { CalculationResultScreen } from './components/organisms/CalculationResult';
-import { WaketabeHeader } from './components/organisms/WaketabeHeader';
+import { ParticipantInputStep } from './pages/ParticipantInputStep';
+import { DishInputStep } from './pages/DishInputStep';
+import { MealSettlementResult } from './pages/MealSettlementResult';
+import { WaketabeHeader } from './components/molecules/WaketabeHeader';
 import type { Participant, Dish } from './domain/entities';
 import { waketabeStore, type WaketabeRootState } from './store/store';
 import { setParticipants, setDishes } from './store/waketabeSlice';
@@ -63,19 +63,19 @@ const WaketabeRoutesInner = () => {
       <Route path="/participants" element={
         <div className="space-y-4">
           <WaketabeHeader />
-          <ParticipantInput onComplete={handleParticipantsComplete} initialParticipants={participants} />
+          <ParticipantInputStep onComplete={handleParticipantsComplete} initialParticipants={participants} />
         </div>
       } />
       <Route path="/dishes" element={participants.length === 0 && !location.search.includes('data=') ? <Navigate to="/waketabe/participants" /> : (
         <div className="space-y-4">
           <WaketabeHeader />
-          <DishInput participants={participants} onComplete={handleDishesComplete} onBack={handleBackToParticipantInput} initialDishes={dishes} />
+          <DishInputStep participants={participants} onComplete={handleDishesComplete} onBack={handleBackToParticipantInput} initialDishes={dishes} />
         </div>
       )} />
       <Route path="/result" element={(participants.length === 0 || dishes.length === 0) && !location.search.includes('data=') ? <Navigate to="/waketabe/participants" /> : (
         <div className="space-y-4">
           <WaketabeHeader />
-          <CalculationResultScreen participants={participants} dishes={dishes} onBack={handleBackToDishInput} />
+          <MealSettlementResult participants={participants} dishes={dishes} onBack={handleBackToDishInput} />
         </div>
       )} />
       <Route path="*" element={<Navigate to="/waketabe/participants" replace />} />

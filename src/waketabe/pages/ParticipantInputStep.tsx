@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
-import type { Participant } from '../../domain/entities';
+import type { Participant } from '../domain/entities';
 
-export const ParticipantInput = ({ onComplete, initialParticipants = [] }: { 
+export const ParticipantInputStep = ({ onComplete, initialParticipants = [] }: { 
   onComplete?: (participants: Participant[]) => void;
   initialParticipants?: Participant[];
 }) => {
@@ -26,8 +26,10 @@ export const ParticipantInput = ({ onComplete, initialParticipants = [] }: {
 
   return (
     <div className="space-y-4">
-      <div className="glass-card p-3 bg-white/90">
-        <p className="text-sm text-slate-600">
+      <div className="glass-card p-4 bg-white/90 space-y-2">
+        <p className="text-sm text-slate-500">フェーズ 1 / 2</p>
+        <h2 className="text-xl font-semibold text-slate-900">参加者を入力</h2>
+        <p className="text-sm text-slate-700">
           食べた人を登録してください。次の画面で料理ごとに食べた人を選ぶと、自動で計算されます。
         </p>
       </div>

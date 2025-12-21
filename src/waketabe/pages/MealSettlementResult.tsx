@@ -1,19 +1,19 @@
 import { useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload, faArrowLeft, faShareAlt } from "@fortawesome/free-solid-svg-icons";
-import waketabeLogoSrc from "../../../assets/waketabe-logo-white.png";
-import type { Dish, Participant, DishContribution } from "../../domain/entities";
-import { calculatePayments, calculateTransfers } from "../../domain/usecases";
-import { formatCurrency } from "../../domain/usecases/formatCurrency";
-import { captureElementToImage } from "../../../infrastructure/html2canvas";
+import waketabeLogoSrc from "../../assets/waketabe-logo-white.png";
+import type { Dish, Participant, DishContribution } from "../domain/entities";
+import { calculatePayments, calculateTransfers } from "../domain/usecases";
+import { formatCurrency } from "../domain/usecases/formatCurrency";
+import { captureElementToImage } from "../../infrastructure/html2canvas";
 
-interface CalculationResultScreenProps {
+interface MealSettlementResultProps {
   participants: Participant[];
   dishes: Dish[];
   onBack: () => void;
 }
 
-export const CalculationResultScreen = ({ participants, dishes, onBack }: CalculationResultScreenProps) => {
+export const MealSettlementResult = ({ participants, dishes, onBack }: MealSettlementResultProps) => {
   const resultRef = useRef<HTMLDivElement>(null);
   const [shareMsg, setShareMsg] = useState('');
 
@@ -103,10 +103,13 @@ export const CalculationResultScreen = ({ participants, dishes, onBack }: Calcul
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <button onClick={onBack} className="btn btn-neutral">
+      <div className="flex justify-start mb-2">
+        <button
+          onClick={onBack}
+          className="btn btn-neutral h-9 px-4 text-sm font-semibold"
+        >
           <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
-          修正する
+          戻る
         </button>
       </div>
 

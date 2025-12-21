@@ -1,14 +1,14 @@
 import { useRef } from "react";
 import { useSelector } from "react-redux";
-import type { RootState } from "../../store/store";
+import type { RootState } from "../store/store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload, faShareAlt, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
-import { captureElementToImage } from "../../../infrastructure/html2canvas";
-import warimaruLogoSrc from "../../../assets/warimaru-logo-white.png";
-import { PaymentStatusSummary } from "../organisms/PaymentStatusSummary";
-import { SettlementRouteList } from "../organisms/SettlementRouteList";
-import { PaymentDetailsSection } from "../organisms/PaymentDetailsSection";
-import { COLORS } from "../../constants/colors";
+import { captureElementToImage } from "../../infrastructure/html2canvas";
+import warimaruLogoSrc from "../../assets/warimaru-logo-white.png";
+import { PaymentStatusSummary } from "../components/organisms/PaymentStatusSummary";
+import { SettlementRouteList } from "../components/molecules/SettlementRouteList";
+import { PaymentDetailsSection } from "../components/organisms/PaymentDetailsSection";
+import { COLORS } from "../constants/colors";
 import {
   calculateTotalAmount,
   calculateTotalParticipants,
@@ -16,7 +16,7 @@ import {
   calculateMaxPayment,
   calculatePaymentStatus,
   calculateTransfers,
-} from "../../domain/usecases/calculatePayments";
+} from "../domain/usecases/calculatePayments";
 
 interface SettlementResultProps {
   onBack: () => void;

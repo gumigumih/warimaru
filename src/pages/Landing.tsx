@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import warimaruLogo from '../assets/warimaru-logo-white.svg';
+import waketabeLogo from '../assets/waketabe-logo-white.svg';
 
 export const Landing = () => {
   const navigate = useNavigate();
@@ -13,6 +14,8 @@ export const Landing = () => {
       to: '/warimaru',
       badge: '総額割り勘',
       accent: 'from-blue-500 via-sky-400 to-cyan-300',
+      logo: warimaruLogo,
+      logoAlt: 'わりまる',
     },
     {
       key: 'waketabe',
@@ -22,6 +25,8 @@ export const Landing = () => {
       to: '/waketabe/participants',
       badge: '食べた分だけ',
       accent: 'from-orange-400 via-amber-400 to-amber-500',
+      logo: waketabeLogo,
+      logoAlt: 'わけたべ',
     },
   ];
 
@@ -62,8 +67,8 @@ export const Landing = () => {
                     : 'bg-gradient-to-br from-orange-400 via-amber-400 to-amber-500'
                 }`}>
                   <img
-                    src={warimaruLogo}
-                    alt="わりまる"
+                    src={action.logo}
+                    alt={action.logoAlt}
                     className="h-1/2 w-auto max-w-full object-contain"
                   />
                 </div>

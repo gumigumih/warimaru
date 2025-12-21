@@ -2,9 +2,9 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import type { RootState, AppDispatch } from '../../store/store';
-import { addPerson, deletePerson, setDetailMode } from '../../store/peopleSlice';
-import { PayerInputCard } from './PayerInputCard';
+import type { RootState, AppDispatch } from '../store/store';
+import { addPerson, deletePerson, setDetailMode } from '../store/peopleSlice';
+import { PayerInputCard } from '../components/molecules/PayerInputCard';
 
 interface PaymentInputStepProps {
   onShowResult: (shareData: { people: { name: string; payments: { amount: number }[] }[]; totalParticipants: number; nonPayingParticipants: number }) => void;
@@ -34,9 +34,9 @@ export const PaymentInputStep = ({ onShowResult, onBack }: PaymentInputStepProps
 
   const handleShowResult = () => {
     const shareData = {
-      people: people.map(p => ({
+      people: people.map((p) => ({
         name: p.name,
-        payments: p.payments.map(pay => ({ amount: pay.amount }))
+        payments: p.payments.map((pay) => ({ amount: pay.amount }))
       })),
       totalParticipants,
       nonPayingParticipants
