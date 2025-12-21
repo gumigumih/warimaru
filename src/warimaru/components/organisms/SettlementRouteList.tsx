@@ -5,11 +5,11 @@ interface Transfer {
   textColor: string;
 }
 
-interface TransferListProps {
+interface SettlementRouteListProps {
   transfers: Transfer[];
 }
 
-export const TransferList = ({ transfers }: TransferListProps) => {
+export const SettlementRouteList = ({ transfers }: SettlementRouteListProps) => {
   if (transfers.length === 0) return null;
 
   const groupedByToAndAmount: { [key: string]: { from: string[]; to: string; amount: number; textColor: string } } = {};
@@ -74,4 +74,3 @@ export const TransferList = ({ transfers }: TransferListProps) => {
     </div>
   );
 };
-

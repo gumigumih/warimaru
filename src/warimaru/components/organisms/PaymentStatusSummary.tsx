@@ -1,6 +1,6 @@
 import type { PersonInterface } from '../../domain/entities/Person';
 
-interface PaymentStatusProps {
+interface PaymentStatusSummaryProps {
   paymentStatus: {
     person: PersonInterface;
     paidAmount: number;
@@ -12,7 +12,7 @@ interface PaymentStatusProps {
   perPersonAmount: number;
 }
 
-export const PaymentStatus = ({ paymentStatus, maxPayment, perPersonAmount }: PaymentStatusProps) => {
+export const PaymentStatusSummary = ({ paymentStatus, maxPayment, perPersonAmount }: PaymentStatusSummaryProps) => {
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-bold mb-4">支払い状況</h3>
@@ -70,4 +70,3 @@ export const PaymentStatus = ({ paymentStatus, maxPayment, perPersonAmount }: Pa
     </div>
   );
 };
-

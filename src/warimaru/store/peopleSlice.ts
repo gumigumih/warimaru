@@ -16,7 +16,12 @@ const initialState: PeopleState = {
     }
   ],
   isDetailMode: false,
-  nonPayingParticipants: 0,
+  totalParticipants: 2,
+  nonPayingParticipants: 1,
+};
+
+const updateNonPayingFromTotal = (state: PeopleState) => {
+  state.nonPayingParticipants = Math.max(0, state.totalParticipants - state.people.length);
 };
 
 export const peopleSlice = createSlice({
@@ -44,6 +49,10 @@ export const peopleSlice = createSlice({
           description: '',
         }],
       });
+      if (state.people.length > state.totalParticipants) {
+        state.totalParticipants = state.people.length;
+      }
+      updateNonPayingFromTotal(state);
     },
     updatePersonName: (state, action: PayloadAction<{ personId: string; newName: string }>) => {
       const person = state.people.find(p => p.id === action.payload.personId);
@@ -53,6 +62,10 @@ export const peopleSlice = createSlice({
     },
     deletePerson: (state, action: PayloadAction<string>) => {
       state.people = state.people.filter(p => p.id !== action.payload);
+      if (state.people.length > state.totalParticipants) {
+        state.totalParticipants = state.people.length;
+      }
+      updateNonPayingFromTotal(state);
     },
     addPayment: (state, action: PayloadAction<{ personId: string; payment: Omit<PaymentItem, 'id'> }>) => {
       const person = state.people.find(p => p.id === action.payload.personId);
@@ -82,7 +95,12 @@ export const peopleSlice = createSlice({
       state.isDetailMode = action.payload;
     },
     setNonPayingParticipants: (state, action: PayloadAction<number>) => {
-      state.nonPayingParticipants = action.payload;
+      state.nonPayingParticipants = Math.max(0, action.payload);
+      state.totalParticipants = state.people.length + state.nonPayingParticipants;
+    },
+    setTotalParticipants: (state, action: PayloadAction<number>) => {
+      state.totalParticipants = Math.max(state.people.length, action.payload);
+      updateNonPayingFromTotal(state);
     },
     updateSimplePayment: (state, action: PayloadAction<{ personId: string; amount: number }>) => {
       const person = state.people.find(p => p.id === action.payload.personId);
@@ -105,6 +123,10 @@ export const peopleSlice = createSlice({
           description: '',
         })),
       }));
+      if (state.people.length > state.totalParticipants) {
+        state.totalParticipants = state.people.length;
+      }
+      updateNonPayingFromTotal(state);
     },
   },
 });
@@ -113,7 +135,18 @@ export const initializeStore = (state: PeopleState | undefined) => {
   if (!state) {
     return initialState;
   }
-  return state;
+  const peopleCount = state.people.length;
+  const totalParticipants = Math.max(
+    state.totalParticipants ?? peopleCount,
+    peopleCount + (state.nonPayingParticipants ?? 0),
+    peopleCount,
+  );
+
+  return {
+    ...state,
+    totalParticipants,
+    nonPayingParticipants: Math.max(0, totalParticipants - peopleCount),
+  };
 };
 
 export const {
@@ -125,6 +158,7 @@ export const {
   deletePayment,
   setDetailMode,
   setNonPayingParticipants,
+  setTotalParticipants,
   updateSimplePayment,
   setPeople,
 } = peopleSlice.actions;

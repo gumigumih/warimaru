@@ -5,9 +5,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload, faShareAlt, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { captureElementToImage } from "../../../infrastructure/html2canvas";
 import warimaruLogoSrc from "../../../assets/warimaru-logo-white.png";
-import { PaymentStatus } from "../organisms/PaymentStatus";
-import { TransferList } from "../organisms/TransferList";
-import { PaymentDetails } from "../organisms/PaymentDetails";
+import { PaymentStatusSummary } from "../organisms/PaymentStatusSummary";
+import { SettlementRouteList } from "../organisms/SettlementRouteList";
+import { PaymentDetailsSection } from "../organisms/PaymentDetailsSection";
 import { COLORS } from "../../constants/colors";
 import {
   calculateTotalAmount,
@@ -18,17 +18,20 @@ import {
   calculateTransfers,
 } from "../../domain/usecases/calculatePayments";
 
-interface PaymentResultProps {
+interface SettlementResultProps {
   onBack: () => void;
 }
 
-export const PaymentResult = ({ onBack }: PaymentResultProps) => {
+export const SettlementResult = ({ onBack }: SettlementResultProps) => {
   const people = useSelector((state: RootState) => state.people.people);
   const isDetailMode = useSelector(
     (state: RootState) => state.people.isDetailMode
   );
   const nonPayingParticipants = useSelector(
     (state: RootState) => state.people.nonPayingParticipants
+  );
+  const totalParticipantsState = useSelector(
+    (state: RootState) => state.people.totalParticipants
   );
   const resultRef = useRef<HTMLDivElement>(null);
 
@@ -79,8 +82,9 @@ export const PaymentResult = ({ onBack }: PaymentResultProps) => {
     const shareData = {
       people: people.map(p => ({
         name: p.name,
-        payments: p.payments.map(pay => ({ amount: pay.amount }))
-      })),
+      payments: p.payments.map(pay => ({ amount: pay.amount }))
+    })),
+      totalParticipants: totalParticipantsState || totalParticipants,
       nonPayingParticipants
     };
     const encoded = btoa(encodeURIComponent(JSON.stringify(shareData)));
@@ -101,13 +105,10 @@ export const PaymentResult = ({ onBack }: PaymentResultProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-start items-center">
-        <button
-          onClick={onBack}
-          className="btn btn-neutral"
-        >
+      <div className="flex justify-between items-center">
+        <button onClick={onBack} className="btn btn-neutral">
           <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
-          修正する
+          戻る
         </button>
       </div>
 
@@ -147,13 +148,13 @@ export const PaymentResult = ({ onBack }: PaymentResultProps) => {
             </div>
           </div>
 
-          <PaymentStatus
+          <PaymentStatusSummary
             paymentStatus={paymentStatus}
             maxPayment={maxPayment}
             perPersonAmount={perPersonAmount}
           />
 
-          <TransferList transfers={transfers} />
+          <SettlementRouteList transfers={transfers} />
 
           <div
             className="mt-4 p-4 flex flex-col items-center bg-slate-900 text-white rounded-lg hidden"
@@ -173,7 +174,7 @@ export const PaymentResult = ({ onBack }: PaymentResultProps) => {
         </div>
       </div>
 
-      {isDetailMode && <PaymentDetails paymentStatus={paymentStatus} />}
+      {isDetailMode && <PaymentDetailsSection paymentStatus={paymentStatus} />}
 
       <div className="flex flex-col gap-3 justify-center items-center bg-white/80 border border-slate-200 rounded-2xl p-4 shadow-sm">
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2">

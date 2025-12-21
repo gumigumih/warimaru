@@ -3,7 +3,7 @@ import { Background } from './components/templates/Background';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { setPeople, setNonPayingParticipants } from './warimaru/store/peopleSlice';
+import { setPeople, setNonPayingParticipants, setTotalParticipants } from './warimaru/store/peopleSlice';
 import { Landing } from './pages/Landing';
 import { WaketabeRoutes } from './waketabe/Routes';
 import { WarimaruRoutes } from './warimaru/Routes';
@@ -32,8 +32,14 @@ export const App = () => {
     if (encoded) {
       try {
         const decoded = JSON.parse(decodeURIComponent(atob(encoded)));
-        dispatch(setPeople(decoded.people));
-        dispatch(setNonPayingParticipants(decoded.nonPayingParticipants));
+        if (decoded.people) {
+          dispatch(setPeople(decoded.people));
+        }
+        if (typeof decoded.totalParticipants === 'number') {
+          dispatch(setTotalParticipants(decoded.totalParticipants));
+        } else if (typeof decoded.nonPayingParticipants === 'number') {
+          dispatch(setNonPayingParticipants(decoded.nonPayingParticipants));
+        }
       } catch {
         // データ不正時は何もしない
       }

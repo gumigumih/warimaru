@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import type { PersonInterface } from '../../domain/entities/Person';
 
-interface PaymentDetailsProps {
+interface PaymentDetailsSectionProps {
   paymentStatus: {
     person: PersonInterface;
     paidAmount: number;
@@ -13,7 +13,7 @@ interface PaymentDetailsProps {
   }[];
 }
 
-export const PaymentDetails = ({ paymentStatus }: PaymentDetailsProps) => {
+export const PaymentDetailsSection = ({ paymentStatus }: PaymentDetailsSectionProps) => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   return (
@@ -54,4 +54,3 @@ export const PaymentDetails = ({ paymentStatus }: PaymentDetailsProps) => {
     </div>
   );
 };
-

@@ -10,14 +10,14 @@ import { SimplePaymentInput } from '../molecules/SimplePaymentInput';
 import { calculateTotalAmount } from '../../domain/usecases/calculatePayments';
 import { updatePersonName } from '../../store/peopleSlice';
 
-interface PersonPaymentFormProps {
+interface PayerInputCardProps {
   person: PersonInterface;
   onDeletePerson: (personId: string) => void;
   dispatch: AppDispatch;
   isDetailMode: boolean;
 }
 
-export const PersonPaymentForm = ({ person, onDeletePerson, dispatch, isDetailMode }: PersonPaymentFormProps) => {
+export const PayerInputCard = ({ person, onDeletePerson, dispatch, isDetailMode }: PayerInputCardProps) => {
   const [inputRows, setInputRows] = useState<{ id: string; amount: string; description: string }[]>([]);
   const [simpleTotal, setSimpleTotal] = useState('');
 
