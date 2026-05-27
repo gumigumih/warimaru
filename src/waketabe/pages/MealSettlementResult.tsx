@@ -1,11 +1,12 @@
 import { useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload, faArrowLeft, faShareAlt } from "@fortawesome/free-solid-svg-icons";
-import waketabeLogoSrc from "../../assets/waketabe-logo-white.png";
 import type { Dish, Participant, DishContribution } from "../domain/entities";
 import { calculatePayments, calculateTransfers } from "../domain/usecases";
 import { formatCurrency } from "../domain/usecases/formatCurrency";
 import { captureElementToImage } from "../../infrastructure/html2canvas";
+import { withDownloadBanner } from "../../infrastructure/downloadBanner";
+import { DownloadBanner } from "../../components/templates/DownloadBanner";
 
 interface MealSettlementResultProps {
   participants: Participant[];
@@ -27,11 +28,6 @@ export const MealSettlementResult = ({ participants, dishes, onBack }: MealSettl
   const handleDownloadImage = async () => {
     if (!resultRef.current) return;
 
-    const logoElement = document.getElementById("result-logo");
-    if (logoElement) {
-      logoElement.classList.remove("hidden");
-    }
-
     const transferListElement = resultRef.current.querySelector(
       '[data-download-highlight="transfers"]'
     ) as HTMLElement;
@@ -44,7 +40,9 @@ export const MealSettlementResult = ({ participants, dishes, onBack }: MealSettl
     resultElement.style.background = "white";
 
     try {
-      const canvas = await captureElementToImage(resultRef.current);
+      const canvas = await withDownloadBanner(resultRef.current, () =>
+        captureElementToImage(resultRef.current as HTMLDivElement)
+      );
       const image = canvas.toDataURL("image/png");
       const now = new Date();
       const timestamp =
@@ -66,9 +64,6 @@ export const MealSettlementResult = ({ participants, dishes, onBack }: MealSettl
       resultElement.style.background = originalBackground;
       if (transferListElement) {
         transferListElement.classList.remove("border-2", "border-orange-500");
-      }
-      if (logoElement) {
-        logoElement.classList.add("hidden");
       }
     }
   };
@@ -206,12 +201,7 @@ export const MealSettlementResult = ({ participants, dishes, onBack }: MealSettl
             </div>
           )}
 
-          <div className="mt-2 p-6 flex flex-col items-center bg-slate-900 text-white rounded-2xl hidden" id="result-logo">
-            <div className="w-48 h-12 flex items-center justify-center mb-2">
-              <img src={waketabeLogoSrc} alt="わけたべ" className="w-full h-full object-contain" style={{ maxWidth: '100%', maxHeight: '100%' }} />
-            </div>
-            <p className="text-center text-sm font-medium">https://wakemaru.meggumi.com</p>
-          </div>
+          <DownloadBanner title="わけたべ 計算結果" url="https://warimaru.meggumi.com" />
         </div>
       </div>
 

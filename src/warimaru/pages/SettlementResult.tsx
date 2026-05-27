@@ -4,7 +4,8 @@ import type { RootState } from "../store/store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload, faShareAlt, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { captureElementToImage } from "../../infrastructure/html2canvas";
-import warimaruLogoSrc from "../../assets/warimaru-logo-white.png";
+import { withDownloadBanner } from "../../infrastructure/downloadBanner";
+import { DownloadBanner } from "../../components/templates/DownloadBanner";
 import { PaymentStatusSummary } from "../components/organisms/PaymentStatusSummary";
 import { SettlementRouteList } from "../components/molecules/SettlementRouteList";
 import { PaymentDetailsSection } from "../components/organisms/PaymentDetailsSection";
@@ -56,10 +57,9 @@ export const SettlementResult = ({ onBack }: SettlementResultProps) => {
 
   const handleDownloadImage = async () => {
     if (!resultRef.current) return;
-    const logo = document.getElementById("result-logo");
-    if (logo) logo.classList.remove("hidden");
-    const canvas = await captureElementToImage(resultRef.current);
-    if (logo) logo.classList.add("hidden");
+    const canvas = await withDownloadBanner(resultRef.current, () =>
+      captureElementToImage(resultRef.current as HTMLDivElement)
+    );
     const now = new Date();
     const timestamp =
       now.getFullYear() +
@@ -156,21 +156,7 @@ export const SettlementResult = ({ onBack }: SettlementResultProps) => {
 
           <SettlementRouteList transfers={transfers} />
 
-          <div
-            className="mt-4 p-4 flex flex-col items-center bg-slate-900 text-white rounded-lg hidden"
-            id="result-logo"
-          >
-            <div className="w-24 flex items-center justify-center">
-              <img
-                src={warimaruLogoSrc}
-                alt="わりまる"
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <p className="mt-1 text-center text-sm">
-              https://warimaru.meggumi.com
-            </p>
-          </div>
+          <DownloadBanner title="わりまる 計算結果" url="https://warimaru.meggumi.com" />
         </div>
       </div>
 

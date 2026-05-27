@@ -12,7 +12,9 @@ import {
 import { BrandHeader } from '../components/templates/BrandHeader';
 import { AmountInput } from '../components/atoms/AmountInput';
 import { StepIntro } from '../components/templates/StepIntro';
+import { DownloadBanner } from '../components/templates/DownloadBanner';
 import { captureElementToImage } from '../infrastructure/html2canvas';
+import { withDownloadBanner } from '../infrastructure/downloadBanner';
 
 type SimpleWarikanData = {
   totalAmount: string;
@@ -185,7 +187,9 @@ const SimpleWarikanResultPage = () => {
   const handleDownloadImage = async () => {
     if (!resultRef.current) return;
 
-    const canvas = await captureElementToImage(resultRef.current);
+    const canvas = await withDownloadBanner(resultRef.current, () =>
+      captureElementToImage(resultRef.current as HTMLDivElement)
+    );
     const now = new Date();
     const timestamp =
       now.getFullYear() +
@@ -283,6 +287,8 @@ const SimpleWarikanResultPage = () => {
             )}
           </div>
         </div>
+
+        <DownloadBanner title="シンプル割り勘 計算結果" url="https://warimaru.meggumi.com" />
       </div>
 
       <div className="flex flex-col gap-3 justify-center items-center bg-white/80 border border-slate-200 rounded-2xl p-4 shadow-sm">
