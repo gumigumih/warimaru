@@ -101,6 +101,17 @@ body {
   filter: brightness(1.05);
 }
 
+.btn-simple {
+  background: linear-gradient(135deg, #334155, #64748b);
+  color: #fff;
+  border: none;
+  box-shadow: 0 12px 30px rgba(51, 65, 85, 0.28);
+}
+
+.btn-simple:hover {
+  filter: brightness(1.06);
+}
+
 .btn-neutral {
   background: rgba(255, 255, 255, 0.85);
   color: #0f172a;

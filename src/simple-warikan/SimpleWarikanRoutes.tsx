@@ -153,7 +153,7 @@ const SimpleWarikanInputPage = () => {
           type="button"
           onClick={showResult}
           disabled={!result.isValid}
-          className="btn btn-neutral w-full text-lg shadow-lg"
+          className="btn btn-simple w-full text-lg shadow-lg"
         >
           計算結果へ
           <FontAwesomeIcon icon={faArrowRight} className="h-4 w-4" />
@@ -288,11 +288,11 @@ const SimpleWarikanResultPage = () => {
 
       <div className="flex flex-col gap-3 justify-center items-center bg-white/80 border border-slate-200 rounded-2xl p-4 shadow-sm">
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <button onClick={handleDownloadImage} className="btn btn-neutral w-full text-base sm:text-lg">
+          <button onClick={handleDownloadImage} className="btn btn-simple w-full text-base sm:text-lg">
             <FontAwesomeIcon icon={faDownload} className="mr-2" />
             画像保存
           </button>
-          <button onClick={handleShare} className="btn btn-neutral w-full text-base sm:text-lg">
+          <button onClick={handleShare} className="btn btn-simple w-full text-base sm:text-lg">
             <FontAwesomeIcon icon={faShareAlt} className="mr-2" />
             シェア
           </button>
