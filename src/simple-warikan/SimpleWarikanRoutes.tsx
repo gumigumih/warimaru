@@ -6,7 +6,6 @@ import {
   faArrowRight,
   faCalculator,
   faDownload,
-  faRotateLeft,
   faShareAlt,
 } from '@fortawesome/free-solid-svg-icons';
 import { BrandHeader } from '../components/templates/BrandHeader';
@@ -91,7 +90,7 @@ const SimpleWarikanInputPage = () => {
   const [peopleCount, setPeopleCount] = useState(restoredData?.peopleCount ?? '2');
   const result = calculateResult({ totalAmount, peopleCount });
 
-  const reset = () => {
+  const clear = () => {
     setTotalAmount('');
     setPeopleCount('2');
   };
@@ -105,22 +104,21 @@ const SimpleWarikanInputPage = () => {
     <div className="space-y-5 text-slate-950">
       <SimpleWarikanHeader />
 
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={reset}
-          className="btn btn-neutral px-4 py-2 text-sm shadow-sm"
-        >
-          <FontAwesomeIcon icon={faRotateLeft} className="h-4 w-4" />
-          リセット
-        </button>
-      </div>
-
       <StepIntro
         currentStep={1}
         totalSteps={2}
-        title="入力"
-        description="合計金額と人数を入力してください。結果画面で画像保存と共有ができます。"
+        title="誰で・何を割る？"
+        description="人数と合計金額を入れるだけで、1人あたりの目安を出します。"
+        accentClassName="bg-gradient-to-b from-slate-700 via-slate-600 to-slate-500"
+        endAction={
+          <button
+            type="button"
+            onClick={clear}
+            className="text-sm font-extrabold text-slate-500 transition hover:text-slate-950"
+          >
+            クリア
+          </button>
+        }
       />
 
       <section className="glass-card p-4 space-y-4">
@@ -237,22 +235,33 @@ const SimpleWarikanResultPage = () => {
     <div className="space-y-5 text-slate-950">
       <SimpleWarikanHeader />
 
-      <div className="flex justify-start">
-        <button
-          type="button"
-          onClick={() => navigate(`/simple?data=${encodeData(data)}`)}
-          className="btn btn-neutral px-4 py-2 text-sm shadow-sm"
-        >
-          <FontAwesomeIcon icon={faArrowLeft} className="h-4 w-4" />
-          入力に戻る
-        </button>
-      </div>
-
       <StepIntro
         currentStep={2}
         totalSteps={2}
-        title="結果・共有"
-        description="計算結果を確認して、画像保存またはURL共有ができます。"
+        title="結果を見る"
+        description="1人あたりと余りを確認して、画像保存またはURL共有ができます。"
+        accentClassName="bg-gradient-to-b from-slate-700 via-slate-600 to-slate-500"
+        action={
+          <button
+            type="button"
+            onClick={() => navigate(`/simple?data=${encodeData(data)}`)}
+            className="inline-flex items-center gap-1.5 text-sm font-extrabold text-slate-500 transition hover:text-slate-950"
+            aria-label="入力に戻る"
+            title="入力に戻る"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} className="h-4 w-4" />
+            入力に戻る
+          </button>
+        }
+        endAction={
+          <button
+            type="button"
+            onClick={() => navigate('/simple')}
+            className="text-sm font-extrabold text-slate-500 transition hover:text-slate-950"
+          >
+            クリア
+          </button>
+        }
       />
 
       <div ref={resultRef} className="glass-card p-0 overflow-hidden shadow-2xl">

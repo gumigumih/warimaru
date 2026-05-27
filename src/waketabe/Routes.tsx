@@ -7,7 +7,7 @@ import { MealSettlementResult } from './pages/MealSettlementResult';
 import { MealSplitHeader } from './components/molecules/WaketabeHeader';
 import type { Participant, Dish } from './domain/entities';
 import { mealSplitStore, type MealSplitRootState } from './store/store';
-import { setParticipants, setDishes } from './store/waketabeSlice';
+import { resetMealSplit, setParticipants, setDishes } from './store/waketabeSlice';
 
 type MealSplitRoutesInnerProps = {
   basePath: string;
@@ -106,6 +106,11 @@ const MealSplitRoutesInner = ({ basePath }: MealSplitRoutesInnerProps) => {
     navigate(`${basePath}/dishes`);
   };
 
+  const handleClear = () => {
+    dispatch(resetMealSplit());
+    navigate(`${basePath}/participants`);
+  };
+
   if (restoring) {
     return <div className="flex flex-col items-center justify-center min-h-[40vh] text-lg text-gray-100">データ復元中...</div>;
   }
@@ -115,19 +120,19 @@ const MealSplitRoutesInner = ({ basePath }: MealSplitRoutesInnerProps) => {
       <Route path="/participants" element={
         <div className="space-y-4">
           <MealSplitHeader />
-          <ParticipantInputStep onComplete={handleParticipantsComplete} initialParticipants={participants} />
+          <ParticipantInputStep onComplete={handleParticipantsComplete} initialParticipants={participants} onClear={handleClear} />
         </div>
       } />
       <Route path="/dishes" element={hasInvalidShareData || (participants.length === 0 && !hasShareData) ? <Navigate to={`${basePath}/participants`} /> : (
         <div className="space-y-4">
           <MealSplitHeader />
-          <DishInputStep participants={participants} onComplete={handleDishesComplete} onBack={handleBackToParticipantInput} initialDishes={dishes} />
+          <DishInputStep participants={participants} onComplete={handleDishesComplete} onBack={handleBackToParticipantInput} initialDishes={dishes} onClear={handleClear} />
         </div>
       )} />
       <Route path="/result" element={hasInvalidShareData || ((participants.length === 0 || dishes.length === 0) && !hasShareData) ? <Navigate to={`${basePath}/participants`} /> : (
         <div className="space-y-4">
           <MealSplitHeader />
-          <MealSettlementResult participants={participants} dishes={dishes} onBack={handleBackToDishInput} />
+          <MealSettlementResult participants={participants} dishes={dishes} onBack={handleBackToDishInput} onClear={handleClear} />
         </div>
       )} />
       <Route path="*" element={<Navigate to={`${basePath}/participants`} replace />} />

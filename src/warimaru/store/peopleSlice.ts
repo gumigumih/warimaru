@@ -3,11 +3,11 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import type { PaymentItem } from '../domain/entities/PaymentItem';
 import type { PeopleState } from '../domain/entities/PeopleState';
 
-const initialState: PeopleState = {
+const createInitialState = (): PeopleState => ({
   people: [
     {
       id: crypto.randomUUID(),
-      name: 'Aさん',
+      name: '',
       payments: [{
         id: crypto.randomUUID(),
         amount: 0,
@@ -18,7 +18,9 @@ const initialState: PeopleState = {
   isDetailMode: false,
   totalParticipants: 2,
   nonPayingParticipants: 1,
-};
+});
+
+const initialState: PeopleState = createInitialState();
 
 const updateNonPayingFromTotal = (state: PeopleState) => {
   state.nonPayingParticipants = Math.max(0, state.totalParticipants - state.people.length);
@@ -29,20 +31,9 @@ export const peopleSlice = createSlice({
   initialState,
   reducers: {
     addPerson: (state) => {
-      let nextName = '';
-      const currentCount = state.people.length;
-      
-      if (currentCount < 26) {
-        nextName = String.fromCharCode(65 + currentCount) + 'さん';
-      } else {
-        const firstChar = String.fromCharCode(65 + Math.floor((currentCount - 26) / 26));
-        const secondChar = String.fromCharCode(65 + ((currentCount - 26) % 26));
-        nextName = firstChar + secondChar + 'さん';
-      }
-      
       state.people.push({
         id: crypto.randomUUID(),
-        name: nextName,
+        name: '',
         payments: [{
           id: crypto.randomUUID(),
           amount: 0,
@@ -128,6 +119,7 @@ export const peopleSlice = createSlice({
       }
       updateNonPayingFromTotal(state);
     },
+    resetPeople: () => createInitialState(),
   },
 });
 
@@ -161,6 +153,7 @@ export const {
   setTotalParticipants,
   updateSimplePayment,
   setPeople,
+  resetPeople,
 } = peopleSlice.actions;
 
 export default peopleSlice.reducer;

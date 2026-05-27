@@ -5,7 +5,7 @@ import { PaymentInputStep } from './pages/PaymentInputStep';
 import { SettlementResult } from './pages/SettlementResult';
 import { Header } from './components/Header';
 import { ParticipantCountStep } from './pages/ParticipantCountStep';
-import { setNonPayingParticipants, setPeople, setTotalParticipants } from './store/peopleSlice';
+import { resetPeople, setNonPayingParticipants, setPeople, setTotalParticipants } from './store/peopleSlice';
 import type { AppDispatch } from './store/store';
 
 type EqualSplitRoutesProps = {
@@ -79,21 +79,25 @@ export const EqualSplitRoutes = ({ basePath }: EqualSplitRoutesProps) => {
     dispatch(setNonPayingParticipants(shareData.nonPayingParticipants ?? 0));
   }, [basePath, hasShareData, shareData, dispatch, navigate]);
 
-  const handleShowResult = (shareData: { people: { name: string; payments: { amount: number }[] }[]; totalParticipants: number; nonPayingParticipants: number }) => {
-    const encoded = btoa(encodeURIComponent(JSON.stringify(shareData)));
-    navigate(`${basePath}/result?data=${encoded}`);
+  const handlePayersComplete = () => {
+    navigate(`${basePath}/participants`);
   };
 
   const handleTotalParticipantsComplete = () => {
-    navigate(`${basePath}/payments`);
+    navigate(`${basePath}/result`);
   };
 
-  const handleBackToTotal = () => {
+  const handleBackToPayers = () => {
     navigate(basePath);
   };
 
   const handleBack = () => {
-    navigate(`${basePath}/payments`);
+    navigate(`${basePath}/participants`);
+  };
+
+  const handleClear = () => {
+    dispatch(resetPeople());
+    navigate(basePath);
   };
 
   return (
@@ -102,22 +106,23 @@ export const EqualSplitRoutes = ({ basePath }: EqualSplitRoutesProps) => {
         index
         element={<>
           <Header />
-          <ParticipantCountStep onNext={handleTotalParticipantsComplete} />
+          <PaymentInputStep onNext={handlePayersComplete} onClear={handleClear} />
         </>}
       />
       <Route
-        path="payments"
+        path="participants"
         element={<>
           <Header />
-          <PaymentInputStep onShowResult={handleShowResult} onBack={handleBackToTotal} />
+          <ParticipantCountStep onNext={handleTotalParticipantsComplete} onBack={handleBackToPayers} onClear={handleClear} />
         </>}
       />
+      <Route path="payments" element={<Navigate to={basePath} replace />} />
       <Route
         path="result"
         element={hasInvalidShareData ? <Navigate to={basePath} replace /> : (
           <>
             <Header />
-            <SettlementResult onBack={handleBack} />
+            <SettlementResult onBack={handleBack} onClear={handleClear} />
           </>
         )}
       />

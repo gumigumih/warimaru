@@ -1,22 +1,21 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserPlus, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faUserPlus } from '@fortawesome/free-solid-svg-icons';
 import type { RootState, AppDispatch } from '../store/store';
-import { addPerson, deletePerson, setDetailMode } from '../store/peopleSlice';
+import { addPerson, deletePerson, setDetailMode, updatePersonName } from '../store/peopleSlice';
 import { PayerInputCard } from '../components/molecules/PayerInputCard';
 import { StepIntro } from '../../components/templates/StepIntro';
+import { getRandomName } from '../../utils/randomName';
 
 interface PaymentInputStepProps {
-  onShowResult: (shareData: { people: { name: string; payments: { amount: number }[] }[]; totalParticipants: number; nonPayingParticipants: number }) => void;
-  onBack: () => void;
+  onNext: () => void;
+  onClear: () => void;
 }
 
-export const PaymentInputStep = ({ onShowResult, onBack }: PaymentInputStepProps) => {
+export const PaymentInputStep = ({ onNext, onClear }: PaymentInputStepProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const people = useSelector((state: RootState) => state.people.people);
-  const totalParticipants = useSelector((state: RootState) => state.people.totalParticipants);
-  const nonPayingParticipants = useSelector((state: RootState) => state.people.nonPayingParticipants);
 
   // シンプル入力のみ（各人の合計だけ）を使う
   useEffect(() => {
@@ -33,58 +32,42 @@ export const PaymentInputStep = ({ onShowResult, onBack }: PaymentInputStepProps
     }
   };
 
-  const handleShowResult = () => {
-    const shareData = {
-      people: people.map((p) => ({
-        name: p.name,
-        payments: p.payments.map((pay) => ({ amount: pay.amount }))
-      })),
-      totalParticipants,
-      nonPayingParticipants
-    };
-    onShowResult(shareData);
+  const handleRandomName = (personId: string) => {
+    dispatch(updatePersonName({
+      personId,
+      newName: getRandomName(people.map(person => person.name)),
+    }));
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <button onClick={onBack} className="btn btn-neutral">
-          <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
-          戻る
-        </button>
-      </div>
-
       <StepIntro
-        currentStep={2}
-        totalSteps={2}
-        title="支払いを入力"
-        description="立て替えた人ごとの合計金額を入力してください。人数を追加し終わったら計算結果へ進めます。"
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-            <p className="text-xs text-slate-500">総人数</p>
-            <p className="text-lg font-semibold text-slate-900">{totalParticipants}人</p>
-          </div>
-          <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-            <p className="text-xs text-slate-500">支払い人数</p>
-            <p className="text-lg font-semibold text-blue-600">{people.length}人</p>
-          </div>
-          <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-            <p className="text-xs text-slate-500">未払い人数</p>
-            <p className="text-lg font-semibold text-slate-800">{nonPayingParticipants}人</p>
-          </div>
-        </div>
-      </StepIntro>
+        currentStep={1}
+        totalSteps={3}
+        title="誰が払った？"
+        description="立て替えた人の名前と、払った合計金額を入力します。"
+        accentClassName="bg-gradient-to-b from-blue-500 via-sky-500 to-cyan-400"
+        endAction={
+          <button
+            type="button"
+            onClick={onClear}
+            className="text-sm font-extrabold text-slate-500 transition hover:text-slate-950"
+          >
+            クリア
+          </button>
+        }
+      />
 
       <div className="space-y-4 glass-card p-4">
         <div className="flex flex-col gap-2 text-lg font-semibold text-slate-900 w-full">
           <span>支払い</span>
-          <span className="text-sm font-normal text-slate-500">立て替えた人の合計金額を入力してください。</span>
+          <span className="text-sm font-normal text-slate-500">払った人だけ追加して、名前と金額を入力してください。</span>
         </div>
         {people.map((person) => (
           <div key={person.id}>
             <PayerInputCard
               person={person}
+              onRandomName={handleRandomName}
               onDeletePerson={handleDeletePerson}
               dispatch={dispatch}
               isDetailMode={false}
@@ -95,7 +78,7 @@ export const PaymentInputStep = ({ onShowResult, onBack }: PaymentInputStepProps
         <div className="space-y-4">
           <button
             onClick={handleAddPerson}
-            className="btn btn-equal-split w-full"
+            className="btn btn-add w-full"
           >
             <FontAwesomeIcon icon={faUserPlus} className="mr-2" />
             人物追加
@@ -105,10 +88,10 @@ export const PaymentInputStep = ({ onShowResult, onBack }: PaymentInputStepProps
 
       <div className="sticky bottom-4 z-10">
         <button
-          onClick={handleShowResult}
+          onClick={onNext}
           className="btn btn-equal-split w-full text-lg shadow-lg"
         >
-          計算結果を見る
+          次へ
         </button>
       </div>
     </div>

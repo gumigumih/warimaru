@@ -6,6 +6,7 @@ import { faDownload, faShareAlt, faArrowLeft } from "@fortawesome/free-solid-svg
 import { captureElementToImage } from "../../infrastructure/html2canvas";
 import { withDownloadBanner } from "../../infrastructure/downloadBanner";
 import { DownloadBanner } from "../../components/templates/DownloadBanner";
+import { StepIntro } from "../../components/templates/StepIntro";
 import { PaymentStatusSummary } from "../components/organisms/PaymentStatusSummary";
 import { SettlementRouteList } from "../components/molecules/SettlementRouteList";
 import { PaymentDetailsSection } from "../components/organisms/PaymentDetailsSection";
@@ -21,9 +22,10 @@ import {
 
 interface SettlementResultProps {
   onBack: () => void;
+  onClear: () => void;
 }
 
-export const SettlementResult = ({ onBack }: SettlementResultProps) => {
+export const SettlementResult = ({ onBack, onClear }: SettlementResultProps) => {
   const people = useSelector((state: RootState) => state.people.people);
   const isDetailMode = useSelector(
     (state: RootState) => state.people.isDetailMode
@@ -105,12 +107,33 @@ export const SettlementResult = ({ onBack }: SettlementResultProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <button onClick={onBack} className="btn btn-neutral">
-          <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
-          戻る
-        </button>
-      </div>
+      <StepIntro
+        currentStep={3}
+        totalSteps={3}
+        title="結果を見る"
+        description="1人あたりと、誰が誰にいくら渡すかを確認できます。"
+        accentClassName="bg-gradient-to-b from-blue-500 via-sky-500 to-cyan-400"
+        action={
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 text-sm font-extrabold text-slate-500 transition hover:text-slate-950"
+            aria-label="戻る"
+            title="戻る"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} className="h-4 w-4" />
+            戻る
+          </button>
+        }
+        endAction={
+          <button
+            type="button"
+            onClick={onClear}
+            className="text-sm font-extrabold text-slate-500 transition hover:text-slate-950"
+          >
+            クリア
+          </button>
+        }
+      />
 
       <div
         ref={resultRef}

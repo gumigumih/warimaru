@@ -5,11 +5,12 @@ import type { Participant, Dish } from '../domain/entities';
 import { AmountInput } from '../../components/atoms/AmountInput';
 import { StepIntro } from '../../components/templates/StepIntro';
 
-export const DishInputStep = ({ participants, onComplete, onBack, initialDishes = [] }: { 
+export const DishInputStep = ({ participants, onComplete, onBack, initialDishes = [], onClear }: { 
   participants: Participant[]; 
   onComplete?: (dishes: Dish[]) => void;
   onBack?: () => void;
   initialDishes?: Dish[];
+  onClear?: () => void;
 }) => {
   const [dishes, setDishes] = useState<Dish[]>(initialDishes);
   const [error, setError] = useState<string>('');
@@ -52,21 +53,35 @@ export const DishInputStep = ({ participants, onComplete, onBack, initialDishes 
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-start mb-2">
-        <button
-          onClick={onBack}
-          className="btn btn-neutral h-9 px-4 text-sm font-semibold"
-        >
-          <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
-          戻る
-        </button>
-      </div>
-
       <StepIntro
         currentStep={2}
-        totalSteps={2}
-        title="料理を入力"
-        description="料理名・金額・食べた人を順番に埋めてください。"
+        totalSteps={3}
+        title="何を割る？"
+        description="料理名・金額・食べた人を入力します。料理ごとに食べた人だけで割ります。"
+        accentClassName="bg-gradient-to-b from-orange-500 via-amber-500 to-yellow-500"
+        action={
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 text-sm font-extrabold text-slate-500 transition hover:text-slate-950"
+            aria-label="戻る"
+            title="戻る"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} className="h-4 w-4" />
+            戻る
+          </button>
+        }
+        endAction={
+          <button
+            type="button"
+            onClick={() => {
+              setDishes([]);
+              onClear?.();
+            }}
+            className="text-sm font-extrabold text-slate-500 transition hover:text-slate-950"
+          >
+            クリア
+          </button>
+        }
       />
 
       <div className="glass-card p-4 sm:p-5 bg-white/95 border border-slate-100 space-y-4">
@@ -97,7 +112,7 @@ export const DishInputStep = ({ participants, onComplete, onBack, initialDishes 
                 <div className="flex justify-end pt-5 sm:pt-0">
                   <button
                     onClick={() => handleDeleteDish(dish.id)}
-                    className="h-12 w-12 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-gray-400 hover:text-red-500 transition-colors shadow-sm"
+                    className="icon-field-button icon-field-button-danger"
                     title="この料理を削除"
                   >
                     <FontAwesomeIcon icon={faTrashAlt} />
@@ -146,7 +161,7 @@ export const DishInputStep = ({ participants, onComplete, onBack, initialDishes 
         )}
 
         <div className="flex">
-          <button type="button" onClick={handleAddDish} className="btn btn-meal-split w-full">
+          <button type="button" onClick={handleAddDish} className="btn btn-add w-full">
             <FontAwesomeIcon icon={faPlus} className="mr-2" />
             料理追加
           </button>

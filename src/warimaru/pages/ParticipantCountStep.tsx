@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import type { RootState, AppDispatch } from '../store/store';
 import { setTotalParticipants } from '../store/peopleSlice';
 import { StepIntro } from '../../components/templates/StepIntro';
 
 interface ParticipantCountStepProps {
   onNext: () => void;
+  onBack: () => void;
+  onClear: () => void;
 }
 
-export const ParticipantCountStep = ({ onNext }: ParticipantCountStepProps) => {
+export const ParticipantCountStep = ({ onNext, onBack, onClear }: ParticipantCountStepProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const peopleCount = useSelector((state: RootState) => state.people.people.length);
   const totalParticipants = useSelector((state: RootState) => state.people.totalParticipants);
@@ -27,15 +31,36 @@ export const ParticipantCountStep = ({ onNext }: ParticipantCountStepProps) => {
   return (
     <div className="space-y-5">
       <StepIntro
-        currentStep={1}
-        totalSteps={2}
-        title="総人数を入力"
-        description="参加者全員の人数を入力してください。支払い人数との差分から除外する人数を自動で計算します。"
+        currentStep={2}
+        totalSteps={3}
+        title="誰で割る？"
+        description="払っていない人も含めて、割り勘に入る人数を決めます。"
+        accentClassName="bg-gradient-to-b from-blue-500 via-sky-500 to-cyan-400"
+        action={
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 text-sm font-extrabold text-slate-500 transition hover:text-slate-950"
+            aria-label="戻る"
+            title="戻る"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} className="h-4 w-4" />
+            戻る
+          </button>
+        }
+        endAction={
+          <button
+            type="button"
+            onClick={onClear}
+            className="text-sm font-extrabold text-slate-500 transition hover:text-slate-950"
+          >
+            クリア
+          </button>
+        }
       />
 
       <div className="glass-card p-4 space-y-4">
         <label className="flex flex-col gap-2 text-lg font-semibold text-slate-900 w-full">
-          全体の参加者数
+          割る人数
           <div className="flex items-center gap-3">
             <input
               id="totalParticipants"
@@ -67,7 +92,7 @@ export const ParticipantCountStep = ({ onNext }: ParticipantCountStepProps) => {
           onClick={handleNext}
           className="btn btn-equal-split w-full text-lg shadow-lg"
         >
-          次へ（支払い入力）
+          結果を見る
         </button>
       </div>
     </div>

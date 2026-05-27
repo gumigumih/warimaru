@@ -7,14 +7,16 @@ import { formatCurrency } from "../domain/usecases/formatCurrency";
 import { captureElementToImage } from "../../infrastructure/html2canvas";
 import { withDownloadBanner } from "../../infrastructure/downloadBanner";
 import { DownloadBanner } from "../../components/templates/DownloadBanner";
+import { StepIntro } from "../../components/templates/StepIntro";
 
 interface MealSettlementResultProps {
   participants: Participant[];
   dishes: Dish[];
   onBack: () => void;
+  onClear: () => void;
 }
 
-export const MealSettlementResult = ({ participants, dishes, onBack }: MealSettlementResultProps) => {
+export const MealSettlementResult = ({ participants, dishes, onBack, onClear }: MealSettlementResultProps) => {
   const resultRef = useRef<HTMLDivElement>(null);
   const [shareMsg, setShareMsg] = useState('');
 
@@ -98,18 +100,36 @@ export const MealSettlementResult = ({ participants, dishes, onBack }: MealSettl
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-start mb-2">
-        <button
-          onClick={onBack}
-          className="btn btn-neutral h-9 px-4 text-sm font-semibold"
-        >
-          <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
-          戻る
-        </button>
-      </div>
+      <StepIntro
+        currentStep={3}
+        totalSteps={3}
+        title="結果を見る"
+        description="食べた分の負担額と、必要な受け渡しを確認できます。"
+        accentClassName="bg-gradient-to-b from-orange-500 via-amber-500 to-yellow-500"
+        action={
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 text-sm font-extrabold text-slate-500 transition hover:text-slate-950"
+            aria-label="戻る"
+            title="戻る"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} className="h-4 w-4" />
+            戻る
+          </button>
+        }
+        endAction={
+          <button
+            type="button"
+            onClick={onClear}
+            className="text-sm font-extrabold text-slate-500 transition hover:text-slate-950"
+          >
+            クリア
+          </button>
+        }
+      />
 
       <div ref={resultRef} className="glass-card p-0 overflow-hidden shadow-2xl">
-        <div className="bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400 text-white px-5 py-4 sm:px-6 sm:py-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-white px-5 py-4 sm:px-6 sm:py-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <p className="text-xs uppercase tracking-[0.08em] opacity-90">meal split report</p>
             <h2 className="text-xl sm:text-2xl font-bold leading-tight">計算結果を共有しましょう</h2>
