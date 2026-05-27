@@ -65,7 +65,7 @@ export const Footer = () => {
 
           {/* Copyright */}
           <div className="text-center text-slate-700">
-            © 2024 わりまる. All rights reserved.
+            © 2026 わりまる. All rights reserved.
           </div>
         </div>
       </footer>

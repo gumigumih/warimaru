@@ -4,11 +4,11 @@ declare const self: ServiceWorkerGlobalScope;
 
 const CACHE_NAME = 'warimaru-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.webmanifest',
-  '/icon-192x192.png',
-  '/icon-512x512.png'
+  '/warimaru/',
+  '/warimaru/index.html',
+  '/warimaru/manifest.webmanifest',
+  '/warimaru/icon-192x192.png',
+  '/warimaru/icon-512x512.png'
 ];
 
 self.addEventListener('install', (event: ExtendableEvent) => {

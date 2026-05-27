@@ -221,7 +221,7 @@ export const MealSettlementResult = ({ participants, dishes, onBack, onClear }: 
             </div>
           )}
 
-          <DownloadBanner title="食べた分割り勘 計算結果" url="https://warimaru.meggumi.com" />
+          <DownloadBanner title="食べた分割り勘 計算結果" url="https://meggumi.com/warimaru/" />
         </div>
       </div>
 

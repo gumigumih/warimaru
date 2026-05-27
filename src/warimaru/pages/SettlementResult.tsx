@@ -179,7 +179,7 @@ export const SettlementResult = ({ onBack, onClear }: SettlementResultProps) => 
 
           <SettlementRouteList transfers={transfers} />
 
-          <DownloadBanner title="総額割り勘 計算結果" url="https://warimaru.meggumi.com" />
+          <DownloadBanner title="総額割り勘 計算結果" url="https://meggumi.com/warimaru/" />
         </div>
       </div>
 

@@ -312,7 +312,7 @@ const SimpleWarikanResultPage = () => {
             </div>
           </div>
 
-          <DownloadBanner title="シンプル割り勘 計算結果" url="https://warimaru.meggumi.com" />
+          <DownloadBanner title="シンプル割り勘 計算結果" url="https://meggumi.com/warimaru/" />
         </div>
       </div>
 
