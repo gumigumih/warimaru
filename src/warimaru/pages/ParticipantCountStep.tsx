@@ -65,7 +65,7 @@ export const ParticipantCountStep = ({ onNext }: ParticipantCountStepProps) => {
       <div className="sticky bottom-4 z-10">
         <button
           onClick={handleNext}
-          className="btn btn-warimaru w-full text-lg shadow-lg"
+          className="btn btn-equal-split w-full text-lg shadow-lg"
         >
           次へ（支払い入力）
         </button>

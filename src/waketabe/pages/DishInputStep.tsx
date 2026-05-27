@@ -146,7 +146,7 @@ export const DishInputStep = ({ participants, onComplete, onBack, initialDishes 
         )}
 
         <div className="flex">
-          <button type="button" onClick={handleAddDish} className="btn btn-waketabe w-full">
+          <button type="button" onClick={handleAddDish} className="btn btn-meal-split w-full">
             <FontAwesomeIcon icon={faPlus} className="mr-2" />
             料理追加
           </button>
@@ -155,7 +155,7 @@ export const DishInputStep = ({ participants, onComplete, onBack, initialDishes 
 
       {onComplete && (
         <button
-          className="btn btn-waketabe w-full text-lg"
+          className="btn btn-meal-split w-full text-lg"
           onClick={handleComplete}
           disabled={dishes.length === 0}
         >

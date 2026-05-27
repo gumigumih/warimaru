@@ -4,15 +4,19 @@ import { Provider, useDispatch, useSelector } from 'react-redux';
 import { ParticipantInputStep } from './pages/ParticipantInputStep';
 import { DishInputStep } from './pages/DishInputStep';
 import { MealSettlementResult } from './pages/MealSettlementResult';
-import { WaketabeHeader } from './components/molecules/WaketabeHeader';
+import { MealSplitHeader } from './components/molecules/WaketabeHeader';
 import type { Participant, Dish } from './domain/entities';
-import { waketabeStore, type WaketabeRootState } from './store/store';
+import { mealSplitStore, type MealSplitRootState } from './store/store';
 import { setParticipants, setDishes } from './store/waketabeSlice';
 
-const WaketabeRoutesInner = () => {
+type MealSplitRoutesInnerProps = {
+  basePath: string;
+};
+
+const MealSplitRoutesInner = ({ basePath }: MealSplitRoutesInnerProps) => {
   const dispatch = useDispatch();
-  const participants = useSelector((state: WaketabeRootState) => state.waketabe.participants);
-  const dishes = useSelector((state: WaketabeRootState) => state.waketabe.dishes);
+  const participants = useSelector((state: MealSplitRootState) => state.mealSplit.participants);
+  const dishes = useSelector((state: MealSplitRootState) => state.mealSplit.dishes);
   const [restoring, setRestoring] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,20 +42,20 @@ const WaketabeRoutesInner = () => {
 
   const handleParticipantsComplete = (newParticipants: Participant[]) => {
     dispatch(setParticipants(newParticipants));
-    navigate('/waketabe/dishes');
+    navigate(`${basePath}/dishes`);
   };
 
   const handleDishesComplete = (newDishes: Dish[]) => {
     dispatch(setDishes(newDishes));
-    navigate('/waketabe/result');
+    navigate(`${basePath}/result`);
   };
 
   const handleBackToParticipantInput = () => {
-    navigate('/waketabe/participants');
+    navigate(`${basePath}/participants`);
   };
 
   const handleBackToDishInput = () => {
-    navigate('/waketabe/dishes');
+    navigate(`${basePath}/dishes`);
   };
 
   if (restoring) {
@@ -62,29 +66,33 @@ const WaketabeRoutesInner = () => {
     <Routes>
       <Route path="/participants" element={
         <div className="space-y-4">
-          <WaketabeHeader />
+          <MealSplitHeader />
           <ParticipantInputStep onComplete={handleParticipantsComplete} initialParticipants={participants} />
         </div>
       } />
-      <Route path="/dishes" element={participants.length === 0 && !location.search.includes('data=') ? <Navigate to="/waketabe/participants" /> : (
+      <Route path="/dishes" element={participants.length === 0 && !location.search.includes('data=') ? <Navigate to={`${basePath}/participants`} /> : (
         <div className="space-y-4">
-          <WaketabeHeader />
+          <MealSplitHeader />
           <DishInputStep participants={participants} onComplete={handleDishesComplete} onBack={handleBackToParticipantInput} initialDishes={dishes} />
         </div>
       )} />
-      <Route path="/result" element={(participants.length === 0 || dishes.length === 0) && !location.search.includes('data=') ? <Navigate to="/waketabe/participants" /> : (
+      <Route path="/result" element={(participants.length === 0 || dishes.length === 0) && !location.search.includes('data=') ? <Navigate to={`${basePath}/participants`} /> : (
         <div className="space-y-4">
-          <WaketabeHeader />
+          <MealSplitHeader />
           <MealSettlementResult participants={participants} dishes={dishes} onBack={handleBackToDishInput} />
         </div>
       )} />
-      <Route path="*" element={<Navigate to="/waketabe/participants" replace />} />
+      <Route path="*" element={<Navigate to={`${basePath}/participants`} replace />} />
     </Routes>
   );
 };
 
-export const WaketabeRoutes = () => (
-  <Provider store={waketabeStore}>
-    <WaketabeRoutesInner />
+type MealSplitRoutesProps = {
+  basePath: string;
+};
+
+export const MealSplitRoutes = ({ basePath }: MealSplitRoutesProps) => (
+  <Provider store={mealSplitStore}>
+    <MealSplitRoutesInner basePath={basePath} />
   </Provider>
 );

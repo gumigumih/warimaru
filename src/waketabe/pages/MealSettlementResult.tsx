@@ -56,7 +56,7 @@ export const MealSettlementResult = ({ participants, dishes, onBack }: MealSettl
 
       const link = document.createElement("a");
       link.href = image;
-      link.download = `わけたべ_計算結果_${timestamp}.png`;
+      link.download = `食べた分割り勘_計算結果_${timestamp}.png`;
       link.click();
     } catch (error) {
       console.error("画像の生成に失敗しました:", error);
@@ -75,11 +75,11 @@ export const MealSettlementResult = ({ participants, dishes, onBack }: MealSettl
     const shareData = { participants, dishes };
     const encoded = btoa(encodeURIComponent(JSON.stringify(shareData)));
     const base = `${window.location.origin}${window.location.pathname}`;
-    const url = `${base}#/waketabe/result?data=${encoded}`;
+    const url = `${base}#/meal-split/result?data=${encoded}`;
 
     if (isWebShareSupported) {
       try {
-        await navigator.share({ title: 'わけたべ 計算結果', url });
+        await navigator.share({ title: '食べた分割り勘 計算結果', url });
         setShareMsg('シェアしました！');
       } catch {
         setShareMsg('シェアをキャンセルしました');
@@ -111,7 +111,7 @@ export const MealSettlementResult = ({ participants, dishes, onBack }: MealSettl
       <div ref={resultRef} className="glass-card p-0 overflow-hidden shadow-2xl">
         <div className="bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400 text-white px-5 py-4 sm:px-6 sm:py-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.08em] opacity-90">waketabe report</p>
+            <p className="text-xs uppercase tracking-[0.08em] opacity-90">meal split report</p>
             <h2 className="text-xl sm:text-2xl font-bold leading-tight">計算結果を共有しましょう</h2>
             <p className="text-sm opacity-90">合計・精算ルートを一目で確認できます</p>
           </div>
@@ -201,17 +201,17 @@ export const MealSettlementResult = ({ participants, dishes, onBack }: MealSettl
             </div>
           )}
 
-          <DownloadBanner title="わけたべ 計算結果" url="https://warimaru.meggumi.com" />
+          <DownloadBanner title="食べた分割り勘 計算結果" url="https://warimaru.meggumi.com" />
         </div>
       </div>
 
       <div className="flex flex-col gap-3 justify-center items-center bg-white/80 border border-slate-200 rounded-2xl p-4 shadow-sm">
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <button onClick={handleDownloadImage} className="btn btn-waketabe w-full text-base sm:text-lg">
+          <button onClick={handleDownloadImage} className="btn btn-meal-split w-full text-base sm:text-lg">
             <FontAwesomeIcon icon={faDownload} className="mr-2" />
             画像保存
           </button>
-          <button onClick={handleShareUrl} className="btn btn-waketabe w-full text-base sm:text-lg">
+          <button onClick={handleShareUrl} className="btn btn-meal-split w-full text-base sm:text-lg">
             <FontAwesomeIcon icon={faShareAlt} className="mr-2" />
             {isWebShareSupported ? 'シェア' : 'URLコピー'}
           </button>

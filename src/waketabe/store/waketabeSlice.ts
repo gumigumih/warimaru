@@ -2,18 +2,18 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { Participant, Dish } from '../domain/entities';
 
-type WaketabeState = {
+type MealSplitState = {
   participants: Participant[];
   dishes: Dish[];
 };
 
-const initialState: WaketabeState = {
+const initialState: MealSplitState = {
   participants: [],
   dishes: [],
 };
 
-export const waketabeSlice = createSlice({
-  name: 'waketabe',
+export const mealSplitSlice = createSlice({
+  name: 'mealSplit',
   initialState,
   reducers: {
     setParticipants: (state, action: PayloadAction<Participant[]>) => {
@@ -22,9 +22,9 @@ export const waketabeSlice = createSlice({
     setDishes: (state, action: PayloadAction<Dish[]>) => {
       state.dishes = action.payload;
     },
-    resetWaketabe: () => initialState,
+    resetMealSplit: () => initialState,
   },
 });
 
-export const { setParticipants, setDishes, resetWaketabe } = waketabeSlice.actions;
-export default waketabeSlice.reducer;
+export const { setParticipants, setDishes, resetMealSplit } = mealSplitSlice.actions;
+export default mealSplitSlice.reducer;

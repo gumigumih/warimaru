@@ -64,7 +64,7 @@ export const ParticipantInputStep = ({ onComplete, initialParticipants = [] }: {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2">
-          <button type="button" onClick={handleAdd} className="btn btn-waketabe w-full">
+          <button type="button" onClick={handleAdd} className="btn btn-meal-split w-full">
             <FontAwesomeIcon icon={faUserPlus} className="mr-2" />
             人物追加
           </button>
@@ -72,7 +72,7 @@ export const ParticipantInputStep = ({ onComplete, initialParticipants = [] }: {
       </div>
       {onComplete && (
         <button
-          className="btn btn-waketabe w-full text-lg"
+          className="btn btn-meal-split w-full text-lg"
           onClick={() => onComplete(participants)}
           disabled={participants.length === 0}
         >

@@ -1,11 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
-import waketabeReducer from './waketabeSlice';
+import mealSplitReducer from './waketabeSlice';
 
-export const waketabeStore = configureStore({
+export const mealSplitStore = configureStore({
   reducer: {
-    waketabe: waketabeReducer,
+    mealSplit: mealSplitReducer,
   },
 });
 
-export type WaketabeRootState = ReturnType<typeof waketabeStore.getState>;
-export type WaketabeDispatch = typeof waketabeStore.dispatch;
+export type MealSplitRootState = ReturnType<typeof mealSplitStore.getState>;
+export type MealSplitDispatch = typeof mealSplitStore.dispatch;

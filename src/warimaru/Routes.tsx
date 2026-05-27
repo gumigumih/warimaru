@@ -8,7 +8,11 @@ import { ParticipantCountStep } from './pages/ParticipantCountStep';
 import { setNonPayingParticipants, setPeople, setTotalParticipants } from './store/peopleSlice';
 import type { AppDispatch } from './store/store';
 
-export const WarimaruRoutes = () => {
+type EqualSplitRoutesProps = {
+  basePath: string;
+};
+
+export const EqualSplitRoutes = ({ basePath }: EqualSplitRoutesProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch<AppDispatch>();
@@ -35,19 +39,19 @@ export const WarimaruRoutes = () => {
 
   const handleShowResult = (shareData: { people: { name: string; payments: { amount: number }[] }[]; totalParticipants: number; nonPayingParticipants: number }) => {
     const encoded = btoa(encodeURIComponent(JSON.stringify(shareData)));
-    navigate(`/warimaru/result?data=${encoded}`);
+    navigate(`${basePath}/result?data=${encoded}`);
   };
 
   const handleTotalParticipantsComplete = () => {
-    navigate('/warimaru/payments');
+    navigate(`${basePath}/payments`);
   };
 
   const handleBackToTotal = () => {
-    navigate('/warimaru');
+    navigate(basePath);
   };
 
   const handleBack = () => {
-    navigate('/warimaru/payments');
+    navigate(`${basePath}/payments`);
   };
 
   return (
@@ -73,7 +77,7 @@ export const WarimaruRoutes = () => {
           <SettlementResult onBack={handleBack} />
         </>}
       />
-      <Route path="*" element={<Navigate to="/warimaru" replace />} />
+      <Route path="*" element={<Navigate to={basePath} replace />} />
     </Routes>
   );
 };

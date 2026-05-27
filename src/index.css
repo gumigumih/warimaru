@@ -79,25 +79,25 @@ body {
   color: var(--wm-primary-strong);
 }
 
-.btn-warimaru {
+.btn-equal-split {
   background: linear-gradient(135deg, #3b82f6, #22d3ee);
   color: #fff;
   border: none;
   box-shadow: 0 12px 30px rgba(59, 130, 246, 0.3);
 }
 
-.btn-warimaru:hover {
+.btn-equal-split:hover {
   filter: brightness(1.05);
 }
 
-.btn-waketabe {
+.btn-meal-split {
   background: linear-gradient(135deg, #f97316, #fb923c, #fbbf24);
   color: #fff;
   border: none;
   box-shadow: 0 12px 30px rgba(249, 115, 22, 0.28);
 }
 
-.btn-waketabe:hover {
+.btn-meal-split:hover {
   filter: brightness(1.05);
 }
 

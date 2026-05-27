@@ -95,7 +95,7 @@ export const PaymentInputStep = ({ onShowResult, onBack }: PaymentInputStepProps
         <div className="space-y-4">
           <button
             onClick={handleAddPerson}
-            className="btn btn-warimaru w-full"
+            className="btn btn-equal-split w-full"
           >
             <FontAwesomeIcon icon={faUserPlus} className="mr-2" />
             人物追加
@@ -106,7 +106,7 @@ export const PaymentInputStep = ({ onShowResult, onBack }: PaymentInputStepProps
       <div className="sticky bottom-4 z-10">
         <button
           onClick={handleShowResult}
-          className="btn btn-warimaru w-full text-lg shadow-lg"
+          className="btn btn-equal-split w-full text-lg shadow-lg"
         >
           計算結果を見る
         </button>

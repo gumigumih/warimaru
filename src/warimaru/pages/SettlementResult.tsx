@@ -72,7 +72,7 @@ export const SettlementResult = ({ onBack }: SettlementResultProps) => {
 
     const link = document.createElement("a");
     link.href = canvas.toDataURL("image/png");
-    link.download = `わけまる_計算結果_${timestamp}.png`;
+    link.download = `総額割り勘_計算結果_${timestamp}.png`;
     link.click();
   };
 
@@ -89,11 +89,11 @@ export const SettlementResult = ({ onBack }: SettlementResultProps) => {
     };
     const encoded = btoa(encodeURIComponent(JSON.stringify(shareData)));
     const base = `${window.location.origin}${window.location.pathname}`;
-    const shareUrl = `${base}#/warimaru/result?data=${encoded}`;
+    const shareUrl = `${base}#/equal-split/result?data=${encoded}`;
 
     if (isMobile && navigator.share) {
       navigator.share({
-        title: 'わりまる 計算結果',
+        title: '総額割り勘 計算結果',
         text: 'この割り勘結果をシェアします！',
         url: shareUrl,
       });
@@ -118,7 +118,7 @@ export const SettlementResult = ({ onBack }: SettlementResultProps) => {
       >
         <div className="bg-gradient-to-r from-blue-500 via-sky-500 to-cyan-400 text-white px-5 py-4 sm:px-6 sm:py-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.08em] opacity-90">warimaru report</p>
+            <p className="text-xs uppercase tracking-[0.08em] opacity-90">equal split report</p>
             <h2 className="text-xl sm:text-2xl font-bold leading-tight">計算結果を共有しましょう</h2>
             <p className="text-sm opacity-90">合計・1人あたり・精算ルートをまとめています</p>
           </div>
@@ -156,7 +156,7 @@ export const SettlementResult = ({ onBack }: SettlementResultProps) => {
 
           <SettlementRouteList transfers={transfers} />
 
-          <DownloadBanner title="わりまる 計算結果" url="https://warimaru.meggumi.com" />
+          <DownloadBanner title="総額割り勘 計算結果" url="https://warimaru.meggumi.com" />
         </div>
       </div>
 
@@ -166,14 +166,14 @@ export const SettlementResult = ({ onBack }: SettlementResultProps) => {
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2">
           <button
             onClick={handleDownloadImage}
-            className="btn btn-warimaru w-full text-base sm:text-lg"
+            className="btn btn-equal-split w-full text-base sm:text-lg"
           >
             <FontAwesomeIcon icon={faDownload} className="mr-2" />
             画像保存
           </button>
           <button
             onClick={handleShare}
-            className="btn btn-warimaru w-full text-base sm:text-lg"
+            className="btn btn-equal-split w-full text-base sm:text-lg"
           >
             <FontAwesomeIcon icon={faShareAlt} className="mr-2" />
             シェア
