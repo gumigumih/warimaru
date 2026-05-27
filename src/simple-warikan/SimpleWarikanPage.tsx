@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalculator, faRotateLeft } from '@fortawesome/free-solid-svg-icons';
+import { faCalculator, faDownload, faRotateLeft, faShareAlt } from '@fortawesome/free-solid-svg-icons';
 import { BrandHeader } from '../components/templates/BrandHeader';
+import { captureElementToImage } from '../infrastructure/html2canvas';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('ja-JP', {
@@ -16,8 +17,28 @@ const parseNumber = (value: string) => {
 };
 
 export const SimpleWarikanPage = () => {
+  const resultRef = useRef<HTMLDivElement>(null);
   const [totalAmount, setTotalAmount] = useState('');
   const [peopleCount, setPeopleCount] = useState('2');
+  const [shareMsg, setShareMsg] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const encoded = params.get('simple');
+    if (!encoded) return;
+
+    try {
+      const decoded = JSON.parse(decodeURIComponent(atob(encoded)));
+      if (typeof decoded.totalAmount === 'string') {
+        setTotalAmount(decoded.totalAmount);
+      }
+      if (typeof decoded.peopleCount === 'string') {
+        setPeopleCount(decoded.peopleCount);
+      }
+    } catch {
+      // 不正データは無視
+    }
+  }, []);
 
   const result = useMemo(() => {
     const total = parseNumber(totalAmount);
@@ -45,6 +66,61 @@ export const SimpleWarikanPage = () => {
   const reset = () => {
     setTotalAmount('');
     setPeopleCount('2');
+  };
+
+  const createShareUrl = () => {
+    const encoded = btoa(encodeURIComponent(JSON.stringify({ totalAmount, peopleCount })));
+    return `${window.location.origin}${window.location.pathname}?simple=${encoded}#/simple`;
+  };
+
+  const handleDownloadImage = async () => {
+    if (!resultRef.current || !hasResult) return;
+
+    const canvas = await captureElementToImage(resultRef.current);
+    const now = new Date();
+    const timestamp =
+      now.getFullYear() +
+      String(now.getMonth() + 1).padStart(2, '0') +
+      String(now.getDate()).padStart(2, '0') +
+      '_' +
+      String(now.getHours()).padStart(2, '0') +
+      String(now.getMinutes()).padStart(2, '0') +
+      String(now.getSeconds()).padStart(2, '0');
+
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = `シンプル割り勘_計算結果_${timestamp}.png`;
+    link.click();
+  };
+
+  const handleShare = async () => {
+    if (!hasResult) return;
+
+    const url = createShareUrl();
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    if (isMobile && navigator.share) {
+      try {
+        await navigator.share({
+          title: 'シンプル割り勘 計算結果',
+          text: `${formatCurrency(result.total)}を${result.people}人で割りました。`,
+          url,
+        });
+        setShareMsg('シェアしました！');
+      } catch {
+        setShareMsg('シェアをキャンセルしました');
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        setShareMsg('URLをコピーしました！');
+        alert('URLをコピーしました！');
+      } catch {
+        setShareMsg('コピーに失敗しました');
+      }
+    }
+
+    setTimeout(() => setShareMsg(''), 2000);
   };
 
   return (
@@ -102,7 +178,7 @@ export const SimpleWarikanPage = () => {
           </div>
         </div>
 
-        <div className="glass-card p-4 space-y-4">
+        <div ref={resultRef} className="glass-card p-4 space-y-4">
           <h2 className="text-lg font-semibold text-slate-900">計算結果</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl bg-slate-50 p-4 border border-slate-100">
@@ -140,6 +216,31 @@ export const SimpleWarikanPage = () => {
           </div>
         </div>
       </section>
+
+      <div className="flex flex-col gap-3 justify-center items-center bg-white/80 border border-slate-200 rounded-2xl p-4 shadow-sm">
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <button
+            onClick={handleDownloadImage}
+            disabled={!hasResult}
+            className="btn btn-neutral w-full text-base sm:text-lg"
+          >
+            <FontAwesomeIcon icon={faDownload} className="mr-2" />
+            画像保存
+          </button>
+          <button
+            onClick={handleShare}
+            disabled={!hasResult}
+            className="btn btn-neutral w-full text-base sm:text-lg"
+          >
+            <FontAwesomeIcon icon={faShareAlt} className="mr-2" />
+            シェア
+          </button>
+        </div>
+        {shareMsg && <div className="text-center text-emerald-700 font-semibold mt-1 text-sm">{shareMsg}</div>}
+        <p className="text-xs text-slate-500 text-center">
+          結果が表示されているときに、画像保存とURL共有ができます。
+        </p>
+      </div>
     </div>
   );
 };
