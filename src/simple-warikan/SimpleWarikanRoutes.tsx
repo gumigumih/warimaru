@@ -10,6 +10,7 @@ import {
   faShareAlt,
 } from '@fortawesome/free-solid-svg-icons';
 import { BrandHeader } from '../components/templates/BrandHeader';
+import { AmountInput } from '../components/atoms/AmountInput';
 import { captureElementToImage } from '../infrastructure/html2canvas';
 
 type SimpleWarikanData = {
@@ -123,16 +124,13 @@ const SimpleWarikanInputPage = () => {
       <section className="glass-card p-4 space-y-4">
         <label className="flex flex-col gap-2 text-lg font-semibold text-slate-900 w-full">
           合計金額
-          <div className="flex h-12 items-center rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm focus-within:border-blue-500 focus-within:ring-blue-500">
-            <span className="mr-2 text-sm font-bold text-slate-500">¥</span>
-            <input
-              value={totalAmount}
-              onChange={event => setTotalAmount(event.target.value)}
-              inputMode="numeric"
-              placeholder="12000"
-              className="w-full bg-transparent text-lg text-slate-900 outline-none placeholder:text-slate-400"
-            />
-          </div>
+          <AmountInput
+            value={totalAmount}
+            onChange={setTotalAmount}
+            title="合計金額を入力"
+            placeholder="12000"
+            className="w-full h-12 rounded-xl bg-white px-3 py-2.5 border border-slate-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400"
+          />
         </label>
 
         <label className="flex flex-col gap-2 text-lg font-semibold text-slate-900 w-full">

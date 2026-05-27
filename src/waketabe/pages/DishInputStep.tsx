@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faPlus, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import type { Participant, Dish } from '../domain/entities';
+import { AmountInput } from '../../components/atoms/AmountInput';
 
 export const DishInputStep = ({ participants, onComplete, onBack, initialDishes = [] }: { 
   participants: Participant[]; 
@@ -89,10 +90,10 @@ export const DishInputStep = ({ participants, onComplete, onBack, initialDishes 
                   />
                 </label>
                 <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
-                  <input
-                    type="text"
+                  <AmountInput
                     value={dish.price}
-                    onChange={(e) => handleUpdateDish(dish.id, 'price', e.target.value)}
+                    onChange={(value) => handleUpdateDish(dish.id, 'price', value)}
+                    title={dish.name ? `${dish.name}の金額を入力` : '料理の金額を入力'}
                     className="h-12 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm focus:border-amber-400 focus:ring-amber-200"
                     placeholder="3000"
                   />
