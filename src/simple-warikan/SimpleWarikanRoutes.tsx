@@ -255,40 +255,56 @@ const SimpleWarikanResultPage = () => {
         description="計算結果を確認して、画像保存またはURL共有ができます。"
       />
 
-      <div ref={resultRef} className="glass-card p-4 space-y-4">
-        <h2 className="text-lg font-semibold text-slate-900">計算結果</h2>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-xl bg-slate-50 p-4 border border-slate-100">
-            <p className="text-xs font-bold text-slate-500">1人あたり</p>
-            <p className="mt-2 text-3xl font-extrabold text-slate-950">
-              {formatCurrency(result.baseAmount)}
-            </p>
+      <div ref={resultRef} className="glass-card p-0 overflow-hidden shadow-2xl">
+        <div className="bg-gradient-to-r from-slate-700 via-slate-600 to-slate-500 text-white px-5 py-4 sm:px-6 sm:py-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-[0.08em] opacity-90">simple split report</p>
+            <h2 className="text-xl sm:text-2xl font-bold leading-tight">計算結果を共有しましょう</h2>
+            <p className="text-sm opacity-90">1人あたりと余りをすぐ確認できます</p>
           </div>
-          <div className="rounded-xl bg-slate-50 p-4 border border-slate-100">
-            <p className="text-xs font-bold text-slate-500">余り</p>
-            <p className="mt-2 text-2xl font-extrabold text-slate-950">
-              {formatCurrency(result.extraPeople)}
-            </p>
+          <div className="bg-white/15 backdrop-blur rounded-xl px-4 py-3 text-right min-w-[180px]">
+            <p className="text-xs opacity-80">合計</p>
+            <p className="text-2xl font-semibold leading-tight">{formatCurrency(result.total)}</p>
+            <p className="text-xs opacity-80">{result.people}人で割る</p>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white/80 p-4">
-          <div className="space-y-2 text-sm text-slate-700">
-            <p>
-              合計 {formatCurrency(result.total)} を {result.people}人で割ります。
-            </p>
-            {result.extraPeople > 0 ? (
-              <p>
-                {result.extraPeople}人が {formatCurrency(result.baseAmount + 1)}、残り
-                {result.people - result.extraPeople}人が {formatCurrency(result.baseAmount)} 払うとぴったりです。
+        <div className="p-4 sm:p-6 space-y-6 bg-gradient-to-b from-white via-white to-slate-50">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="text-xs text-slate-500 mb-1">1人あたり</p>
+              <p className="text-2xl font-semibold text-slate-900">
+                {formatCurrency(result.baseAmount)}
               </p>
-            ) : (
-              <p>全員が同じ金額でぴったり割れます。</p>
-            )}
+              <p className="text-xs text-slate-500 mt-1">均等割りの目安</p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="text-xs text-slate-500 mb-1">余り</p>
+              <p className="text-2xl font-semibold text-slate-900">
+                {formatCurrency(result.extraPeople)}
+              </p>
+              <p className="text-xs text-slate-500 mt-1">割り切れない金額</p>
+            </div>
           </div>
-        </div>
 
-        <DownloadBanner title="シンプル割り勘 計算結果" url="https://warimaru.meggumi.com" />
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="space-y-2 text-sm text-slate-700">
+              <p>
+                合計 {formatCurrency(result.total)} を {result.people}人で割ります。
+              </p>
+              {result.extraPeople > 0 ? (
+                <p>
+                  {result.extraPeople}人が {formatCurrency(result.baseAmount + 1)}、残り
+                  {result.people - result.extraPeople}人が {formatCurrency(result.baseAmount)} 払うとぴったりです。
+                </p>
+              ) : (
+                <p>全員が同じ金額でぴったり割れます。</p>
+              )}
+            </div>
+          </div>
+
+          <DownloadBanner title="シンプル割り勘 計算結果" url="https://warimaru.meggumi.com" />
+        </div>
       </div>
 
       <div className="flex flex-col gap-3 justify-center items-center bg-white/80 border border-slate-200 rounded-2xl p-4 shadow-sm">
