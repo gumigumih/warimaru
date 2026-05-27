@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faCalculator, faRotateLeft } from '@fortawesome/free-solid-svg-icons';
+import { faCalculator, faRotateLeft } from '@fortawesome/free-solid-svg-icons';
 import { BrandHeader } from '../components/templates/BrandHeader';
 
 const formatCurrency = (amount: number) =>
@@ -17,7 +16,6 @@ const parseNumber = (value: string) => {
 };
 
 export const SimpleWarikanPage = () => {
-  const navigate = useNavigate();
   const [totalAmount, setTotalAmount] = useState('');
   const [peopleCount, setPeopleCount] = useState('2');
 
@@ -51,15 +49,6 @@ export const SimpleWarikanPage = () => {
 
   return (
     <div className="space-y-5 text-slate-950">
-      <button
-        type="button"
-        onClick={() => navigate('/')}
-        className="btn btn-neutral px-4 py-2 text-sm shadow-sm"
-      >
-        <FontAwesomeIcon icon={faArrowLeft} className="h-4 w-4" />
-        ツール一覧へ
-      </button>
-
       <BrandHeader
         icon={faCalculator}
         tag="simple"
