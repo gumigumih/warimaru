@@ -122,12 +122,25 @@ export const Landing = () => {
     },
   ];
 
-  const calculationPolicies = [
-    'まず総額を項目に分ける',
-    '項目ごとに払う人と対象者を決める',
-    '対象者ごとの係数で負担額を出す',
-    '立替額との差分から精算ルートを作る',
-    '最後に端数処理を選ぶ',
+  const toolPolicies = [
+    {
+      title: 'シンプルに割る',
+      input: '合計金額と人数',
+      method: '合計金額を人数で等分し、割り切れない分は余りとして表示します。',
+      result: '1人あたりの目安と余り',
+    },
+    {
+      title: '総額を等分して割る',
+      input: '参加人数と立替者ごとの支払い合計',
+      method: '全員の負担額を等分し、立替額との差分から受け渡しをまとめます。',
+      result: '誰が誰にいくら払うか',
+    },
+    {
+      title: '食べた分だけで割る',
+      input: '料理ごとの金額と食べた人',
+      method: '料理ごとに対象者だけで等分し、各人の負担額を積み上げます。',
+      result: '人ごとの食べた分の金額',
+    },
   ];
 
   return (
@@ -301,20 +314,31 @@ export const Landing = () => {
       </section>
 
       <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-xl">
-            <h2 className="text-lg font-bold text-slate-950">計算の基本方針</h2>
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-bold text-slate-950">ツールごとの計算方針</h2>
             <p className="mt-2 text-sm leading-relaxed text-slate-600">
-              複雑な割り勘でも、内部では「誰が払ったか」「誰が対象か」「どの比率で負担するか」に分けて扱います。最後に送金回数が少なくなるように精算ルートをまとめます。
+              画面の流れや共有方法は揃えつつ、何を入力してどう割るかはツールごとに分けます。
             </p>
           </div>
-          <div className="grid w-full gap-2 lg:max-w-md">
-            {calculationPolicies.map((policy, index) => (
-              <div key={policy} className="flex items-center gap-3 rounded-md bg-slate-50 px-3 py-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white text-xs font-bold text-slate-700 ring-1 ring-slate-200">
-                  {index + 1}
-                </span>
-                <span className="text-sm font-semibold text-slate-700">{policy}</span>
+          <div className="grid gap-3 lg:grid-cols-3">
+            {toolPolicies.map(policy => (
+              <div key={policy.title} className="rounded-md bg-slate-50 p-4 ring-1 ring-slate-100">
+                <h3 className="font-bold text-slate-950">{policy.title}</h3>
+                <div className="mt-3 space-y-2 text-sm leading-relaxed text-slate-600">
+                  <p>
+                    <span className="font-bold text-slate-700">入力: </span>
+                    {policy.input}
+                  </p>
+                  <p>
+                    <span className="font-bold text-slate-700">計算: </span>
+                    {policy.method}
+                  </p>
+                  <p>
+                    <span className="font-bold text-slate-700">結果: </span>
+                    {policy.result}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
