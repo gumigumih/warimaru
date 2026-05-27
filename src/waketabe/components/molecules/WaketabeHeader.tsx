@@ -8,7 +8,7 @@ export const MealSplitHeader = () => {
       tag="食事精算"
       title="食べた分だけ、気持ちよく割る"
       subtitle="料理ごとに食べた人を選ぶだけで自動計算"
-      accent="bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400"
+      accent="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500"
     />
   );
 };

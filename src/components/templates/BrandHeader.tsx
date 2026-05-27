@@ -19,7 +19,7 @@ export const BrandHeader = ({ icon, tag, title, subtitle, accent }: BrandHeaderP
       <button
         type="button"
         onClick={() => navigate('/')}
-        className="btn btn-neutral px-4 py-2 text-sm shadow-sm"
+        className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 transition hover:text-slate-950"
       >
         <FontAwesomeIcon icon={faArrowLeft} className="h-4 w-4" />
         ツール一覧へ
