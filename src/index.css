@@ -91,10 +91,10 @@ body {
 }
 
 .btn-waketabe {
-  background: linear-gradient(135deg, #f97316, #fbbf24);
+  background: linear-gradient(135deg, #f97316, #fb923c, #fbbf24);
   color: #fff;
   border: none;
-  box-shadow: 0 12px 30px rgba(249, 115, 22, 0.3);
+  box-shadow: 0 12px 30px rgba(249, 115, 22, 0.28);
 }
 
 .btn-waketabe:hover {

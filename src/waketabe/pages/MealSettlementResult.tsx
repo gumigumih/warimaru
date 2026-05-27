@@ -114,7 +114,7 @@ export const MealSettlementResult = ({ participants, dishes, onBack }: MealSettl
       </div>
 
       <div ref={resultRef} className="glass-card p-0 overflow-hidden shadow-2xl">
-        <div className="bg-gradient-to-r from-orange-400 via-amber-400 to-amber-500 text-white px-5 py-4 sm:px-6 sm:py-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400 text-white px-5 py-4 sm:px-6 sm:py-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <p className="text-xs uppercase tracking-[0.08em] opacity-90">waketabe report</p>
             <h2 className="text-xl sm:text-2xl font-bold leading-tight">計算結果を共有しましょう</h2>

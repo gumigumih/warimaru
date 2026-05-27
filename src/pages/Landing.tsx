@@ -49,7 +49,7 @@ export const Landing = () => {
       cta: '計算する',
       to: '/waketabe/participants',
       badge: '公開中',
-      accent: 'from-orange-400 via-amber-400 to-amber-500',
+      accent: 'from-orange-500 via-orange-400 to-amber-400',
       icon: faUtensils,
     },
   ];
