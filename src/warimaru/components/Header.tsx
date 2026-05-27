@@ -1,11 +1,10 @@
-import warimaruSvg from "../../assets/warimaru-logo-white.svg";
+import { faCalculator } from "@fortawesome/free-solid-svg-icons";
 import { BrandHeader } from "../../components/templates/BrandHeader";
 
 export const Header = () => {
   return (
     <BrandHeader
-      logoSrc={warimaruSvg}
-      alt="わりまる"
+      icon={faCalculator}
       tag="warimaru"
       title="総額割り勘をすぐに"
       subtitle="人数はそのまま、計算結果は画像でシェア"
