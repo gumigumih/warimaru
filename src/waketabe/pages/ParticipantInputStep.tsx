@@ -9,6 +9,7 @@ export const ParticipantInputStep = ({ onComplete, initialParticipants = [] }: {
   initialParticipants?: Participant[];
 }) => {
   const [participants, setParticipants] = useState<Participant[]>(initialParticipants);
+  const validParticipants = participants.filter(participant => participant.name.trim() !== '');
 
   const handleAdd = () => {
     setParticipants([
@@ -73,8 +74,8 @@ export const ParticipantInputStep = ({ onComplete, initialParticipants = [] }: {
       {onComplete && (
         <button
           className="btn btn-meal-split w-full text-lg"
-          onClick={() => onComplete(participants)}
-          disabled={participants.length === 0}
+          onClick={() => onComplete(validParticipants)}
+          disabled={validParticipants.length === 0}
         >
           次へ
         </button>
