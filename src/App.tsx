@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { setPeople, setNonPayingParticipants, setTotalParticipants } from './warimaru/store/peopleSlice';
 import { Landing } from './pages/Landing';
+import { SimpleWarikanPage } from './simple-warikan/SimpleWarikanPage';
 import { WaketabeRoutes } from './waketabe/Routes';
 import { WarimaruRoutes } from './warimaru/Routes';
 
@@ -12,6 +13,7 @@ const AppRoutes = () => (
   <Background>
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/simple" element={<SimpleWarikanPage />} />
       <Route path="/warimaru/*" element={<WarimaruRoutes />} />
       {/* 旧リンク互換 */}
       <Route path="/result" element={<Navigate to="/warimaru/result" replace />} />

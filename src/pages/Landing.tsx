@@ -20,6 +20,17 @@ export const Landing = () => {
 
   const calculators = [
     {
+      key: 'simple',
+      title: 'シンプルに割る',
+      description: '合計金額と人数だけで、1人あたりの金額と余りをすぐ確認します。',
+      bestFor: '立替者の精算までは不要で、その場の目安だけ知りたいとき',
+      cta: '計算する',
+      to: '/simple',
+      badge: '公開中',
+      accent: 'from-slate-700 via-slate-600 to-slate-500',
+      icon: faCalculator,
+    },
+    {
       key: 'warimaru',
       title: '総額を等分して割る',
       description: '飲み会、イベント、ちょっとした立替を、総額と人数からすばやく精算します。',
@@ -156,7 +167,7 @@ export const Landing = () => {
         </div>
         <div className="grid grid-cols-3 overflow-hidden rounded-lg border border-slate-200 bg-white text-center shadow-sm">
           <div className="border-r border-slate-200 px-3 py-4">
-            <p className="text-2xl font-extrabold text-slate-950">2</p>
+            <p className="text-2xl font-extrabold text-slate-950">3</p>
             <p className="mt-1 text-xs font-semibold text-slate-500">公開中</p>
           </div>
           <div className="border-r border-slate-200 px-3 py-4">
