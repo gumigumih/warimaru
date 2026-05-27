@@ -11,6 +11,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { BrandHeader } from '../components/templates/BrandHeader';
 import { AmountInput } from '../components/atoms/AmountInput';
+import { StepIntro } from '../components/templates/StepIntro';
 import { captureElementToImage } from '../infrastructure/html2canvas';
 
 type SimpleWarikanData = {
@@ -113,13 +114,12 @@ const SimpleWarikanInputPage = () => {
         </button>
       </div>
 
-      <section className="glass-card p-4 bg-white/90 space-y-3">
-        <p className="text-sm text-slate-500">フェーズ 1 / 2</p>
-        <h2 className="text-xl font-semibold text-slate-900">入力</h2>
-        <p className="text-base leading-relaxed text-slate-700">
-          合計金額と人数を入力してください。結果画面で画像保存と共有ができます。
-        </p>
-      </section>
+      <StepIntro
+        currentStep={1}
+        totalSteps={2}
+        title="入力"
+        description="合計金額と人数を入力してください。結果画面で画像保存と共有ができます。"
+      />
 
       <section className="glass-card p-4 space-y-4">
         <label className="flex flex-col gap-2 text-lg font-semibold text-slate-900 w-full">
@@ -244,13 +244,12 @@ const SimpleWarikanResultPage = () => {
         </button>
       </div>
 
-      <section className="glass-card p-4 bg-white/90 space-y-3">
-        <p className="text-sm text-slate-500">フェーズ 2 / 2</p>
-        <h2 className="text-xl font-semibold text-slate-900">結果・共有</h2>
-        <p className="text-base leading-relaxed text-slate-700">
-          計算結果を確認して、画像保存またはURL共有ができます。
-        </p>
-      </section>
+      <StepIntro
+        currentStep={2}
+        totalSteps={2}
+        title="結果・共有"
+        description="計算結果を確認して、画像保存またはURL共有ができます。"
+      />
 
       <div ref={resultRef} className="glass-card p-4 space-y-4">
         <h2 className="text-lg font-semibold text-slate-900">計算結果</h2>

@@ -5,6 +5,7 @@ import { faUserPlus, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import type { RootState, AppDispatch } from '../store/store';
 import { addPerson, deletePerson, setDetailMode } from '../store/peopleSlice';
 import { PayerInputCard } from '../components/molecules/PayerInputCard';
+import { StepIntro } from '../../components/templates/StepIntro';
 
 interface PaymentInputStepProps {
   onShowResult: (shareData: { people: { name: string; payments: { amount: number }[] }[]; totalParticipants: number; nonPayingParticipants: number }) => void;
@@ -53,16 +54,12 @@ export const PaymentInputStep = ({ onShowResult, onBack }: PaymentInputStepProps
         </button>
       </div>
 
-      <div className="glass-card p-4 bg-white/90 space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-sm text-slate-500">フェーズ 2 / 2</p>
-            <h2 className="text-xl font-semibold text-slate-900 mt-1">支払いを入力</h2>
-            <p className="text-base text-slate-700 mt-1">
-              立て替えた人ごとの合計金額を入力してください。人数を追加し終わったら計算結果へ進めます。
-            </p>
-          </div>
-        </div>
+      <StepIntro
+        currentStep={2}
+        totalSteps={2}
+        title="支払いを入力"
+        description="立て替えた人ごとの合計金額を入力してください。人数を追加し終わったら計算結果へ進めます。"
+      >
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
             <p className="text-xs text-slate-500">総人数</p>
@@ -77,7 +74,7 @@ export const PaymentInputStep = ({ onShowResult, onBack }: PaymentInputStepProps
             <p className="text-lg font-semibold text-slate-800">{nonPayingParticipants}人</p>
           </div>
         </div>
-      </div>
+      </StepIntro>
 
       <div className="space-y-4 glass-card p-4">
         <div className="flex flex-col gap-2 text-lg font-semibold text-slate-900 w-full">

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import type { Participant } from '../domain/entities';
+import { StepIntro } from '../../components/templates/StepIntro';
 
 export const ParticipantInputStep = ({ onComplete, initialParticipants = [] }: { 
   onComplete?: (participants: Participant[]) => void;
@@ -26,13 +27,12 @@ export const ParticipantInputStep = ({ onComplete, initialParticipants = [] }: {
 
   return (
     <div className="space-y-4">
-      <div className="glass-card p-4 bg-white/90 space-y-2">
-        <p className="text-sm text-slate-500">フェーズ 1 / 2</p>
-        <h2 className="text-xl font-semibold text-slate-900">参加者を入力</h2>
-        <p className="text-sm text-slate-700">
-          食べた人を登録してください。次の画面で料理ごとに食べた人を選ぶと、自動で計算されます。
-        </p>
-      </div>
+      <StepIntro
+        currentStep={1}
+        totalSteps={2}
+        title="参加者を入力"
+        description="食べた人を登録してください。次の画面で料理ごとに食べた人を選ぶと、自動で計算されます。"
+      />
 
       <div className="glass-card p-4 sm:p-5 bg-white/95 border border-slate-100 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">

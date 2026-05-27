@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState, AppDispatch } from '../store/store';
 import { setTotalParticipants } from '../store/peopleSlice';
+import { StepIntro } from '../../components/templates/StepIntro';
 
 interface ParticipantCountStepProps {
   onNext: () => void;
@@ -25,17 +26,12 @@ export const ParticipantCountStep = ({ onNext }: ParticipantCountStepProps) => {
 
   return (
     <div className="space-y-5">
-      <div className="glass-card p-4 bg-white/90 space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-sm text-slate-500">フェーズ 1 / 2</p>
-            <h2 className="text-xl font-semibold text-slate-900 mt-1">総人数を入力</h2>
-            <p className="text-base text-slate-700 mt-1">
-              参加者全員の人数を入力してください。支払い人数との差分から除外する人数を自動で計算します。
-            </p>
-          </div>
-        </div>
-      </div>
+      <StepIntro
+        currentStep={1}
+        totalSteps={2}
+        title="総人数を入力"
+        description="参加者全員の人数を入力してください。支払い人数との差分から除外する人数を自動で計算します。"
+      />
 
       <div className="glass-card p-4 space-y-4">
         <label className="flex flex-col gap-2 text-lg font-semibold text-slate-900 w-full">

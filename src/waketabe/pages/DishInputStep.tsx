@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faPlus, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import type { Participant, Dish } from '../domain/entities';
 import { AmountInput } from '../../components/atoms/AmountInput';
+import { StepIntro } from '../../components/templates/StepIntro';
 
 export const DishInputStep = ({ participants, onComplete, onBack, initialDishes = [] }: { 
   participants: Participant[]; 
@@ -61,17 +62,12 @@ export const DishInputStep = ({ participants, onComplete, onBack, initialDishes 
         </button>
       </div>
 
-      <div className="glass-card p-4 bg-white/90 space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-sm text-slate-500">フェーズ 2 / 2</p>
-            <h2 className="text-xl font-semibold text-slate-900 mt-1">料理を入力</h2>
-            <p className="text-base text-slate-700 mt-1">
-              料理名・金額・食べた人を順番に埋めてください。
-            </p>
-          </div>
-        </div>
-      </div>
+      <StepIntro
+        currentStep={2}
+        totalSteps={2}
+        title="料理を入力"
+        description="料理名・金額・食べた人を順番に埋めてください。"
+      />
 
       <div className="glass-card p-4 sm:p-5 bg-white/95 border border-slate-100 space-y-4">
         <div className="text-lg font-semibold text-slate-900">料理の行を追加して入力してください</div>
