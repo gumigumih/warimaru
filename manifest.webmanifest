@@ -2,20 +2,20 @@
   "name": "わりまる",
   "short_name": "わりまる",
   "description": "飲み会や旅行の支払いを簡単に計算できるアプリ",
-  "start_url": "/warimaru/",
-  "scope": "/warimaru/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0ea5e9",
   "theme_color": "#0ea5e9",
   "icons": [
     {
-      "src": "/warimaru/icon-192x192.png",
+      "src": "/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/warimaru/icon-512x512.png",
+      "src": "/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
