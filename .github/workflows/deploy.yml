@@ -163,7 +163,7 @@ jobs:
           echo "$CHANGES" >> release_notes.md
           echo "" >> release_notes.md
           echo "## 🌐 アクセス" >> release_notes.md
-          echo "[わりまる v$VERSION](https://meggumi.com/warimaru/)" >> release_notes.md
+          echo "[わりまる v$VERSION](https://warimaru.meggumi.com/)" >> release_notes.md
           echo "" >> release_notes.md
           echo "## 📋 フィードバック" >> release_notes.md
           echo "[GitHub Issues](https://github.com/gumigumih/warimaru/issues) でフィードバックをお待ちしています。" >> release_notes.md

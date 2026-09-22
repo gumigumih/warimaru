@@ -18,5 +18,5 @@ export default defineConfig({
       interval: 100       // ポーリング間隔（ミリ秒）
     },
   },
-  base: '/warimaru/',
+  base: '/',
 })
