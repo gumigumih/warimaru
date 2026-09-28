@@ -11,6 +11,8 @@ permissions:
 jobs:
   version-check:
     runs-on: ubuntu-latest
+    outputs:
+      should_create_tag: ${{ steps.version-check.outputs.should_create_tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,7 +37,7 @@ jobs:
         id: version-check
         run: |
           CURRENT_VERSION="${{ steps.current-version.outputs.current_version }}"
-          LATEST_TAG="${{ steps.current-version.outputs.latest_tag }}"
+          LATEST_TAG="${{ steps.latest-tag.outputs.latest_tag }}"
 
           # タグからvプレフィックスを除去
           LATEST_VERSION=${LATEST_TAG#v}
