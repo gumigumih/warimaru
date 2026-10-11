@@ -1,14 +1,14 @@
-import { faUtensils } from "@fortawesome/free-solid-svg-icons";
+import { faRoute } from "@fortawesome/free-solid-svg-icons";
 import { BrandHeader } from "../../../components/templates/BrandHeader";
 
 export const MealSplitHeader = () => {
   return (
     <BrandHeader
-      icon={faUtensils}
-      tag="食事精算"
-      title="食べた分だけ、気持ちよく割る"
-      subtitle="料理ごとに食べた人を選ぶだけで自動計算"
-      accent="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500"
+    icon={faRoute}
+    tag="項目別精算"
+    title="食べた料理・使った項目だけで払う"
+    subtitle="料理・宿代・交通費などを、対象者ごとに自動計算"
+    accent="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500"
     />
   );
 };

@@ -1,30 +1,11 @@
 import type { CalculationResult, Transfer } from '../entities';
+import { settleBalances } from '../../../domain/split';
 
 export const calculateTransfers = (calculationResult: CalculationResult): Transfer[] => {
   const { participants } = calculationResult;
-  const debtors = participants.filter(p => p.netAmount < 0).sort((a, b) => a.netAmount - b.netAmount);
-  const creditors = participants.filter(p => p.netAmount > 0).sort((a, b) => b.netAmount - a.netAmount);
-
-  const transfers: Transfer[] = [];
-  let debtorIndex = 0;
-  let creditorIndex = 0;
-
-  while (debtorIndex < debtors.length && creditorIndex < creditors.length) {
-    const debtor = debtors[debtorIndex];
-    const creditor = creditors[creditorIndex];
-    const transferAmount = Math.min(Math.abs(debtor.netAmount), creditor.netAmount);
-    if (transferAmount > 0) {
-      transfers.push({
-        from: debtor.participantName,
-        to: creditor.participantName,
-        amount: transferAmount
-      });
-    }
-    debtor.netAmount += transferAmount;
-    creditor.netAmount -= transferAmount;
-    if (Math.abs(debtor.netAmount) < 0.01) debtorIndex++;
-    if (creditor.netAmount < 0.01) creditorIndex++;
-  }
-  return transfers;
+  const paid = participants.reduce((sum, participant) => sum + participant.totalPaid, 0);
+  if (paid !== calculationResult.totalAmount) return [];
+  const names = new Map(participants.map(participant => [participant.participantId, participant.participantName]));
+  return settleBalances(participants.map(participant => ({ id: participant.participantId, balance: participant.netAmount })))
+    .map(transfer => ({ ...transfer, from: names.get(transfer.from) ?? '', to: names.get(transfer.to) ?? '' }));
 };
-

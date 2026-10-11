@@ -3,8 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import type { RootState, AppDispatch } from '../store/store';
-import { setTotalParticipants } from '../store/peopleSlice';
+import { setTotalParticipants, setMembers, setLegacyEqual } from '../store/peopleSlice';
 import { StepIntro } from '../../components/templates/StepIntro';
+import { equalMembers } from '../domain/usecases/settlement';
 
 interface ParticipantCountStepProps {
   onNext: () => void;
@@ -14,17 +15,25 @@ interface ParticipantCountStepProps {
 
 export const ParticipantCountStep = ({ onNext, onBack, onClear }: ParticipantCountStepProps) => {
   const dispatch = useDispatch<AppDispatch>();
-  const peopleCount = useSelector((state: RootState) => state.people.people.length);
+  const people = useSelector((state: RootState) => state.people.people);
+  const peopleCount = people.length;
   const totalParticipants = useSelector((state: RootState) => state.people.totalParticipants);
   const [inputValue, setInputValue] = useState(totalParticipants);
+  const storedMembers = useSelector((state: RootState) => state.people.members);
+  const members = equalMembers(people, Math.max(peopleCount, Math.min(300, Math.floor(inputValue) || peopleCount)), storedMembers);
+  const valid = Number.isInteger(inputValue) && inputValue >= peopleCount && inputValue > 0 && inputValue <= 300 &&
+    members.every(member => Number.isFinite(member.burdenRate) && member.burdenRate >= 0 && member.burdenRate <= 100) &&
+    members.some(member => !member.displayOnly && member.burdenRate > 0);
 
   useEffect(() => {
     setInputValue(Math.max(peopleCount, totalParticipants));
   }, [peopleCount, totalParticipants]);
 
   const handleNext = () => {
-    const nextValue = Math.max(peopleCount, Math.min(300, Number(inputValue) || 0));
-    dispatch(setTotalParticipants(nextValue));
+    if (!valid) return;
+    dispatch(setTotalParticipants(inputValue));
+    dispatch(setMembers(members));
+    dispatch(setLegacyEqual(false));
     onNext();
   };
 
@@ -85,11 +94,15 @@ export const ParticipantCountStep = ({ onNext, onBack, onClear }: ParticipantCou
             <span className="text-sm text-slate-600 whitespace-nowrap">人</span>
           </div>
         </label>
+        <p className="text-xs text-slate-500">負担率や端数は、結果を見ながら調整できます。</p>
+        {!valid && <p role="alert" className="text-sm text-red-700">人数は立替者以上の整数で300人まで。負担する人を1人以上残してください。</p>}
+        {!members.some(member => !member.displayOnly && member.burdenRate > 0) && <button type="button" className="btn btn-equal-split w-full" onClick={() => dispatch(setMembers(members.map(member => ({ ...member, burdenRate: 1, displayOnly: false }))))}>負担する人がいないため、全員を100%に戻す</button>}
       </div>
 
       <div className="sticky bottom-4 z-10">
         <button
           onClick={handleNext}
+          disabled={!valid}
           className="btn btn-equal-split w-full text-lg shadow-lg"
         >
           結果を見る

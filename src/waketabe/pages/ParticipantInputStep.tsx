@@ -4,10 +4,13 @@ import { faDice, faUserPlus, faTrashAlt } from '@fortawesome/free-solid-svg-icon
 import type { Participant } from '../domain/entities';
 import { StepIntro } from '../../components/templates/StepIntro';
 import { getRandomName } from '../../utils/randomName';
+import { ParticipantAdjustment } from '../../components/molecules/ParticipantAdjustment';
 
 const createBlankParticipant = (): Participant => ({
   id: crypto.randomUUID(),
   name: '',
+  displayOnly: false,
+  burdenRate: 1,
 });
 
 export const ParticipantInputStep = ({ onComplete, initialParticipants = [], onClear }: { 
@@ -19,6 +22,8 @@ export const ParticipantInputStep = ({ onComplete, initialParticipants = [], onC
     initialParticipants.length > 0 ? initialParticipants : [createBlankParticipant()]
   );
   const validParticipants = participants.filter(participant => participant.name.trim() !== '');
+  const needsRecovery = validParticipants.length > 0 && (!validParticipants.some(p => !p.displayOnly && p.burdenRate > 0) ||
+    validParticipants.some(p => !Number.isFinite(p.burdenRate) || p.burdenRate < 0 || p.burdenRate > 100));
 
   const handleAdd = () => {
     setParticipants([
@@ -48,7 +53,7 @@ export const ParticipantInputStep = ({ onComplete, initialParticipants = [], onC
         currentStep={1}
         totalSteps={3}
         title="誰で割る？"
-        description="食べた人を登録します。次の画面で、料理ごとに誰が食べたかを選びます。"
+        description="参加者の名前を登録します。負担率や表示のみの設定は、結果を見ながら調整できます。"
         accentClassName="bg-gradient-to-b from-orange-500 via-amber-500 to-yellow-500"
         endAction={
           <button
@@ -74,12 +79,14 @@ export const ParticipantInputStep = ({ onComplete, initialParticipants = [], onC
 
         <div className="space-y-2">
           {participants.map(p => (
-            <div key={p.id} className="flex items-center gap-2">
+            <div key={p.id} className="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div className="flex items-center gap-2">
               <input
                 type="text"
                 value={p.name}
                 onChange={(e) => handleUpdateName(p.id, e.target.value)}
-                className="h-12 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm focus:border-amber-400 focus:ring-amber-200"
+                className="h-12 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm focus:border-amber-400 focus:ring-amber-200"
+                aria-label="参加者名"
                 placeholder="名前"
               />
               <button
@@ -98,6 +105,9 @@ export const ParticipantInputStep = ({ onComplete, initialParticipants = [], onC
               >
                 <FontAwesomeIcon icon={faTrashAlt} />
               </button>
+              </div>
+              {(p.displayOnly || p.burdenRate !== 1) && <p className="text-xs text-slate-500">{p.displayOnly ? '表示のみ' : `負担率 ${p.burdenRate * 100}%`}（結果画面で調整）</p>}
+              {needsRecovery && <ParticipantAdjustment value={p} onChange={changes => setParticipants(participants.map(item => item.id === p.id ? { ...item, ...changes } : item))} />}
             </div>
           ))}
         </div>
@@ -113,11 +123,14 @@ export const ParticipantInputStep = ({ onComplete, initialParticipants = [], onC
         <button
           className="btn btn-meal-split w-full text-lg"
           onClick={() => onComplete(validParticipants)}
-          disabled={validParticipants.length === 0}
+          disabled={validParticipants.length === 0 || validParticipants.length > 300 ||
+            validParticipants.some(p => !Number.isFinite(p.burdenRate) || p.burdenRate < 0 || p.burdenRate > 100) ||
+            !validParticipants.some(p => !p.displayOnly && p.burdenRate > 0)}
         >
           次へ
         </button>
       )}
+      {needsRecovery && <p role="alert" className="text-sm text-red-700">負担する人がいなくなりました。上の設定で「表示のみ」を外し、負担率を0より大きくしてください。</p>}
     </div>
   );
 };

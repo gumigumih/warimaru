@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus } from '@fortawesome/free-solid-svg-icons';
@@ -16,6 +16,16 @@ interface PaymentInputStepProps {
 export const PaymentInputStep = ({ onNext, onClear }: PaymentInputStepProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const people = useSelector((state: RootState) => state.people.people);
+  const [error, setError] = useState('');
+  const handleNext = () => {
+    const total = people.reduce((sum, person) => sum + person.payments.reduce((amount, payment) => amount + payment.amount, 0), 0);
+    if (people.length === 0 || people.length > 300 || people.some(person => !person.name.trim() || person.payments.some(payment => !Number.isSafeInteger(payment.amount) || payment.amount < 0)) || !Number.isSafeInteger(total) || total <= 0) {
+      setError('立替者の名前と0以上の整数の金額を入力してください。合計は1円以上としてください。');
+      return;
+    }
+    setError('');
+    onNext();
+  };
 
   // シンプル入力のみ（各人の合計だけ）を使う
   useEffect(() => {
@@ -87,8 +97,9 @@ export const PaymentInputStep = ({ onNext, onClear }: PaymentInputStepProps) => 
       </div>
 
       <div className="sticky bottom-4 z-10">
+        {error && <p role="alert" className="mb-2 text-sm text-red-700">{error}</p>}
         <button
-          onClick={onNext}
+          onClick={handleNext}
           className="btn btn-equal-split w-full text-lg shadow-lg"
         >
           次へ

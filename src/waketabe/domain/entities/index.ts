@@ -4,3 +4,4 @@ export * from './DishContribution';
 export * from './ParticipantPayment';
 export * from './CalculationResult';
 export * from './Transfer';
+export * from './SplitOptions';

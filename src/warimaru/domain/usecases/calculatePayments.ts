@@ -1,4 +1,5 @@
 import type { PersonInterface } from '../entities/Person';
+import { settleBalances } from '../../../domain/split';
 
 export function calculateTotalAmount(people: PersonInterface[]): number {
   return people.reduce(
@@ -59,9 +60,8 @@ export function calculateTransfers(
   people: PersonInterface[],
   colors: { text: readonly string[] }
 ): Transfer[] {
-  const transfers: Transfer[] = [];
-
   const payingBalances = paymentStatus.map((status) => ({
+    id: status.person.id,
     name: status.person.name,
     balance: status.difference,
     textColor: status.textColor,
@@ -70,6 +70,7 @@ export function calculateTransfers(
   const nonPayingBalances = [];
   for (let i = 0; i < nonPayingParticipants; i++) {
     nonPayingBalances.push({
+      id: `guest-${i}`,
       name: `参加者${i + 1}`,
       balance: -perPersonAmount,
       textColor: colors.text[(people.length + i) % colors.text.length],
@@ -77,27 +78,10 @@ export function calculateTransfers(
   }
 
   const allBalances = [...payingBalances, ...nonPayingBalances];
-  const creditors = allBalances.filter((b) => b.balance > 0).sort((a, b) => b.balance - a.balance);
-  const debtors = allBalances.filter((b) => b.balance < 0).sort((a, b) => a.balance - b.balance);
-
-  for (const debtor of debtors) {
-    let remainingDebt = Math.abs(debtor.balance);
-    for (const creditor of creditors) {
-      if (remainingDebt === 0) break;
-      if (creditor.balance === 0) continue;
-      const transferAmount = Math.min(remainingDebt, creditor.balance);
-      if (transferAmount > 0) {
-        transfers.push({
-          from: debtor.name,
-          to: creditor.name,
-          amount: transferAmount,
-          textColor: creditor.textColor,
-        });
-        remainingDebt -= transferAmount;
-        creditor.balance -= transferAmount;
-      }
-    }
-  }
-  return transfers;
+  return settleBalances(allBalances).map(transfer => ({
+    from: allBalances.find(item => item.id === transfer.from)?.name ?? '',
+    to: allBalances.find(item => item.id === transfer.to)?.name ?? '',
+    amount: transfer.amount,
+    textColor: allBalances.find(item => item.id === transfer.to)?.textColor ?? '',
+  }));
 }
-

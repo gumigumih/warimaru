@@ -42,13 +42,11 @@ export const PayerInputCard = ({
         }
       }));
     } else {
-      if (amount) {
-        const numericAmount = typeof amount === 'string' ? Number(amount.replace(/,/g, '')) || 0 : amount;
-        dispatch(updateSimplePayment({
-          personId,
-          amount: numericAmount,
-        }));
-      }
+      const numericAmount = typeof amount === 'string' ? Number(amount.replace(/,/g, '')) || 0 : amount;
+      dispatch(updateSimplePayment({
+        personId,
+        amount: numericAmount,
+      }));
     }
   };
 

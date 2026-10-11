@@ -3,5 +3,5 @@ export interface Dish {
   name: string;
   price: string;
   eaters: string[];
+  paidBy: string;
 }
-

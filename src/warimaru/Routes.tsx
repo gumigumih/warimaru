@@ -5,43 +5,12 @@ import { PaymentInputStep } from './pages/PaymentInputStep';
 import { SettlementResult } from './pages/SettlementResult';
 import { Header } from './components/Header';
 import { ParticipantCountStep } from './pages/ParticipantCountStep';
-import { resetPeople, setNonPayingParticipants, setPeople, setTotalParticipants } from './store/peopleSlice';
+import { resetPeople, setMembers, setRounding, setLegacyEqual, setPeople, setTotalParticipants } from './store/peopleSlice';
 import type { AppDispatch } from './store/store';
+import { decodeEqualShareData } from './domain/usecases/shareData';
 
 type EqualSplitRoutesProps = {
   basePath: string;
-};
-
-const isEqualSplitShareData = (data: unknown): data is {
-  people: { name: string; payments: { amount: number }[] }[];
-  totalParticipants?: number;
-  nonPayingParticipants?: number;
-} => {
-  if (!data || typeof data !== 'object') return false;
-
-  const value = data as {
-    people?: unknown;
-    totalParticipants?: unknown;
-    nonPayingParticipants?: unknown;
-  };
-
-  if (!Array.isArray(value.people)) return false;
-  if (typeof value.totalParticipants !== 'number' && typeof value.nonPayingParticipants !== 'number') {
-    return false;
-  }
-
-  return value.people.every(person => {
-    if (!person || typeof person !== 'object') return false;
-    const personValue = person as { name?: unknown; payments?: unknown };
-    return (
-      typeof personValue.name === 'string' &&
-      Array.isArray(personValue.payments) &&
-      personValue.payments.every(payment => {
-        if (!payment || typeof payment !== 'object') return false;
-        return typeof (payment as { amount?: unknown }).amount === 'number';
-      })
-    );
-  });
 };
 
 const decodeEqualSplitShareData = (search: string) => {
@@ -49,8 +18,7 @@ const decodeEqualSplitShareData = (search: string) => {
   if (!encoded) return null;
 
   try {
-    const decoded = JSON.parse(decodeURIComponent(atob(encoded)));
-    return isEqualSplitShareData(decoded) ? decoded : null;
+    return decodeEqualShareData(JSON.parse(decodeURIComponent(atob(encoded.replace(/ /g, '+')))));
   } catch {
     return null;
   }
@@ -72,11 +40,10 @@ export const EqualSplitRoutes = ({ basePath }: EqualSplitRoutesProps) => {
     }
 
     dispatch(setPeople(shareData.people));
-    if (typeof shareData.totalParticipants === 'number') {
-      dispatch(setTotalParticipants(shareData.totalParticipants));
-      return;
-    }
-    dispatch(setNonPayingParticipants(shareData.nonPayingParticipants ?? 0));
+    dispatch(setTotalParticipants(shareData.totalParticipants));
+    dispatch(setMembers(shareData.members));
+    dispatch(setRounding(shareData.rounding));
+    dispatch(setLegacyEqual(shareData.legacy));
   }, [basePath, hasShareData, shareData, dispatch, navigate]);
 
   const handlePayersComplete = () => {
@@ -122,7 +89,7 @@ export const EqualSplitRoutes = ({ basePath }: EqualSplitRoutesProps) => {
         element={hasInvalidShareData ? <Navigate to={basePath} replace /> : (
           <>
             <Header />
-            <SettlementResult onBack={handleBack} onClear={handleClear} />
+            <SettlementResult key={location.search} data={shareData ?? undefined} onBack={handleBack} onClear={handleClear} />
           </>
         )}
       />
