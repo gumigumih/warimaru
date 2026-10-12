@@ -35,7 +35,7 @@ export const PrivacyModal = ({ isOpen, onClose }: PrivacyModalProps) => {
           <div>
             <h3 className="font-semibold text-gray-900 mb-2">2. データの保存について</h3>
             <p className="text-sm leading-relaxed">
-              入力されたデータは、お客様のブラウザのローカルストレージに一時的に保存されます。ページを閉じると、データは自動的に削除されます。
+              入力データはページを開いている間、ブラウザのメモリ上に保持されます。ローカルストレージには保存しません。結果画面のURLには入力値と計算条件が含まれ、再読み込みやURLの共有で復元できます。URLはブラウザの履歴や共有先に残るため、名前や金額の取り扱いにご注意ください。
             </p>
           </div>
 
@@ -61,7 +61,7 @@ export const PrivacyModal = ({ isOpen, onClose }: PrivacyModalProps) => {
           </div>
 
           <div className="text-xs text-gray-500 pt-4 border-t border-gray-200">
-            最終更新日: 2025年06月24日
+            最終更新日: 2026年10月11日
           </div>
         </div>
 
@@ -77,4 +77,4 @@ export const PrivacyModal = ({ isOpen, onClose }: PrivacyModalProps) => {
       </div>
     </div>
   );
-}; 
+};

@@ -3,7 +3,8 @@ import { Background } from './components/templates/Background';
 import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { setPeople, setNonPayingParticipants, setTotalParticipants } from './warimaru/store/peopleSlice';
+import { setPeople, setMembers, setRounding, setLegacyEqual, setTotalParticipants } from './warimaru/store/peopleSlice';
+import { decodeEqualShareData } from './warimaru/domain/usecases/shareData';
 import { Landing } from './pages/Landing';
 import { SimpleWarikanRoutes } from './simple-warikan/SimpleWarikanRoutes';
 import { MealSplitRoutes } from './waketabe/Routes';
@@ -45,18 +46,19 @@ export const App = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    // Result-route data takes precedence over the query on an old shared URL.
+    if (new URLSearchParams(window.location.hash.split('?')[1]).has('data')) return;
     const params = new URLSearchParams(window.location.search);
     const encoded = params.get('data');
     if (encoded) {
       try {
-        const decoded = JSON.parse(decodeURIComponent(atob(encoded)));
-        if (decoded.people) {
+        const decoded = decodeEqualShareData(JSON.parse(decodeURIComponent(atob(encoded.replace(/ /g, '+')))));
+        if (decoded) {
           dispatch(setPeople(decoded.people));
-        }
-        if (typeof decoded.totalParticipants === 'number') {
           dispatch(setTotalParticipants(decoded.totalParticipants));
-        } else if (typeof decoded.nonPayingParticipants === 'number') {
-          dispatch(setNonPayingParticipants(decoded.nonPayingParticipants));
+          dispatch(setMembers(decoded.members));
+          dispatch(setRounding(decoded.rounding));
+          dispatch(setLegacyEqual(decoded.legacy));
         }
       } catch {
         // データ不正時は何もしない

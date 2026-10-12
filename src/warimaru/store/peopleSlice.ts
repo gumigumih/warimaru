@@ -2,6 +2,8 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { PaymentItem } from '../domain/entities/PaymentItem';
 import type { PeopleState } from '../domain/entities/PeopleState';
+import { defaultSplitOptions } from '../../domain/split';
+import type { RoundingOptions, SplitMember } from '../../domain/split';
 
 const createInitialState = (): PeopleState => ({
   people: [
@@ -18,6 +20,9 @@ const createInitialState = (): PeopleState => ({
   isDetailMode: false,
   totalParticipants: 2,
   nonPayingParticipants: 1,
+  members: [],
+  rounding: { roundingUnit: defaultSplitOptions.roundingUnit, roundingMode: defaultSplitOptions.roundingMode, remainderRecipient: defaultSplitOptions.remainderRecipient },
+  legacy: false,
 });
 
 const initialState: PeopleState = createInitialState();
@@ -85,6 +90,15 @@ export const peopleSlice = createSlice({
     setDetailMode: (state, action: PayloadAction<boolean>) => {
       state.isDetailMode = action.payload;
     },
+    setMembers: (state, action: PayloadAction<SplitMember[]>) => {
+      state.members = action.payload;
+    },
+    setRounding: (state, action: PayloadAction<RoundingOptions>) => {
+      state.rounding = action.payload;
+    },
+    setLegacyEqual: (state, action: PayloadAction<boolean>) => {
+      state.legacy = action.payload;
+    },
     setNonPayingParticipants: (state, action: PayloadAction<number>) => {
       state.nonPayingParticipants = Math.max(0, action.payload);
       state.totalParticipants = state.people.length + state.nonPayingParticipants;
@@ -104,9 +118,9 @@ export const peopleSlice = createSlice({
         });
       }
     },
-    setPeople: (state, action: PayloadAction<{ name: string; payments: { amount: number }[] }[]>) => {
+    setPeople: (state, action: PayloadAction<{ id?: string; name: string; payments: { amount: number }[] }[]>) => {
       state.people = action.payload.map(person => ({
-        id: crypto.randomUUID(),
+        id: person.id ?? crypto.randomUUID(),
         name: person.name,
         payments: person.payments.map(pay => ({
           id: crypto.randomUUID(),
@@ -136,6 +150,9 @@ export const initializeStore = (state: PeopleState | undefined) => {
 
   return {
     ...state,
+    members: state.members ?? [],
+    rounding: state.rounding ?? { roundingUnit: 1, remainderRecipient: 'fraction' },
+    legacy: state.legacy ?? false,
     totalParticipants,
     nonPayingParticipants: Math.max(0, totalParticipants - peopleCount),
   };
@@ -149,6 +166,9 @@ export const {
   updatePayment,
   deletePayment,
   setDetailMode,
+  setMembers,
+  setRounding,
+  setLegacyEqual,
   setNonPayingParticipants,
   setTotalParticipants,
   updateSimplePayment,

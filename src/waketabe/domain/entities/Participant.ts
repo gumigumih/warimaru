@@ -1,5 +1,1 @@
-export interface Participant {
-  id: string;
-  name: string;
-}
-
+export type { SplitMember as Participant } from '../../../domain/split';

@@ -4,4 +4,3 @@ export interface CalculationResult {
   participants: ParticipantPayment[];
   totalAmount: number;
 }
-
