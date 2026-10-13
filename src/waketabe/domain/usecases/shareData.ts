@@ -43,8 +43,9 @@ export const decodeMealShareData = (data: unknown): MealShareData | null => {
         if (!rawPayment || typeof rawPayment !== 'object') return null;
         const payment = rawPayment as Partial<DishPayment>;
         if (typeof payment.id !== 'string' || !payment.id || payments.some(item => item.id === payment.id) ||
-          typeof payment.amount !== 'string' || !Number.isSafeInteger(parseAmount(payment.amount)) || parseAmount(payment.amount) <= 0 ||
-          typeof payment.paidBy !== 'string' || (payment.paidBy !== '' && !participants.some(p => p.id === payment.paidBy && !p.displayOnly))) return null;
+          typeof payment.amount !== 'string' || !Number.isSafeInteger(parseAmount(payment.amount)) || parseAmount(payment.amount) === 0 ||
+          typeof payment.paidBy !== 'string' || (payment.paidBy === '' && parseAmount(payment.amount) < 0) ||
+          (payment.paidBy !== '' && !participants.some(p => p.id === payment.paidBy && !p.displayOnly))) return null;
         payments.push({ id: payment.id, amount: payment.amount, paidBy: payment.paidBy });
       }
       const paidTotal = payments.reduce((sum, payment) => sum + parseAmount(payment.amount), 0);

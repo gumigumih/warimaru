@@ -69,14 +69,15 @@ export const PotluckInputStep = ({ participants, options = defaultSplitOptions, 
   };
 
   const handleComplete = () => {
-    const invalidPayment = dishes.find(item => getDishPayments(item).some(payment => !Number.isSafeInteger(parseAmount(payment.amount)) || parseAmount(payment.amount) < 0));
+    const invalidPayment = dishes.find(item => getDishPayments(item).some(payment => !Number.isSafeInteger(parseAmount(payment.amount)) ||
+      (parseAmount(payment.amount) < 0 && !payment.paidBy)));
     if (invalidPayment) {
       setSelectedId(invalidPayment.id);
-      setError('立替額は0以上の整数で入力してください。払っていない人の入力は不要です。');
+      setError('金額は整数で入力してください。マイナスの金額には対象者を指定してください。');
       return;
     }
     const normalized = dishes.map(item => {
-      const payments = getDishPayments(item).filter(payment => parseAmount(payment.amount) > 0);
+      const payments = getDishPayments(item).filter(payment => parseAmount(payment.amount) !== 0);
       return { ...item, paidBy: '', payments, price: String(payments.reduce((sum, payment) => sum + parseAmount(payment.amount), 0)) };
     });
     const subtotal = normalized.reduce((sum, item) => sum + parseAmount(item.price), 0);
@@ -88,7 +89,7 @@ export const PotluckInputStep = ({ participants, options = defaultSplitOptions, 
     if (!decoded) {
       const invalid = normalized.find(item => !decodeMealShareData({ version: 3, participants, dishes: [item], options }));
       if (invalid) setSelectedId(invalid.id);
-      setError('「' + (invalid?.name || '費目') + '」に、名前・1円以上の合計金額・負担する参加者を入力し、立替者を確認してください。');
+      setError('「' + (invalid?.name || '費目') + '」に、名前・正の合計金額・負担する参加者を入力し、マイナスの金額には対象者を指定してください。');
       return;
     }
     setError('');
@@ -153,7 +154,7 @@ export const PotluckInputStep = ({ participants, options = defaultSplitOptions, 
 
         <div className="space-y-3">
           <h3 className="text-sm font-bold text-slate-800">この費目を誰がいくら払った？</h3>
-          <p className="text-xs text-slate-500">複数人が払った場合は立替を追加します。払っていない人の入力は不要です。</p>
+          <p className="text-xs text-slate-500">プラスは立替、マイナスは返金・買取・減額です。マイナスの金額にも対象者を指定してください。</p>
           {getDishPayments(dish).map((payment, index, payments) => <div key={payment.id} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] items-end gap-2 rounded-lg border border-slate-200 p-3">
             <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
               {'立替者（' + (index + 1) + '件目）'}
@@ -163,9 +164,9 @@ export const PotluckInputStep = ({ participants, options = defaultSplitOptions, 
               </select>
             </label>
             <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
-              {'金額（' + (index + 1) + '件目）'}
+              {'金額（' + (index + 1) + '件目・マイナス可）'}
               <AmountInput className={fieldClass} value={payment.amount} onChange={amount => updatePayments(payments.map(item => item.id === payment.id ? { ...item, amount } : item))}
-                title={dish.name + 'の立替額を入力（' + (index + 1) + '件目）'} placeholder="3000" />
+                title={dish.name + 'の支払・減額を入力（' + (index + 1) + '件目）'} placeholder="3000" allowNegative />
             </label>
             <button type="button" disabled={payments.length === 1} aria-label={'立替を削除（' + (index + 1) + '件目）'} className="icon-field-button icon-field-button-danger disabled:opacity-40"
               onClick={() => { if (window.confirm('この立替の入力を削除してもよろしいですか？')) updatePayments(payments.filter(item => item.id !== payment.id)); }}>

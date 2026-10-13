@@ -31,7 +31,7 @@ export const defaultSplitOptions: SplitOptions = {
 export const parseAmount = (value: string): number => {
   const text = value.replace(/[,¥￥\s]/g, '');
   if (text === '') return 0;
-  if (!/^\d+$/.test(text)) return NaN;
+  if (!/^-?\d+$/.test(text)) return NaN;
   const amount = Number(text);
   return Number.isSafeInteger(amount) ? amount : NaN;
 };
@@ -49,7 +49,7 @@ export const isValidOptions = (options: SplitOptions): boolean =>
   ['payer', 'fraction'].includes(options.remainderRecipient) &&
   Number.isFinite(parseRate(options.taxRate)) &&
   Number.isFinite(parseRate(options.serviceRate)) &&
-  Number.isFinite(parseAmount(options.discount));
+  Number.isSafeInteger(parseAmount(options.discount)) && parseAmount(options.discount) >= 0;
 
 export const decodeOptions = (value: unknown): SplitOptions | null => {
   if (value === undefined) return { ...defaultSplitOptions };
@@ -112,6 +112,30 @@ export const allocateAmount = (
   );
   amounts[partialRecipient.index] += remainder;
   return amounts;
+};
+
+// Allocate a positive net total while keeping negative payment adjustments on their payer.
+export const allocateSignedAmount = (
+  total: number,
+  amounts: number[],
+  options: RoundingOptions = defaultSplitOptions,
+): number[] => {
+  if (!Number.isSafeInteger(total) || total < 0 || amounts.length === 0 ||
+    amounts.some(amount => !Number.isSafeInteger(amount)) || !Number.isSafeInteger(amounts.reduce((sum, amount) => sum + amount, 0))) {
+    throw new Error('配分条件が不正です。');
+  }
+  const net = amounts.reduce((sum, amount) => sum + amount, 0);
+  const positiveTotal = amounts.reduce((sum, amount) => sum + Math.max(0, amount), 0);
+  const negativeTotal = amounts.reduce((sum, amount) => sum + Math.max(0, -amount), 0);
+  if (net <= 0 || positiveTotal <= 0 || !Number.isSafeInteger(positiveTotal) || !Number.isSafeInteger(negativeTotal)) {
+    throw new Error('正の合計金額が必要です。');
+  }
+  const positiveTarget = Number((BigInt(total) * BigInt(positiveTotal) + BigInt(net) / 2n) / BigInt(net));
+  const negativeTarget = positiveTarget - total;
+  if (!Number.isSafeInteger(positiveTarget) || !Number.isSafeInteger(negativeTarget) || negativeTarget < 0) throw new Error('配分条件が不正です。');
+  const positive = allocateAmount(positiveTarget, amounts.map(amount => Math.max(0, amount)), options);
+  const negative = allocateAmount(negativeTarget, amounts.map(amount => Math.max(0, -amount)), options);
+  return amounts.map((amount, index) => amount < 0 ? -negative[index] : positive[index]);
 };
 
 export const settleBalances = (balances: { id: string; balance: number }[]) => {

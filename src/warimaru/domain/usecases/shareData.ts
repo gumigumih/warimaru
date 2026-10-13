@@ -27,7 +27,7 @@ export const decodeEqualShareData = (data: unknown): EqualShareData | null => {
     for (const rawPayment of person.payments) {
       if (!rawPayment || typeof rawPayment !== 'object') return null;
       const payment = rawPayment as { amount?: unknown };
-      if (typeof payment.amount !== 'number' || !Number.isSafeInteger(payment.amount) || payment.amount < 0) return null;
+      if (typeof payment.amount !== 'number' || !Number.isSafeInteger(payment.amount)) return null;
       payments.push({ id: `${id}-payment-${payments.length}`, description: '', amount: payment.amount });
     }
     people.push({ id, name: person.name, payments });
@@ -44,11 +44,11 @@ export const decodeEqualShareData = (data: unknown): EqualShareData | null => {
       if (!raw || typeof raw !== 'object') return null;
       const member = raw as SplitMember;
       if (typeof member.id !== 'string' || !members.some(item => item.id === member.id) || decoded.some(item => item.id === member.id) || typeof member.name !== 'string' || typeof member.displayOnly !== 'boolean' || !Number.isFinite(member.burdenRate) || member.burdenRate < 0 || member.burdenRate > 100) return null;
-      if (member.displayOnly && people.some(person => person.id === member.id && person.payments.some(payment => payment.amount > 0))) return null;
+      if (member.displayOnly && people.some(person => person.id === member.id && person.payments.some(payment => payment.amount !== 0))) return null;
       decoded.push({ id: member.id, name: member.name, burdenRate: member.burdenRate, displayOnly: member.displayOnly });
     }
     members = equalMembers(people, total, decoded);
   }
-  if (!members.some(member => !member.displayOnly && member.burdenRate > 0) || !Number.isSafeInteger(people.reduce((sum, person) => sum + person.payments.reduce((amount, payment) => amount + payment.amount, 0), 0))) return null;
+  if (!members.some(member => !member.displayOnly && member.burdenRate > 0) || !Number.isSafeInteger(people.reduce((sum, person) => sum + person.payments.reduce((amount, payment) => amount + payment.amount, 0), 0)) || people.reduce((sum, person) => sum + person.payments.reduce((amount, payment) => amount + payment.amount, 0), 0) <= 0) return null;
   return { people, totalParticipants: total, members, rounding: { roundingUnit: rounding.roundingUnit, roundingMode: rounding.roundingMode, remainderRecipient: rounding.remainderRecipient }, legacy: value.version !== 2 };
 };

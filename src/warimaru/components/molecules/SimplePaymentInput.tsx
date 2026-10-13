@@ -17,7 +17,7 @@ export const SimplePaymentInput = ({
 }: SimplePaymentInputProps) => {
   const handleCalculatorInputFormChange = (newValue: string) => {
     onChange(newValue);
-    const amount = Number(newValue) || 0;
+    const amount = Number(newValue.replace(/,/g, '')) || 0;
     savePayment(personId, '', amount);
   };
 
@@ -32,10 +32,11 @@ export const SimplePaymentInput = ({
         <AmountInput
           value={value}
           onChange={handleCalculatorInputFormChange}
+          allowNegative
           className="w-full h-full px-3 py-2.5 pr-10 text-base"
           placeholder="金額を入力"
           title={getTitle()}
-          description="金額を計算して入力できます（税込・税抜対応）"
+          description="プラスは立替、マイナスは返金・買取・減額として入力できます"
         />
       </div>
       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">円</span>

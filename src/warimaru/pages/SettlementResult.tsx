@@ -153,7 +153,7 @@ export const SettlementResult = ({ onBack, onClear, data }: SettlementResultProp
           {draftMembers.map(member => <div key={member.id} className="space-y-2 rounded-lg border border-slate-200 bg-white p-3">
             {people.some(person => person.id === member.id) ? <p className="text-sm font-bold text-slate-800">{member.name || '名前未入力'}</p> :
               <label className="flex items-center gap-2 text-sm text-slate-700">参加者名<input className="h-10 min-w-0 flex-1 rounded-lg border border-slate-200 px-3" value={member.name} onChange={event => setDraftMembers(draftMembers.map(item => item.id === member.id ? { ...item, name: event.target.value } : item))} /></label>}
-            <ParticipantAdjustment value={member} hasPayment={people.some(person => person.id === member.id && person.payments.some(payment => payment.amount > 0))}
+            <ParticipantAdjustment value={member} hasPayment={people.some(person => person.id === member.id && person.payments.some(payment => payment.amount !== 0))}
               onChange={changes => setDraftMembers(draftMembers.map(item => item.id === member.id ? { ...item, ...changes } : item))} />
           </div>)}
           <RoundingSettings options={draftRounding} onChange={setDraftRounding} />

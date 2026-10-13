@@ -6,7 +6,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 const server = await createServer({ configFile: false, server: { middlewareMode: true }, appType: 'custom' });
 try {
-  const { allocateAmount, adjustedAmount, defaultSplitOptions: defaults, parseAmount, settleBalances, roundAmount, decodeOptions } = await server.ssrLoadModule('/src/domain/split.ts');
+  const { allocateAmount, allocateSignedAmount, adjustedAmount, defaultSplitOptions: defaults, parseAmount, settleBalances, roundAmount, decodeOptions } = await server.ssrLoadModule('/src/domain/split.ts');
   const { calculatePayments } = await server.ssrLoadModule('/src/waketabe/domain/usecases/calculatePayments.ts');
   const { calculateTransfers } = await server.ssrLoadModule('/src/waketabe/domain/usecases/calculateTransfers.ts');
   const { decodeMealShareData } = await server.ssrLoadModule('/src/waketabe/domain/usecases/shareData.ts');
@@ -33,10 +33,12 @@ try {
   assert.deepEqual(allocateAmount(1001, [1, 1, 1], { roundingUnit: 100, remainderRecipient: 'payer' }, 2), [300, 300, 401]);
   assert.throws(() => allocateAmount(100, [0, 0]));
   assert.throws(() => allocateAmount(NaN, [1]));
-  assert.ok(Number.isNaN(parseAmount('-100')));
+  assert.equal(parseAmount('-100'), -100);
   assert.equal(parseAmount('¥1,001'), 1001);
   assert.equal(adjustedAmount(10000, { ...defaults, taxRate: '10', serviceRate: '5', discount: '1000' }), 10500);
   assert.equal(adjustedAmount(100, { ...defaults, discount: '200' }), 0);
+  assert.deepEqual(allocateSignedAmount(4000, [5000, -1000]), [5000, -1000]);
+  assert.deepEqual(allocateSignedAmount(4400, [5000, -1000], { ...defaults, roundingUnit: 100 }), [5500, -1100]);
 
   assert.deepEqual(allocateAmount(10001, [1, 1, 1], { roundingUnit: 1000, remainderRecipient: 'payer' }, 0), [4001, 3000, 3000]);
   assert.deepEqual(allocateAmount(10500, [1, 1, 1], { roundingUnit: 1000, remainderRecipient: 'fraction' }), [4000, 3500, 3000]);
@@ -209,6 +211,13 @@ try {
   const legacyEqual = calculateEqualSettlement(restoredEqual.people, restoredEqual.totalParticipants, restoredEqual.members, restoredEqual.rounding, restoredEqual.legacy, colors);
   assert.deepEqual(legacyEqual.charges.map(p => p.owedAmount), [334, 334, 334]);
   assert.deepEqual(legacyEqual.transfers.map(t => t.amount), [334, 333]);
+  const buyoutEqual = { version: 2, people: [payment('A', 10000), payment('B', -2000)], totalParticipants: 2, members: [member('A'), member('B')], rounding: defaults };
+  const restoredBuyout = decodeEqualShareData(buyoutEqual);
+  assert.ok(restoredBuyout);
+  const buyoutResult = calculateEqualSettlement(restoredBuyout.people, restoredBuyout.totalParticipants, restoredBuyout.members, restoredBuyout.rounding, false, colors);
+  assert.equal(buyoutResult.totalAmount, 8000);
+  assert.deepEqual(buyoutResult.charges.map(charge => charge.paidAmount), [10000, -2000]);
+  assert.deepEqual(buyoutResult.transfers.map(transfer => transfer.amount), [6000]);
   const newEqualLink = { version: 2, people, totalParticipants: 3, members: weighted, rounding: { roundingUnit: 500, remainderRecipient: 'payer' } };
   const restoredNewEqual = decodeEqualShareData(JSON.parse(JSON.stringify(newEqualLink)));
   assert.equal(restoredNewEqual.legacy, false);
@@ -292,6 +301,15 @@ try {
   const repeatedPayer = category('酒代', ['A', 'B'], [['A', 300], ['A', 700]]);
   assert.equal(calculatePayments([repeatedPayer], seven).participants[0].totalPaid, 1000);
   assert.ok(decodeMealShareData({ ...groupedLink, dishes: [repeatedPayer] }));
+  const adjustedCategory = category('減額後の酒代', ['A', 'B'], [['A', 5000], ['A', -1000]]);
+  assert.ok(decodeMealShareData({ ...groupedLink, dishes: [adjustedCategory] }));
+  const adjustedResult = calculatePayments([adjustedCategory], seven);
+  assert.equal(adjustedResult.totalAmount, 4000);
+  assert.equal(adjustedResult.participants[0].totalPaid, 4000);
+  assert.equal(sum(adjustedResult.participants.map(p => p.totalPaid)), 4000);
+  assert.equal(sum(adjustedResult.participants.map(p => p.totalOwed)), 4000);
+  assert.equal(calculateTransfers(adjustedResult)[0].from, 'B');
+  assert.equal(decodeMealShareData({ ...groupedLink, dishes: [{ ...adjustedCategory, payments: [{ id: 'discount', paidBy: '', amount: '-1000' }, { id: 'paid', paidBy: 'A', amount: '5000' }] }] }), null);
   const partialUnpaid = category('酒代', ['A', 'B'], [['A', 300], ['', 700]]);
   assert.ok(decodeMealShareData({ ...groupedLink, dishes: [partialUnpaid] }));
   assert.deepEqual(calculateTransfers(calculatePayments([partialUnpaid], seven)), []);

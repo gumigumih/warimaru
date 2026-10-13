@@ -159,7 +159,7 @@ export const MealSettlementResult = ({ basePath, potluck = false, participants: 
           <p className="text-xs leading-relaxed text-slate-500">100%を基準に、50%は半分、200%は2倍。途中参加や子ども料金にも使えます。名前だけ残す人は「表示のみ」にできます。変更後に「結果に反映」を押してください。</p>
           {draftParticipants.map(participant => <div key={participant.id} className="space-y-2 rounded-lg border border-slate-200 bg-white p-3">
             <p className="text-sm font-bold text-slate-800">{participant.name}</p>
-            <ParticipantAdjustment value={participant} hasPayment={dishes.some(dish => getDishPayments(dish).some(payment => payment.paidBy === participant.id && parseAmount(payment.amount) > 0))}
+            <ParticipantAdjustment value={participant} hasPayment={dishes.some(dish => getDishPayments(dish).some(payment => payment.paidBy === participant.id && parseAmount(payment.amount) !== 0))}
               onChange={changes => setDraftParticipants(draftParticipants.map(item => item.id === participant.id ? { ...item, ...changes } : item))} />
           </div>)}
           <AccountingSettings options={draftOptions} onChange={setDraftOptions} />

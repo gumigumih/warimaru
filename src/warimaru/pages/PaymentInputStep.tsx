@@ -19,8 +19,8 @@ export const PaymentInputStep = ({ onNext, onClear }: PaymentInputStepProps) => 
   const [error, setError] = useState('');
   const handleNext = () => {
     const total = people.reduce((sum, person) => sum + person.payments.reduce((amount, payment) => amount + payment.amount, 0), 0);
-    if (people.length === 0 || people.length > 300 || people.some(person => !person.name.trim() || person.payments.some(payment => !Number.isSafeInteger(payment.amount) || payment.amount < 0)) || !Number.isSafeInteger(total) || total <= 0) {
-      setError('立替者の名前と0以上の整数の金額を入力してください。合計は1円以上としてください。');
+    if (people.length === 0 || people.length > 300 || people.some(person => !person.name.trim() || person.payments.some(payment => !Number.isSafeInteger(payment.amount))) || !Number.isSafeInteger(total) || total <= 0) {
+      setError('立替者の名前と整数の金額を入力してください。マイナスは返金・買取・減額として使えます。合計は1円以上としてください。');
       return;
     }
     setError('');
@@ -71,7 +71,7 @@ export const PaymentInputStep = ({ onNext, onClear }: PaymentInputStepProps) => 
       <div className="space-y-4 glass-card p-4">
         <div className="flex flex-col gap-2 text-lg font-semibold text-slate-900 w-full">
           <span>支払い</span>
-          <span className="text-sm font-normal text-slate-500">払った人だけ追加して、名前と金額を入力してください。</span>
+          <span className="text-sm font-normal text-slate-500">払った人だけ追加して、名前と金額を入力してください。マイナスは返金・買取・減額に使えます。</span>
         </div>
         {people.map((person) => (
           <div key={person.id}>

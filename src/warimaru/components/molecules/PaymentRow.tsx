@@ -78,6 +78,7 @@ export const PaymentRow = ({
             placeholder="金額を入力"
             title={getTitle()}
             description="金額を計算して入力できます（税込・税抜対応）"
+            numberFormatOptions={{ allowNegative: true, thousandSeparator: true, decimalScale: 0 }}
             enableTaxCalculation={true}
           />
         </div>
