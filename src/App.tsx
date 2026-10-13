@@ -32,6 +32,7 @@ const AppRoutes = () => (
       <Route path="/equal-split/*" element={<EqualSplitRoutes basePath="/equal-split" />} />
       <Route path="/meal-split" element={<Navigate to="/meal-split/participants" replace />} />
       <Route path="/meal-split/*" element={<MealSplitRoutes basePath="/meal-split" />} />
+      <Route path="/potluck-split/*" element={<MealSplitRoutes basePath="/potluck-split" potluck />} />
       {/* 旧リンク互換 */}
       <Route path="/result" element={<LegacyToolRedirect from="/result" to="/equal-split/result" />} />
       <Route path="/warimaru/*" element={<LegacyToolRedirect from="/warimaru" to="/equal-split" />} />
