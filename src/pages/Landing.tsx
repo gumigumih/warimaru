@@ -34,9 +34,9 @@ export const Landing = () => {
     },
     {
       key: 'meal-split',
-      title: '食べた料理・使った項目だけで払う',
-      description: '項目ごとに対象者を選んで、食べた分・使った分を精算します。',
-      bestFor: '例：料理、宿代、交通費、プレゼント代',
+      title: '食べた人・使った人だけで割る',
+      description: '項目ごとに、払った人と負担する人を指定して精算します。持ち寄りの食事会なら、酒代は飲む人だけ、食事代は全員で割れます。',
+      bestFor: '例：持ち寄りの食事会・BBQ、宿代、交通費、プレゼント代',
       cta: '計算する',
       to: '/meal-split/participants',
       accent: 'from-emerald-500 via-teal-500 to-cyan-500',

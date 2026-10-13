@@ -79,7 +79,7 @@ export const MealSettlementResult = ({ participants: initialParticipants, dishes
 
       const link = document.createElement("a");
       link.href = image;
-      link.download = `項目別精算_計算結果_${timestamp}.png`;
+      link.download = `食べた人・使った人だけで割る_計算結果_${timestamp}.png`;
       link.click();
     } catch (error) {
       console.error("画像の生成に失敗しました:", error);
@@ -102,7 +102,7 @@ export const MealSettlementResult = ({ participants: initialParticipants, dishes
 
     if (isWebShareSupported) {
       try {
-        await navigator.share({ title: '項目別精算 計算結果', url });
+        await navigator.share({ title: '食べた人・使った人だけで割る 計算結果', url });
         setShareMsg('シェアしました！');
       } catch {
         setShareMsg('シェアをキャンセルしました');
@@ -269,7 +269,7 @@ export const MealSettlementResult = ({ participants: initialParticipants, dishes
           {dishes.some(dish => !dish.paidBy) && <p className="text-sm text-slate-600">負担額だけを表示しています。項目の立替者をすべて指定すると、受け渡しも計算できます。</p>}
           {!legacy && (options.taxRate || options.serviceRate || options.discount) && <p className="text-xs text-slate-500">税 {options.taxRate || '0'}% ／サービス料 {options.serviceRate || '0'}% ／割引 {options.discount || '0'}円</p>}
 
-          <DownloadBanner title="項目別精算 計算結果" url="https://warimaru.meggumi.com/" />
+          <DownloadBanner title="食べた人・使った人だけで割る 計算結果" url="https://warimaru.meggumi.com/" />
         </div>
       </div>
 
