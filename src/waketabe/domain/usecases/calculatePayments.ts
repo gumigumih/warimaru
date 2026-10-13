@@ -1,5 +1,6 @@
-import { adjustedAmount, allocateAmount, defaultSplitOptions, parseAmount } from '../../../domain/split';
+import { adjustedAmount, allocateAmount, allocateSignedAmount, defaultSplitOptions, parseAmount } from '../../../domain/split';
 import type { Dish, Participant, CalculationResult, ParticipantPayment, SplitOptions } from '../entities';
+import { getDishPayments } from './dishPayments';
 
 export const calculatePayments = (
   dishes: Dish[],
@@ -27,10 +28,13 @@ export const calculatePayments = (
 
   validDishes.forEach(({ dish, price }, index) => {
     const dishPrice = adjustedPrices[index];
-    const payer = participantPayments.find(payment => payment.participantId === dish.paidBy);
-    const payerParticipant = participants.find(participant => participant.id === dish.paidBy);
-    if (!legacy && payer && payerParticipant && !payerParticipant.displayOnly) {
-      payer.totalPaid += dishPrice;
+    if (!legacy) {
+      const payments = getDishPayments(dish);
+      const paidAmounts = allocateSignedAmount(dishPrice, payments.map(payment => parseAmount(payment.amount)), options);
+      payments.forEach((payment, paymentIndex) => {
+        const payer = participantPayments.find(item => item.participantId === payment.paidBy);
+        if (payer && !payer.displayOnly) payer.totalPaid += paidAmounts[paymentIndex];
+      });
     }
 
     const targets = participants.filter(participant =>

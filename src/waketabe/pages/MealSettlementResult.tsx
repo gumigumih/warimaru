@@ -12,8 +12,11 @@ import { parseAmount, roundingLabels } from '../../domain/split';
 import { ParticipantAdjustment } from '../../components/molecules/ParticipantAdjustment';
 import { AccountingSettings, RoundingSettings } from '../../components/molecules/SplitSettings';
 import { decodeMealShareData } from '../domain/usecases/shareData';
+import { getDishPayments } from '../domain/usecases/dishPayments';
 
 interface MealSettlementResultProps {
+  basePath: string;
+  potluck?: boolean;
   participants: Participant[];
   dishes: Dish[];
   options: SplitOptions;
@@ -23,12 +26,13 @@ interface MealSettlementResultProps {
   onAdjust: (participants: Participant[], options: SplitOptions) => void;
 }
 
-export const MealSettlementResult = ({ participants: initialParticipants, dishes, options: initialOptions, legacy: initialLegacy = false, onBack, onClear, onAdjust }: MealSettlementResultProps) => {
+export const MealSettlementResult = ({ basePath, potluck = false, participants: initialParticipants, dishes, options: initialOptions, legacy: initialLegacy = false, onBack, onClear, onAdjust }: MealSettlementResultProps) => {
+  const toolTitle = potluck ? '持ち寄り飲み会を精算する' : 'レストランで食べた分だけ割る';
   const [applied, setApplied] = useState({ participants: initialParticipants, options: initialOptions, legacy: initialLegacy });
   const { participants, options, legacy } = applied;
   const [draftParticipants, setDraftParticipants] = useState(initialParticipants);
   const [draftOptions, setDraftOptions] = useState(initialOptions);
-  const adjustedData = decodeMealShareData({ version: 2, participants: draftParticipants, dishes, options: draftOptions });
+  const adjustedData = decodeMealShareData({ version: potluck ? 3 : 2, participants: draftParticipants, dishes, options: draftOptions });
   const resultRef = useRef<HTMLDivElement>(null);
   const [shareMsg, setShareMsg] = useState('');
   const hasUnappliedChanges = JSON.stringify(draftParticipants) !== JSON.stringify(participants) ||
@@ -79,7 +83,7 @@ export const MealSettlementResult = ({ participants: initialParticipants, dishes
 
       const link = document.createElement("a");
       link.href = image;
-      link.download = `食べた人・使った人だけで割る_計算結果_${timestamp}.png`;
+      link.download = `${toolTitle}_計算結果_${timestamp}.png`;
       link.click();
     } catch (error) {
       console.error("画像の生成に失敗しました:", error);
@@ -95,14 +99,14 @@ export const MealSettlementResult = ({ participants: initialParticipants, dishes
   const isWebShareSupported = isMobile && typeof navigator !== 'undefined' && !!navigator.share;
 
   const handleShareUrl = async () => {
-    const shareData = legacy ? { participants: participants.map(({ id, name }) => ({ id, name })), dishes: dishes.map(({ id, name, price, eaters }) => ({ id, name, price, eaters })) } : { version: 2, participants, dishes, options };
+    const shareData = legacy ? { participants: participants.map(({ id, name }) => ({ id, name })), dishes: dishes.map(({ id, name, price, eaters }) => ({ id, name, price, eaters })) } : { version: potluck ? 3 : 2, participants, dishes, options };
     const encoded = btoa(encodeURIComponent(JSON.stringify(shareData)));
     const base = `${window.location.origin}${window.location.pathname}`;
-    const url = `${base}#/meal-split/result?data=${encodeURIComponent(encoded)}`;
+    const url = `${base}#${basePath}/result?data=${encodeURIComponent(encoded)}`;
 
     if (isWebShareSupported) {
       try {
-        await navigator.share({ title: '食べた人・使った人だけで割る 計算結果', url });
+        await navigator.share({ title: `${toolTitle} 計算結果`, url });
         setShareMsg('シェアしました！');
       } catch {
         setShareMsg('シェアをキャンセルしました');
@@ -125,7 +129,7 @@ export const MealSettlementResult = ({ participants: initialParticipants, dishes
         currentStep={3}
         totalSteps={3}
         title="結果を見る"
-        description="項目ごとの負担額を確認し、必要なら細かく調整して共有できます。"
+        description={potluck ? '費目ごとの立替と参加者別の負担をまとめて精算し、必要なら調整して共有できます。' : '料理ごとの負担額を確認し、必要なら調整して共有できます。'}
         accentClassName="bg-gradient-to-b from-orange-500 via-amber-500 to-yellow-500"
         action={
           <button
@@ -155,7 +159,7 @@ export const MealSettlementResult = ({ participants: initialParticipants, dishes
           <p className="text-xs leading-relaxed text-slate-500">100%を基準に、50%は半分、200%は2倍。途中参加や子ども料金にも使えます。名前だけ残す人は「表示のみ」にできます。変更後に「結果に反映」を押してください。</p>
           {draftParticipants.map(participant => <div key={participant.id} className="space-y-2 rounded-lg border border-slate-200 bg-white p-3">
             <p className="text-sm font-bold text-slate-800">{participant.name}</p>
-            <ParticipantAdjustment value={participant} hasPayment={dishes.some(dish => dish.paidBy === participant.id && parseAmount(dish.price) > 0)}
+            <ParticipantAdjustment value={participant} hasPayment={dishes.some(dish => getDishPayments(dish).some(payment => payment.paidBy === participant.id && parseAmount(payment.amount) !== 0))}
               onChange={changes => setDraftParticipants(draftParticipants.map(item => item.id === participant.id ? { ...item, ...changes } : item))} />
           </div>)}
           <AccountingSettings options={draftOptions} onChange={setDraftOptions} />
@@ -200,6 +204,18 @@ export const MealSettlementResult = ({ participants: initialParticipants, dishes
               <p className="text-xs text-slate-500 mt-1">マイナス収支</p>
             </div>
           </div>
+
+          {potluck && !legacy && <section className="space-y-3">
+            <h3 className="text-lg font-semibold text-slate-900">費目ごとの立替</h3>
+            <p className="text-xs text-slate-500">入力した金額です。税・サービス料・割引の調整がある場合は、下の参加者別の金額に反映されます。</p>
+            {dishes.map(dish => <div key={dish.id} className="rounded-xl border border-slate-200 bg-white p-3 text-sm space-y-2">
+              <p className="flex justify-between gap-2 font-semibold text-slate-800"><span>{dish.name}</span><span>{formatCurrency(parseAmount(dish.price))}</span></p>
+              <p className="text-xs text-slate-500">負担する人：{participants.filter(p => dish.eaters.includes(p.id) && !p.displayOnly && p.burdenRate > 0).map(p => p.name).join('、')}</p>
+              {getDishPayments(dish).map(payment => <p key={payment.id} className="flex justify-between gap-2 text-slate-600">
+                <span>{participants.find(p => p.id === payment.paidBy)?.name ?? '未会計'}</span><span>{formatCurrency(parseAmount(payment.amount))}</span>
+              </p>)}
+            </div>)}
+          </section>}
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -266,10 +282,10 @@ export const MealSettlementResult = ({ participants: initialParticipants, dishes
             </div>
           )}
 
-          {dishes.some(dish => !dish.paidBy) && <p className="text-sm text-slate-600">負担額だけを表示しています。項目の立替者をすべて指定すると、受け渡しも計算できます。</p>}
+          {dishes.some(dish => getDishPayments(dish).some(payment => !payment.paidBy && parseAmount(payment.amount) > 0)) && <p className="text-sm text-slate-600">負担額だけを表示しています。すべての支払いに立替者を指定すると、受け渡しも計算できます。</p>}
           {!legacy && (options.taxRate || options.serviceRate || options.discount) && <p className="text-xs text-slate-500">税 {options.taxRate || '0'}% ／サービス料 {options.serviceRate || '0'}% ／割引 {options.discount || '0'}円</p>}
 
-          <DownloadBanner title="食べた人・使った人だけで割る 計算結果" url="https://warimaru.meggumi.com/" />
+          <DownloadBanner title={`${toolTitle} 計算結果`} url="https://warimaru.meggumi.com/" />
         </div>
       </div>
 

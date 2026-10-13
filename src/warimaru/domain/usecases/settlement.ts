@@ -7,7 +7,7 @@ export const equalMembers = (people: PersonInterface[], total: number, settings:
   const members: SplitMember[] = people.map(person => ({
     id: person.id, name: person.name,
     burdenRate: settings.find(member => member.id === person.id)?.burdenRate ?? 1,
-    displayOnly: person.payments.some(payment => payment.amount > 0) ? false : settings.find(member => member.id === person.id)?.displayOnly ?? false,
+    displayOnly: person.payments.some(payment => payment.amount !== 0) ? false : settings.find(member => member.id === person.id)?.displayOnly ?? false,
   }));
   for (let index = 0; index < Math.max(0, total - people.length); index += 1) {
     const id = `guest-${index}`;

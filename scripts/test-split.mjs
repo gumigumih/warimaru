@@ -2,10 +2,11 @@ import assert from 'node:assert/strict';
 import { createServer } from 'vite';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 const server = await createServer({ configFile: false, server: { middlewareMode: true }, appType: 'custom' });
 try {
-  const { allocateAmount, adjustedAmount, defaultSplitOptions: defaults, parseAmount, settleBalances, roundAmount, decodeOptions } = await server.ssrLoadModule('/src/domain/split.ts');
+  const { allocateAmount, allocateSignedAmount, adjustedAmount, defaultSplitOptions: defaults, parseAmount, settleBalances, roundAmount, decodeOptions } = await server.ssrLoadModule('/src/domain/split.ts');
   const { calculatePayments } = await server.ssrLoadModule('/src/waketabe/domain/usecases/calculatePayments.ts');
   const { calculateTransfers } = await server.ssrLoadModule('/src/waketabe/domain/usecases/calculateTransfers.ts');
   const { decodeMealShareData } = await server.ssrLoadModule('/src/waketabe/domain/usecases/shareData.ts');
@@ -13,6 +14,13 @@ try {
   const { decodeEqualShareData } = await server.ssrLoadModule('/src/warimaru/domain/usecases/shareData.ts');
   const { calculateSimpleResult, decodeSimpleData } = await server.ssrLoadModule('/src/simple-warikan/calculation.ts');
   const { ParticipantInputStep } = await server.ssrLoadModule('/src/waketabe/pages/ParticipantInputStep.tsx');
+  const { DishInputStep } = await server.ssrLoadModule('/src/waketabe/pages/DishInputStep.tsx');
+  const { PotluckInputStep } = await server.ssrLoadModule('/src/waketabe/pages/PotluckInputStep.tsx');
+  const { MealSplitRoutes } = await server.ssrLoadModule('/src/waketabe/Routes.tsx');
+  const { Landing } = await server.ssrLoadModule('/src/pages/Landing.tsx');
+  const { mealSplitStore, potluckSplitStore } = await server.ssrLoadModule('/src/waketabe/store/store.ts');
+  const { setParticipants, setDishes, resetMealSplit } = await server.ssrLoadModule('/src/waketabe/store/waketabeSlice.ts');
+  const { getDishPayments } = await server.ssrLoadModule('/src/waketabe/domain/usecases/dishPayments.ts');
   const { SettlementRouteList } = await server.ssrLoadModule('/src/warimaru/components/molecules/SettlementRouteList.tsx');
   const colors = { backgrounds: ['blue'], text: ['blue'] };
   const member = (id, burdenRate = 1, displayOnly = false) => ({ id, name: id, burdenRate, displayOnly });
@@ -25,10 +33,12 @@ try {
   assert.deepEqual(allocateAmount(1001, [1, 1, 1], { roundingUnit: 100, remainderRecipient: 'payer' }, 2), [300, 300, 401]);
   assert.throws(() => allocateAmount(100, [0, 0]));
   assert.throws(() => allocateAmount(NaN, [1]));
-  assert.ok(Number.isNaN(parseAmount('-100')));
+  assert.equal(parseAmount('-100'), -100);
   assert.equal(parseAmount('¥1,001'), 1001);
   assert.equal(adjustedAmount(10000, { ...defaults, taxRate: '10', serviceRate: '5', discount: '1000' }), 10500);
   assert.equal(adjustedAmount(100, { ...defaults, discount: '200' }), 0);
+  assert.deepEqual(allocateSignedAmount(4000, [5000, -1000]), [5000, -1000]);
+  assert.deepEqual(allocateSignedAmount(4400, [5000, -1000], { ...defaults, roundingUnit: 100 }), [5500, -1100]);
 
   assert.deepEqual(allocateAmount(10001, [1, 1, 1], { roundingUnit: 1000, remainderRecipient: 'payer' }, 0), [4001, 3000, 3000]);
   assert.deepEqual(allocateAmount(10500, [1, 1, 1], { roundingUnit: 1000, remainderRecipient: 'fraction' }), [4000, 3500, 3000]);
@@ -201,6 +211,13 @@ try {
   const legacyEqual = calculateEqualSettlement(restoredEqual.people, restoredEqual.totalParticipants, restoredEqual.members, restoredEqual.rounding, restoredEqual.legacy, colors);
   assert.deepEqual(legacyEqual.charges.map(p => p.owedAmount), [334, 334, 334]);
   assert.deepEqual(legacyEqual.transfers.map(t => t.amount), [334, 333]);
+  const buyoutEqual = { version: 2, people: [payment('A', 10000), payment('B', -2000)], totalParticipants: 2, members: [member('A'), member('B')], rounding: defaults };
+  const restoredBuyout = decodeEqualShareData(buyoutEqual);
+  assert.ok(restoredBuyout);
+  const buyoutResult = calculateEqualSettlement(restoredBuyout.people, restoredBuyout.totalParticipants, restoredBuyout.members, restoredBuyout.rounding, false, colors);
+  assert.equal(buyoutResult.totalAmount, 8000);
+  assert.deepEqual(buyoutResult.charges.map(charge => charge.paidAmount), [10000, -2000]);
+  assert.deepEqual(buyoutResult.transfers.map(transfer => transfer.amount), [6000]);
   const newEqualLink = { version: 2, people, totalParticipants: 3, members: weighted, rounding: { roundingUnit: 500, remainderRecipient: 'payer' } };
   const restoredNewEqual = decodeEqualShareData(JSON.parse(JSON.stringify(newEqualLink)));
   assert.equal(restoredNewEqual.legacy, false);
@@ -227,6 +244,152 @@ try {
   const balances = [{ id: 'A', balance: 100 }, { id: 'B', balance: -100 }];
   assert.deepEqual(settleBalances(balances), [{ from: 'B', to: 'A', amount: 100 }]);
   assert.deepEqual(balances, [{ id: 'A', balance: 100 }, { id: 'B', balance: -100 }]);
+
+  const seven = ['A', 'B', 'C', 'D', 'E', 'F', 'G'].map(id => member(id));
+  const category = (name, eaters, payments) => ({
+    id: name, name, eaters, paidBy: '',
+    price: String(sum(payments.map(([, amount]) => amount))),
+    payments: payments.map(([paidBy, amount], index) => ({ id: name + '-' + index, paidBy, amount: String(amount) })),
+  });
+  const categories = [
+    category('酒代', ['A', 'B', 'C', 'E'], [['A', 6000], ['B', 2500]]),
+    category('ご飯代', seven.map(p => p.id), [['C', 7000], ['D', 4000]]),
+    category('温泉代', ['A', 'C', 'D', 'F', 'G'], [['A', 800], ['G', 3200]]),
+    category('ピクニック代', ['B', 'D', 'E', 'F'], [['F', 1200]]),
+    category('パーティ代', ['A', 'B', 'E', 'G'], [['E', 4500], ['B', 1500]]),
+  ];
+  const groupedLink = { version: 3, participants: seven, dishes: categories, options: defaults };
+  const restoredGroups = decodeMealShareData(JSON.parse(JSON.stringify(groupedLink)));
+  assert.ok(restoredGroups);
+  assert.equal(restoredGroups.legacy, false);
+  assert.deepEqual(restoredGroups.dishes, categories);
+  const encodedGroups = encodeURIComponent(btoa(encodeURIComponent(JSON.stringify(groupedLink))));
+  const queryGroups = new URLSearchParams('data=' + encodedGroups).get('data');
+  assert.deepEqual(decodeMealShareData(JSON.parse(decodeURIComponent(atob(queryGroups)))), restoredGroups);
+  const groupedResult = calculatePayments(categories, seven);
+  assert.equal(groupedResult.totalAmount, 30700);
+  assert.deepEqual(groupedResult.participants.map(p => p.totalPaid), [6800, 4000, 7000, 4000, 4500, 1200, 3200]);
+  assert.equal(sum(groupedResult.participants.map(p => p.totalOwed)), 30700);
+  assert.deepEqual(calculatePayments(restoredGroups.dishes, restoredGroups.participants, restoredGroups.options), groupedResult);
+  for (const dish of categories) {
+    for (const p of groupedResult.participants) assert.equal(p.dishes.some(detail => detail.dishId === dish.id), dish.eaters.includes(p.participantId));
+  }
+  const flatItems = categories.flatMap(dish => dish.payments.map(p => item(p.id, p.amount, dish.eaters, p.paidBy)));
+  assert.deepEqual(groupedResult.participants.map(p => p.totalOwed), calculatePayments(flatItems, seven).participants.map(p => p.totalOwed));
+  for (const roundingUnit of [1, 100, 500, 1000]) {
+    for (const roundingMode of ['floor', 'ceil', 'nearest']) {
+      for (const remainderRecipient of ['payer', 'fraction']) {
+        const options = { ...defaults, roundingUnit, roundingMode, remainderRecipient, taxRate: '10', discount: '500' };
+        const result = calculatePayments(categories, seven, options);
+        assert.equal(sum(result.participants.map(p => p.totalOwed)), result.totalAmount);
+        assert.equal(sum(result.participants.map(p => p.totalPaid)), result.totalAmount);
+        const remaining = new Map(result.participants.map(p => [p.participantName, p.netAmount]));
+        for (const transfer of calculateTransfers(result)) {
+          assert.ok(Number.isSafeInteger(transfer.amount) && transfer.amount > 0);
+          remaining.set(transfer.from, remaining.get(transfer.from) + transfer.amount);
+          remaining.set(transfer.to, remaining.get(transfer.to) - transfer.amount);
+        }
+        assert.ok([...remaining.values()].every(amount => amount === 0));
+      }
+    }
+  }
+  const singleCategory = category('酒代', ['A', 'B'], [['A', 300], ['C', 700]]);
+  const groupOnly = calculatePayments([singleCategory], seven);
+  assert.deepEqual(groupOnly.participants.map(p => p.totalOwed), [500, 500, 0, 0, 0, 0, 0]);
+  assert.equal(groupOnly.participants[2].totalPaid, 700);
+  assert.equal(groupOnly.participants[2].dishes.length, 0);
+  const repeatedPayer = category('酒代', ['A', 'B'], [['A', 300], ['A', 700]]);
+  assert.equal(calculatePayments([repeatedPayer], seven).participants[0].totalPaid, 1000);
+  assert.ok(decodeMealShareData({ ...groupedLink, dishes: [repeatedPayer] }));
+  const adjustedCategory = category('減額後の酒代', ['A', 'B'], [['A', 5000], ['A', -1000]]);
+  assert.ok(decodeMealShareData({ ...groupedLink, dishes: [adjustedCategory] }));
+  const adjustedResult = calculatePayments([adjustedCategory], seven);
+  assert.equal(adjustedResult.totalAmount, 4000);
+  assert.equal(adjustedResult.participants[0].totalPaid, 4000);
+  assert.equal(sum(adjustedResult.participants.map(p => p.totalPaid)), 4000);
+  assert.equal(sum(adjustedResult.participants.map(p => p.totalOwed)), 4000);
+  assert.equal(calculateTransfers(adjustedResult)[0].from, 'B');
+  assert.equal(decodeMealShareData({ ...groupedLink, dishes: [{ ...adjustedCategory, payments: [{ id: 'discount', paidBy: '', amount: '-1000' }, { id: 'paid', paidBy: 'A', amount: '5000' }] }] }), null);
+  const partialUnpaid = category('酒代', ['A', 'B'], [['A', 300], ['', 700]]);
+  assert.ok(decodeMealShareData({ ...groupedLink, dishes: [partialUnpaid] }));
+  assert.deepEqual(calculateTransfers(calculatePayments([partialUnpaid], seven)), []);
+  const free = calculatePayments(categories, seven, { ...defaults, discount: '99999' });
+  assert.equal(free.totalAmount, 0);
+  assert.ok(free.participants.every(p => p.totalPaid === 0 && p.totalOwed === 0));
+  const withPayments = payments => ({ ...groupedLink, dishes: [{ ...singleCategory, payments }] });
+  for (const payments of [[], null, [null], singleCategory.payments.map(p => ({ ...p, id: 'duplicate' })),
+    [{ id: 'bad', paidBy: 'missing', amount: '1000' }], [{ id: 'bad', paidBy: 'A', amount: '-1000' }],
+    [{ id: 'bad', paidBy: 'A', amount: '0' }], [{ id: 'bad', paidBy: 'A', amount: '1.5' }],
+    [{ id: 'bad', paidBy: 'A', amount: Number.MAX_SAFE_INTEGER + '0' }],
+    [{ id: 'bad', paidBy: 'A', amount: 1000 }]]) assert.equal(decodeMealShareData(withPayments(payments)), null);
+  assert.equal(decodeMealShareData({ ...groupedLink, dishes: [{ ...singleCategory, price: '999' }] }), null);
+  assert.equal(decodeMealShareData({ ...groupedLink, dishes: [{ ...singleCategory, paidBy: 'A' }] }), null);
+  const overflowGroup = category('上限', ['A'], [['A', Number.MAX_SAFE_INTEGER], ['B', 1]]);
+  assert.equal(decodeMealShareData({ ...groupedLink, dishes: [overflowGroup] }), null);
+  assert.equal(decodeMealShareData({ ...groupedLink, participants: seven.map(p => ({ ...p, displayOnly: p.id === 'C' })), dishes: [singleCategory] }), null);
+  assert.equal(decodeMealShareData({ ...groupedLink, version: 2 }), null);
+  assert.equal(decodeMealShareData({ ...groupedLink, participants: seven.map(p => ({ ...p, name: ' ' })) }), null);
+  const oldSingle = item('料理', 1001, ['A', 'B'], 'A');
+  assert.deepEqual(getDishPayments(oldSingle), [{ id: '料理', paidBy: 'A', amount: '1001' }]);
+  assert.ok(decodeMealShareData({ ...groupedLink, dishes: [oldSingle] }));
+  const inputMarkup = renderToStaticMarkup(createElement(PotluckInputStep, { participants: seven, initialDishes: categories, onComplete() {} }));
+  assert.match(inputMarkup, /入力する費目/);
+  assert.match(inputMarkup, /立替を追加/);
+  assert.equal((inputMarkup.match(/立替者（/g) ?? []).length, 2);
+  assert.equal((inputMarkup.match(/aria-pressed=/g) ?? []).length, 7);
+  assert.match(inputMarkup, /value="温泉代"/);
+  const migratedMarkup = renderToStaticMarkup(createElement(PotluckInputStep, { participants: seven, initialDishes: [oldSingle], onComplete() {} }));
+  assert.equal((migratedMarkup.match(/立替者（/g) ?? []).length, 1);
+  assert.match(migratedMarkup, /1,001円/);
+  const removedPayerMarkup = renderToStaticMarkup(createElement(PotluckInputStep, { participants: seven.filter(p => p.id !== 'C'), initialDishes: [singleCategory], onComplete() {} }));
+  assert.match(removedPayerMarkup, /value="" selected="">未会計/);
+  assert.match(removedPayerMarkup, /1,000円/);
+  const simpleMarkup = renderToStaticMarkup(createElement(DishInputStep, { participants: seven, initialDishes: [oldSingle], onComplete() {} }));
+  assert.match(simpleMarkup, /料理名/);
+  assert.match(simpleMarkup, /食べた人/);
+  assert.match(simpleMarkup, /料理を追加/);
+  assert.match(simpleMarkup, /<details[^>]*><summary[^>]*>払った人を指定（任意）/);
+  assert.doesNotMatch(simpleMarkup, /入力する費目|費目を登録|立替を追加/);
+  const flatMarkup = renderToStaticMarkup(createElement(DishInputStep, { participants: seven, initialDishes: [singleCategory], onComplete() {} }));
+  assert.equal((flatMarkup.match(/<span>料理名<\/span>/g) ?? []).length, 2);
+  assert.doesNotMatch(flatMarkup, /費目を登録/);
+
+  mealSplitStore.dispatch(resetMealSplit());
+  potluckSplitStore.dispatch(resetMealSplit());
+  mealSplitStore.dispatch(setParticipants([member('レストラン用') ]));
+  potluckSplitStore.dispatch(setParticipants(seven));
+  potluckSplitStore.dispatch(setDishes(categories));
+  assert.deepEqual(mealSplitStore.getState().mealSplit.participants.map(p => p.name), ['レストラン用']);
+  assert.equal(mealSplitStore.getState().mealSplit.dishes.length, 0);
+  assert.equal(potluckSplitStore.getState().mealSplit.participants.length, 7);
+  assert.equal(potluckSplitStore.getState().mealSplit.dishes.length, 5);
+  const routeMarkup = (basePath, potluck, path) => renderToStaticMarkup(createElement(MemoryRouter, { initialEntries: [path] },
+    createElement(Routes, null, createElement(Route, { path: basePath + '/*', element: createElement(MealSplitRoutes, { basePath, potluck }) }))));
+  const mealRoute = routeMarkup('/meal-split', false, '/meal-split/participants');
+  assert.match(mealRoute, /レストランで食べた分だけ割る/);
+  assert.doesNotMatch(mealRoute, /持ち寄り飲み会を精算する/);
+  const potluckRoute = routeMarkup('/potluck-split', true, '/potluck-split/dishes');
+  assert.match(potluckRoute, /持ち寄り飲み会を精算する/);
+  assert.match(potluckRoute, /酒代は飲む人だけ、料理代は全員/);
+  assert.match(potluckRoute, /入力する費目/);
+  assert.match(potluckRoute, /立替を追加/);
+  const restaurantLink = encodeURIComponent(btoa(encodeURIComponent(JSON.stringify({ version: 2, participants: seven, dishes: [oldSingle], options: defaults }))));
+  const restaurantResult = routeMarkup('/meal-split', false, '/meal-split/result?data=' + restaurantLink);
+  assert.match(restaurantResult, /レストランで食べた分だけ割る/);
+  assert.doesNotMatch(restaurantResult, /費目ごとの立替/);
+  const potluckResult = routeMarkup('/potluck-split', true, '/potluck-split/result?data=' + encodedGroups);
+  assert.match(potluckResult, /持ち寄り飲み会を精算する/);
+  assert.match(potluckResult, /費目ごとの立替/);
+  for (const dish of categories) assert.match(potluckResult, new RegExp(dish.name));
+  assert.equal(routeMarkup('/meal-split', false, '/meal-split/result?data=' + encodedGroups), '');
+  const landingMarkup = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(Landing)));
+  assert.equal((landingMarkup.match(/計算する/g) ?? []).length, 4);
+  assert.match(landingMarkup, /お酒を飲まない人がいる飲み会/);
+  potluckSplitStore.dispatch(resetMealSplit());
+  assert.equal(mealSplitStore.getState().mealSplit.participants.length, 1);
+  mealSplitStore.dispatch(resetMealSplit());
+  console.log('レストラン入力・持ち寄り入力・ツール別データ分離: 検証OK');
+  console.log('7人・5費目・複数立替・費目別参加者・v3共有データ: 検証OK');
   console.log('配分・端数・精算・旧/新共有データ: 検証OK');
 } finally {
   await server.close();

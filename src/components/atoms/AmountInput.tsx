@@ -3,9 +3,9 @@ import { CalculatorInputForm, type CalculatorInputFormProps } from '@gumigumih/r
 type AmountInputProps = Omit<
   CalculatorInputFormProps,
   'enableTaxCalculation' | 'decimalPlaces' | 'numberFormatOptions'
->;
+> & { allowNegative?: boolean };
 
-export const AmountInput = (props: AmountInputProps) => {
+export const AmountInput = ({ allowNegative = false, ...props }: AmountInputProps) => {
   return (
     <CalculatorInputForm
       {...props}
@@ -15,7 +15,7 @@ export const AmountInput = (props: AmountInputProps) => {
         prefix: '¥',
         thousandSeparator: true,
         decimalScale: 0,
-        allowNegative: false,
+        allowNegative,
       }}
     />
   );

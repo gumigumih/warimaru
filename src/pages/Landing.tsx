@@ -4,6 +4,7 @@ import {
   faArrowRight,
   faCalculator,
   faRoute,
+  faUtensils,
 } from '@fortawesome/free-solid-svg-icons';
 import warimaruLogo from '../assets/warimaru-logo-white.svg';
 import warimaruBackground from '../assets/warimaru-background.png';
@@ -34,11 +35,21 @@ export const Landing = () => {
     },
     {
       key: 'meal-split',
-      title: '食べた人・使った人だけで割る',
-      description: '項目ごとに、払った人と負担する人を指定して精算します。持ち寄りの食事会なら、酒代は飲む人だけ、食事代は全員で割れます。',
-      bestFor: '例：持ち寄りの食事会・BBQ、宿代、交通費、プレゼント代',
+      title: 'レストランで食べた分だけ割る',
+      description: '料理名・金額・食べた人を入力して、一緒に食べた料理だけで割り勘します。',
+      bestFor: '例：レストラン、大皿料理、飲み物',
       cta: '計算する',
       to: '/meal-split/participants',
+      accent: 'from-orange-500 via-amber-500 to-yellow-500',
+      icon: faUtensils,
+    },
+    {
+      key: 'potluck-split',
+      title: '持ち寄り飲み会を精算する',
+      description: '酒代は飲む人だけ、料理代は全員で。費目ごとの参加者と、みんなの立替額をまとめて精算します。',
+      bestFor: '例：お酒を飲まない人がいる飲み会、BBQ、旅行',
+      cta: '計算する',
+      to: '/potluck-split/participants',
       accent: 'from-emerald-500 via-teal-500 to-cyan-500',
       icon: faRoute,
     },
@@ -105,7 +116,7 @@ export const Landing = () => {
             <p className="mt-1 text-sm text-slate-600">よくある割り勘なら、ここからそのまま計算できます。</p>
           </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
           {calculators.map(action => (
             <div
               key={action.title}

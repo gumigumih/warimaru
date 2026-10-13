@@ -5,20 +5,23 @@ import type { Participant, Dish, SplitOptions } from '../domain/entities';
 import { AmountInput } from '../../components/atoms/AmountInput';
 import { StepIntro } from '../../components/templates/StepIntro';
 import { parseAmount, adjustedAmount, defaultSplitOptions } from '../../domain/split';
+import { getDishPayments } from '../domain/usecases/dishPayments';
 
 export const DishInputStep = ({ participants, options = defaultSplitOptions, onComplete, onBack, initialDishes = [], onClear }: {
   participants: Participant[]; 
   options?: SplitOptions;
   onComplete?: (dishes: Dish[]) => void;
-  onBack?: () => void;
+  onBack?: (dishes: Dish[]) => void;
   initialDishes?: Dish[];
   onClear?: () => void;
 }) => {
-  const [dishes, setDishes] = useState<Dish[]>(() => initialDishes.map(dish => ({
-    ...dish,
-    paidBy: participants.some(p => p.id === dish.paidBy && !p.displayOnly) ? dish.paidBy : '',
+  const [dishes, setDishes] = useState<Dish[]>(() => initialDishes.flatMap(dish => getDishPayments(dish).map(payment => ({
+    id: dish.payments ? crypto.randomUUID() : dish.id,
+    name: dish.name,
+    price: payment.amount,
+    paidBy: participants.some(p => p.id === payment.paidBy && !p.displayOnly) ? payment.paidBy : '',
     eaters: dish.eaters.filter(id => participants.some(p => p.id === id)),
-  })));
+  }))));
   const [error, setError] = useState<string>('');
 
   const handleAddDish = () => {
@@ -70,11 +73,11 @@ export const DishInputStep = ({ participants, options = defaultSplitOptions, onC
         currentStep={2}
         totalSteps={3}
         title="何を割る？"
-        description="項目名・金額と、負担する人を選びます。支払い済みなら立替者も指定してください。"
+        description="料理名・金額と、食べた人を選ぶだけ。払った人の指定は任意です。"
         accentClassName="bg-gradient-to-b from-orange-500 via-amber-500 to-yellow-500"
         action={
           <button
-            onClick={onBack}
+            onClick={() => onBack?.(dishes)}
             className="inline-flex items-center gap-1.5 text-sm font-extrabold text-slate-500 transition hover:text-slate-950"
             aria-label="戻る"
             title="戻る"
@@ -98,34 +101,21 @@ export const DishInputStep = ({ participants, options = defaultSplitOptions, onC
       />
 
       <div className="glass-card p-4 sm:p-5 bg-white/95 border border-slate-100 space-y-4">
-        <div className="text-lg font-semibold text-slate-900">項目の行を追加して入力してください</div>
+        <div className="text-lg font-semibold text-slate-900">料理の行を追加して入力してください</div>
 
         <div className="space-y-4">
           {dishes.map((dish) => (
             <div key={dish.id} className="space-y-2">
-              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_auto] gap-2 items-center">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 items-center">
                 <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
-                  <span>項目名</span>
+                  <span>料理名</span>
                   <input
                     type="text"
                     value={dish.name}
                     onChange={(e) => handleUpdateDish(dish.id, 'name', e.target.value)}
                     className="h-12 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm focus:border-amber-400 focus:ring-amber-200"
-                    placeholder="項目名（例：宿代）"
+                    placeholder="料理名（例：ピザ）"
                   />
-                </label>
-                <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
-                  <span>立替者</span>
-                  <select
-                    value={dish.paidBy}
-                    onChange={(e) => handleUpdateDish(dish.id, 'paidBy', e.target.value)}
-                    className="h-12 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm focus:border-amber-400 focus:ring-amber-200"
-                  >
-                    <option value="">未会計（負担額だけ計算）</option>
-                    {participants.filter(participant => !participant.displayOnly).map(participant => (
-                      <option key={participant.id} value={participant.id}>{participant.name || '名前未入力'}</option>
-                    ))}
-                  </select>
                 </label>
                 <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
                   <span>金額</span>
@@ -148,8 +138,27 @@ export const DishInputStep = ({ participants, options = defaultSplitOptions, onC
                 </div>
               </div>
 
+              <details className="rounded-lg border border-slate-200 p-3">
+                <summary className="cursor-pointer text-sm text-slate-600">払った人を指定（任意）</summary>
+                <div className="mt-2">
+                <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
+                  <span>立替者</span>
+                  <select
+                    value={dish.paidBy}
+                    onChange={(e) => handleUpdateDish(dish.id, 'paidBy', e.target.value)}
+                    className="h-12 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm focus:border-amber-400 focus:ring-amber-200"
+                  >
+                    <option value="">未会計（負担額だけ計算）</option>
+                    {participants.filter(participant => !participant.displayOnly).map(participant => (
+                      <option key={participant.id} value={participant.id}>{participant.name || '名前未入力'}</option>
+                    ))}
+                  </select>
+                </label>
+                </div>
+              </details>
+
               <div className="flex flex-wrap items-center gap-3">
-                <div className="text-sm font-medium text-slate-700 min-w-[60px]">対象者</div>
+                <div className="text-sm font-medium text-slate-700 min-w-[60px]">食べた人</div>
                 <div className="flex flex-wrap gap-2">
                   {participants.filter(p => !p.displayOnly && p.burdenRate > 0).map((p) => {
                     const checked = dish.eaters.includes(p.id);
@@ -195,7 +204,7 @@ export const DishInputStep = ({ participants, options = defaultSplitOptions, onC
         <div className="flex">
           <button type="button" onClick={handleAddDish} className="btn btn-add w-full">
             <FontAwesomeIcon icon={faPlus} className="mr-2" />
-            項目追加
+            料理を追加
           </button>
         </div>
       </div>
