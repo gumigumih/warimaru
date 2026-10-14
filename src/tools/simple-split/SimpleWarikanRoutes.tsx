@@ -5,12 +5,8 @@ import {
   faArrowLeft,
   faArrowRight,
   faCalculator,
-  faDownload,
-  faShareAlt,
 } from '@fortawesome/free-solid-svg-icons';
-import { AmountInput, BrandHeader, DownloadBanner, StepIntro } from '../../shared/components';
-import { captureElementToImage } from '../../infrastructure/html2canvas';
-import { withDownloadBanner } from '../../infrastructure/downloadBanner';
+import { AmountInput, BrandHeader, DownloadBanner, ResultReportCard, ResultShareActions, StepIntro } from '../../shared/components';
 import { defaultSplitOptions, roundingLabels } from '../../shared/domain/split';
 import { AccountingSettings, RoundingSettings } from '../../shared/components';
 import { calculateSimpleResult, decodeSimpleData } from './calculation';
@@ -146,7 +142,6 @@ const SimpleWarikanResultPage = () => {
   const [data, setData] = useState(sharedData);
   const [draftOptions, setDraftOptions] = useState(sharedData?.options ?? defaultSplitOptions);
   const resultRef = useRef<HTMLDivElement>(null);
-  const [shareMsg, setShareMsg] = useState('');
 
   if (!data) {
     return <Navigate to="/simple" replace />;
@@ -164,59 +159,9 @@ const SimpleWarikanResultPage = () => {
     if (!validAdjustment) return;
     setData({ ...data, options: draftOptions });
     navigate(`/simple/result?data=${encodeData({ ...data, options: draftOptions })}`, { replace: true });
-    setShareMsg('');
   };
 
   const resultUrl = `${window.location.origin}${window.location.pathname}#/simple/result?data=${encodeData(data)}`;
-
-  const handleDownloadImage = async () => {
-    if (!resultRef.current) return;
-
-    const canvas = await withDownloadBanner(resultRef.current, () =>
-      captureElementToImage(resultRef.current as HTMLDivElement)
-    );
-    const now = new Date();
-    const timestamp =
-      now.getFullYear() +
-      String(now.getMonth() + 1).padStart(2, '0') +
-      String(now.getDate()).padStart(2, '0') +
-      '_' +
-      String(now.getHours()).padStart(2, '0') +
-      String(now.getMinutes()).padStart(2, '0') +
-      String(now.getSeconds()).padStart(2, '0');
-
-    const link = document.createElement('a');
-    link.href = canvas.toDataURL('image/png');
-    link.download = `シンプル割り勘_計算結果_${timestamp}.png`;
-    link.click();
-  };
-
-  const handleShare = async () => {
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-    if (isMobile && navigator.share) {
-      try {
-        await navigator.share({
-          title: 'シンプル割り勘 計算結果',
-          text: `${formatCurrency(result.total)}を${result.people}人で割りました。`,
-          url: resultUrl,
-        });
-        setShareMsg('シェアしました！');
-      } catch {
-        setShareMsg('シェアをキャンセルしました');
-      }
-    } else {
-      try {
-        await navigator.clipboard.writeText(resultUrl);
-        setShareMsg('URLをコピーしました！');
-        alert('URLをコピーしました！');
-      } catch {
-        setShareMsg('コピーに失敗しました');
-      }
-    }
-
-    setTimeout(() => setShareMsg(''), 2000);
-  };
 
   return (
     <div className="space-y-5 text-slate-950">
@@ -263,21 +208,14 @@ const SimpleWarikanResultPage = () => {
 
       {hasUnappliedChanges && <p role="status" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">変更はまだ反映されていません。下の負担額は変更前の結果です。「結果に反映」を押してください。反映するまで共有・画像保存はできません。</p>}
 
-      <div ref={resultRef} className="glass-card p-0 overflow-hidden shadow-2xl">
-        <div className="bg-gradient-to-r from-slate-700 via-slate-600 to-slate-500 text-white px-5 py-4 sm:px-6 sm:py-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.08em] opacity-90">simple split report</p>
-            <h2 className="text-xl sm:text-2xl font-bold leading-tight">計算結果を共有しましょう</h2>
-            <p className="text-sm opacity-90">1人あたりと余りをすぐ確認できます</p>
-          </div>
-          <div className="bg-white/15 backdrop-blur rounded-xl px-4 py-3 text-right min-w-[180px]">
-            <p className="text-xs opacity-80">合計</p>
-          <p className="text-2xl font-semibold leading-tight">{formatCurrency(result.total)}</p>
-            <p className="text-xs opacity-80">{result.people}人で割る</p>
-          </div>
-        </div>
-
-        <div className="p-4 sm:p-6 space-y-6 bg-gradient-to-b from-white via-white to-slate-50">
+      <ResultReportCard
+        ref={resultRef}
+        accentGradient="from-slate-700 via-slate-600 to-slate-500"
+        reportLabel="simple split report"
+        subtitle="1人あたりと余りをすぐ確認できます"
+        total={formatCurrency(result.total)}
+        participantSummary={`${result.people}人で割る`}
+      >
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
               <p className="text-xs text-slate-500 mb-1">1人あたり</p>
@@ -306,26 +244,19 @@ const SimpleWarikanResultPage = () => {
             </div>
           </div>
 
-          <DownloadBanner title="シンプル割り勘 計算結果" url="https://warimaru.meggumi.com/" />
-        </div>
-      </div>
+        <DownloadBanner title="シンプル割り勘 計算結果" url="https://warimaru.meggumi.com/" />
+      </ResultReportCard>
 
-      <div className="flex flex-col gap-3 justify-center items-center bg-white/80 border border-slate-200 rounded-2xl p-4 shadow-sm">
-        <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <button onClick={handleDownloadImage} disabled={hasUnappliedChanges} className="btn btn-simple w-full text-base sm:text-lg">
-            <FontAwesomeIcon icon={faDownload} className="mr-2" />
-            画像保存
-          </button>
-          <button onClick={handleShare} disabled={hasUnappliedChanges} className="btn btn-simple w-full text-base sm:text-lg">
-            <FontAwesomeIcon icon={faShareAlt} className="mr-2" />
-            シェア
-          </button>
-        </div>
-        {shareMsg && <div className="text-center text-emerald-700 font-semibold mt-1 text-sm">{shareMsg}</div>}
-        <p className="text-xs text-slate-500 text-center">
-          結果画面はURLで共有でき、共有先でも同じ入力値と結果を復元できます。
-        </p>
-      </div>
+      <ResultShareActions
+        resultRef={resultRef}
+        disabled={hasUnappliedChanges}
+        buttonClassName="btn btn-simple"
+        downloadFilename="シンプル割り勘_計算結果"
+        shareTitle="シンプル割り勘 計算結果"
+        shareText={`${formatCurrency(result.total)}を${result.people}人で割りました。`}
+        shareUrl={resultUrl}
+        showCopyAlert
+      />
     </div>
   );
 };

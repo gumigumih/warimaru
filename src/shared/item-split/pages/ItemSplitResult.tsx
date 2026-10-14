@@ -1,12 +1,10 @@
 import { useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDownload, faArrowLeft, faShareAlt } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import type { Dish, Participant, DishContribution, SplitOptions } from "../domain/entities";
 import { calculatePayments, calculateTransfers } from "../domain/usecases";
 import { formatCurrency } from "../domain/usecases/formatCurrency";
-import { captureElementToImage } from "../../../infrastructure/html2canvas";
-import { withDownloadBanner } from "../../../infrastructure/downloadBanner";
-import { DownloadBanner, ParticipantAdjustment, StepIntro, AccountingSettings, RoundingSettings } from '../../components';
+import { DownloadBanner, ParticipantAdjustment, ResultReportCard, ResultShareActions, StepIntro, AccountingSettings, RoundingSettings } from '../../components';
 import { parseAmount, roundingLabels } from '../../domain/split';
 import { decodeMealShareData } from '../domain/usecases/shareData';
 import { getDishPayments } from '../domain/usecases/dishPayments';
@@ -34,7 +32,6 @@ export const ItemSplitResult = ({ basePath, potluck = false, participants: initi
   const [draftOptions, setDraftOptions] = useState(initialOptions);
   const adjustedData = decodeMealShareData({ version: potluck ? 3 : 2, participants: draftParticipants, dishes, options: draftOptions });
   const resultRef = useRef<HTMLDivElement>(null);
-  const [shareMsg, setShareMsg] = useState('');
   const hasUnappliedChanges = JSON.stringify(draftParticipants) !== JSON.stringify(participants) ||
     JSON.stringify(draftOptions) !== JSON.stringify(options);
 
@@ -49,79 +46,12 @@ export const ItemSplitResult = ({ basePath, potluck = false, participants: initi
     if (!adjustedData) return;
     setApplied({ participants: adjustedData.participants, options: adjustedData.options, legacy: false });
     onAdjust(adjustedData.participants, adjustedData.options);
-    setShareMsg('');
   };
-
-  const handleDownloadImage = async () => {
-    if (!resultRef.current) return;
-
-    const transferListElement = resultRef.current.querySelector(
-      '[data-download-highlight="transfers"]'
-    ) as HTMLElement;
-    if (transferListElement) {
-      transferListElement.classList.add("border-2", accentBorder);
-    }
-
-    const resultElement = resultRef.current;
-    const originalBackground = resultElement.style.background;
-    resultElement.style.background = "white";
-
-    try {
-      const canvas = await withDownloadBanner(resultRef.current, () =>
-        captureElementToImage(resultRef.current as HTMLDivElement)
-      );
-      const image = canvas.toDataURL("image/png");
-      const now = new Date();
-      const timestamp =
-        now.getFullYear() +
-        String(now.getMonth() + 1).padStart(2, "0") +
-        String(now.getDate()).padStart(2, "0") +
-        "_" +
-        String(now.getHours()).padStart(2, "0") +
-        String(now.getMinutes()).padStart(2, "0") +
-        String(now.getSeconds()).padStart(2, "0");
-
-      const link = document.createElement("a");
-      link.href = image;
-      link.download = `${toolTitle}_計算結果_${timestamp}.png`;
-      link.click();
-    } catch (error) {
-      console.error("画像の生成に失敗しました:", error);
-    } finally {
-      resultElement.style.background = originalBackground;
-      if (transferListElement) {
-        transferListElement.classList.remove("border-2", accentBorder);
-      }
-    }
-  };
-
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  const isWebShareSupported = isMobile && typeof navigator !== 'undefined' && !!navigator.share;
-
-  const handleShareUrl = async () => {
-    const shareData = legacy ? { participants: participants.map(({ id, name }) => ({ id, name })), dishes: dishes.map(({ id, name, price, eaters }) => ({ id, name, price, eaters })) } : { version: potluck ? 3 : 2, participants, dishes, options };
-    const encoded = btoa(encodeURIComponent(JSON.stringify(shareData)));
-    const base = `${window.location.origin}${window.location.pathname}`;
-    const url = `${base}#${basePath}/result?data=${encodeURIComponent(encoded)}`;
-
-    if (isWebShareSupported) {
-      try {
-        await navigator.share({ title: `${toolTitle} 計算結果`, url });
-        setShareMsg('シェアしました！');
-      } catch {
-        setShareMsg('シェアをキャンセルしました');
-      }
-    } else {
-      try {
-        await navigator.clipboard.writeText(url);
-        setShareMsg('URLをコピーしました！');
-        alert('URLをコピーしました！');
-      } catch {
-        setShareMsg('コピーに失敗しました');
-      }
-    }
-    setTimeout(() => setShareMsg(''), 2000);
-  };
+  const shareData = legacy ? { participants: participants.map(({ id, name }) => ({ id, name })), dishes: dishes.map(({ id, name, price, eaters }) => ({ id, name, price, eaters })) } : { version: potluck ? 3 : 2, participants, dishes, options };
+  const encodedShareData = btoa(encodeURIComponent(JSON.stringify(shareData)));
+  const resultUrl = typeof window === 'undefined'
+    ? ''
+    : `${window.location.origin}${window.location.pathname}#${basePath}/result?data=${encodeURIComponent(encodedShareData)}`;
 
   return (
     <div className="space-y-4">
@@ -171,21 +101,14 @@ export const ItemSplitResult = ({ basePath, potluck = false, participants: initi
 
       {hasUnappliedChanges && <p role="status" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">変更はまだ反映されていません。下の負担額・精算金額は変更前の結果です。「結果に反映」を押してください。反映するまで共有・画像保存はできません。</p>}
 
-      <div ref={resultRef} className="glass-card p-0 overflow-hidden shadow-2xl">
-        <div className={`bg-gradient-to-r ${accentGradient} text-white px-5 py-4 sm:px-6 sm:py-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`}>
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.08em] opacity-90">item split report</p>
-            <h2 className="text-xl sm:text-2xl font-bold leading-tight">計算結果を共有しましょう</h2>
-            <p className="text-sm opacity-90">合計・精算ルートを一目で確認できます</p>
-          </div>
-          <div className="bg-white/15 backdrop-blur rounded-xl px-4 py-3 text-right min-w-[180px]">
-            <p className="text-xs opacity-80">合計</p>
-            <p className="text-2xl font-semibold leading-tight">{formatCurrency(calculationResult.totalAmount)}</p>
-            <p className="text-xs opacity-80">{participants.length}人 / {dishes.length}項目</p>
-          </div>
-        </div>
-
-        <div className="p-4 sm:p-6 space-y-6 bg-gradient-to-b from-white via-white to-slate-50">
+      <ResultReportCard
+        ref={resultRef}
+        accentGradient={accentGradient}
+        reportLabel="item split report"
+        subtitle="合計・精算ルートを一目で確認できます"
+        total={formatCurrency(calculationResult.totalAmount)}
+        participantSummary={`${participants.length}人 / ${dishes.length}項目`}
+      >
           {!legacy && <p className="text-xs text-slate-600">丸め方：{roundingLabels[options.roundingMode ?? 'floor']}・{options.roundingUnit.toLocaleString()}円単位 ／ 差額は{options.remainderRecipient === 'payer' ? '立替者で調整' : '全員で調整'}</p>}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -286,25 +209,27 @@ export const ItemSplitResult = ({ basePath, potluck = false, participants: initi
           {!legacy && (options.taxRate || options.serviceRate || options.discount) && <p className="text-xs text-slate-500">税 {options.taxRate || '0'}% ／サービス料 {options.serviceRate || '0'}% ／割引 {options.discount || '0'}円</p>}
 
           <DownloadBanner title={`${toolTitle} 計算結果`} url="https://warimaru.meggumi.com/" />
-        </div>
-      </div>
+      </ResultReportCard>
 
-      <div className="flex flex-col gap-3 justify-center items-center bg-white/80 border border-slate-200 rounded-2xl p-4 shadow-sm">
-        <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <button onClick={handleDownloadImage} disabled={hasUnappliedChanges} className={`${actionButtonClass} w-full text-base sm:text-lg`}>
-            <FontAwesomeIcon icon={faDownload} className="mr-2" />
-            画像保存
-          </button>
-          <button onClick={handleShareUrl} disabled={hasUnappliedChanges} className={`${actionButtonClass} w-full text-base sm:text-lg`}>
-            <FontAwesomeIcon icon={faShareAlt} className="mr-2" />
-            {isWebShareSupported ? 'シェア' : 'URLコピー'}
-          </button>
-        </div>
-        {shareMsg && <div className="text-center text-emerald-700 font-semibold mt-1 text-sm">{shareMsg}</div>}
-        <p className="text-xs text-slate-500 text-center">
-          画像保存はロゴ入り・枠線付きで出力されます。共有前に内容を確認してください。
-        </p>
-      </div>
+      <ResultShareActions
+        resultRef={resultRef}
+        disabled={hasUnappliedChanges}
+        buttonClassName={actionButtonClass}
+        downloadFilename={`${toolTitle}_計算結果`}
+        shareTitle={`${toolTitle} 計算結果`}
+        shareUrl={resultUrl}
+        showCopyAlert
+        onBeforeDownload={element => {
+          const transferListElement = element.querySelector('[data-download-highlight="transfers"]') as HTMLElement | null;
+          transferListElement?.classList.add('border-2', accentBorder);
+          const originalBackground = element.style.background;
+          element.style.background = 'white';
+          return () => {
+            element.style.background = originalBackground;
+            transferListElement?.classList.remove('border-2', accentBorder);
+          };
+        }}
+      />
     </div>
   );
 };

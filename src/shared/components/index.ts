@@ -8,4 +8,6 @@ export { DownloadBanner } from './templates/DownloadBanner';
 export { Footer } from './templates/Footer';
 export { PrivacyModal } from './templates/PrivacyModal';
 export { StepIntro } from './templates/StepIntro';
+export { ResultReportCard } from './templates/ResultReportCard';
+export { ResultShareActions } from './templates/ResultShareActions';
 export { AccountingSettings, RoundingSettings } from './molecules/SplitSettings';

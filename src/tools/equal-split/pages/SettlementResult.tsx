@@ -3,10 +3,8 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "../store/store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDownload, faShareAlt, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
-import { captureElementToImage } from "../../../infrastructure/html2canvas";
-import { withDownloadBanner } from "../../../infrastructure/downloadBanner";
-import { DownloadBanner, ParticipantAdjustment, RoundingSettings, StepIntro } from '../../../shared/components';
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { DownloadBanner, ParticipantAdjustment, ResultReportCard, ResultShareActions, RoundingSettings, StepIntro } from '../../../shared/components';
 import { PaymentStatusSummary } from "../components/organisms/PaymentStatusSummary";
 import { SettlementRouteList } from "../components/molecules/SettlementRouteList";
 import { PaymentDetailsSection } from "../components/organisms/PaymentDetailsSection";
@@ -42,7 +40,6 @@ export const SettlementResult = ({ onBack, onClear, data }: SettlementResultProp
   const isDetailMode = stored.isDetailMode;
   const nonPayingParticipants = totalParticipants - people.length;
   const resultRef = useRef<HTMLDivElement>(null);
-  const [shareMsg, setShareMsg] = useState('');
   const hasUnappliedChanges = JSON.stringify(draftMembers) !== JSON.stringify(equalMembers(people, totalParticipants, members)) ||
     JSON.stringify(draftRounding) !== JSON.stringify(rounding);
   const sharedPeople = people.map(p => ({ id: p.id, name: p.name, payments: p.payments.map(pay => ({ amount: pay.amount })) }));
@@ -71,47 +68,8 @@ export const SettlementResult = ({ onBack, onClear, data }: SettlementResultProp
     dispatch(setLegacyEqual(false));
     const encoded = encodeURIComponent(btoa(encodeURIComponent(JSON.stringify({ version: 2, people: sharedPeople, totalParticipants, members: draftMembers, rounding: draftRounding }))));
     navigate(`${location.pathname}?data=${encoded}`, { replace: true });
-    setShareMsg('');
   };
-
-  const handleDownloadImage = async () => {
-    if (!resultRef.current) return;
-    const canvas = await withDownloadBanner(resultRef.current, () =>
-      captureElementToImage(resultRef.current as HTMLDivElement)
-    );
-    const now = new Date();
-    const timestamp =
-      now.getFullYear() +
-      String(now.getMonth() + 1).padStart(2, "0") +
-      String(now.getDate()).padStart(2, "0") +
-      "_" +
-      String(now.getHours()).padStart(2, "0") +
-      String(now.getMinutes()).padStart(2, "0") +
-      String(now.getSeconds()).padStart(2, "0");
-
-    const link = document.createElement("a");
-    link.href = canvas.toDataURL("image/png");
-    link.download = `総額割り勘_計算結果_${timestamp}.png`;
-    link.click();
-  };
-
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-  const handleShare = async () => {
-    const base = `${window.location.origin}${window.location.pathname}`;
-    const shareUrl = `${base}#/equal-split/result?data=${encodedResult}`;
-    try {
-      if (isMobile && navigator.share) {
-        await navigator.share({ title: '立て替え精算 計算結果', url: shareUrl });
-        setShareMsg('シェアしました！');
-      } else {
-        await navigator.clipboard.writeText(shareUrl);
-        setShareMsg('URLをコピーしました！');
-      }
-    } catch {
-      setShareMsg('共有できませんでした。ブラウザの設定を確認してください。');
-    }
-  };
+  const resultUrl = `${window.location.origin}${window.location.pathname}#/equal-split/result?data=${encodedResult}`;
 
   return (
     <div className="space-y-4">
@@ -161,24 +119,14 @@ export const SettlementResult = ({ onBack, onClear, data }: SettlementResultProp
 
       {hasUnappliedChanges && <p role="status" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">変更はまだ反映されていません。下の負担額・精算金額は変更前の結果です。「結果に反映」を押してください。反映するまで共有・画像保存はできません。</p>}
 
-      <div
+      <ResultReportCard
         ref={resultRef}
-        className="glass-card p-0 overflow-hidden shadow-2xl"
+        accentGradient="from-blue-500 via-sky-500 to-cyan-400"
+        reportLabel="equal split report"
+        subtitle="合計・1人あたり・精算ルートをまとめています"
+        total={`${totalAmount.toLocaleString()}円`}
+        participantSummary={`${totalParticipants}人（支払 ${people.length}人）`}
       >
-        <div className="bg-gradient-to-r from-blue-500 via-sky-500 to-cyan-400 text-white px-5 py-4 sm:px-6 sm:py-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.08em] opacity-90">equal split report</p>
-            <h2 className="text-xl sm:text-2xl font-bold leading-tight">計算結果を共有しましょう</h2>
-            <p className="text-sm opacity-90">合計・1人あたり・精算ルートをまとめています</p>
-          </div>
-          <div className="bg-white/15 backdrop-blur rounded-xl px-4 py-3 text-right min-w-[180px]">
-            <p className="text-xs opacity-80">合計</p>
-            <p className="text-2xl font-semibold leading-tight">{totalAmount.toLocaleString()}円</p>
-            <p className="text-xs opacity-80">{totalParticipants}人（支払 {people.length}人）</p>
-          </div>
-        </div>
-
-        <div className="p-4 sm:p-6 space-y-6 bg-gradient-to-b from-white via-white to-slate-50">
           {!legacy && <p className="text-xs text-slate-600">丸め方：{roundingLabels[rounding.roundingMode ?? 'floor']}・{rounding.roundingUnit.toLocaleString()}円単位 ／ 差額は{rounding.remainderRecipient === 'payer' ? '立替者で調整' : '全員で調整'}</p>}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -215,35 +163,19 @@ export const SettlementResult = ({ onBack, onClear, data }: SettlementResultProp
           <SettlementRouteList transfers={transfers} />
 
           <DownloadBanner title="総額割り勘 計算結果" url="https://warimaru.meggumi.com/" />
-        </div>
-      </div>
+      </ResultReportCard>
 
       {isDetailMode && <PaymentDetailsSection paymentStatus={paymentStatus} />}
 
-      <div className="flex flex-col gap-3 justify-center items-center bg-white/80 border border-slate-200 rounded-2xl p-4 shadow-sm">
-        {shareMsg && <p role="status" className="text-sm text-slate-700">{shareMsg}</p>}
-        <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <button
-            onClick={handleDownloadImage}
-            disabled={hasUnappliedChanges}
-            className="btn btn-equal-split w-full text-base sm:text-lg"
-          >
-            <FontAwesomeIcon icon={faDownload} className="mr-2" />
-            画像保存
-          </button>
-          <button
-            onClick={handleShare}
-            disabled={hasUnappliedChanges}
-            className="btn btn-equal-split w-full text-base sm:text-lg"
-          >
-            <FontAwesomeIcon icon={faShareAlt} className="mr-2" />
-            シェア
-          </button>
-        </div>
-        <p className="text-xs text-slate-500 text-center">
-          画像保存はロゴ入り・枠線付きで出力されます。共有前に内容を確認してください。
-        </p>
-      </div>
+      <ResultShareActions
+        resultRef={resultRef}
+        disabled={hasUnappliedChanges}
+        buttonClassName="btn btn-equal-split"
+        downloadFilename="総額割り勘_計算結果"
+        shareTitle="立て替え精算 計算結果"
+        shareUrl={resultUrl}
+        copyLabel="シェア"
+      />
     </div>
   );
 };
