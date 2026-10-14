@@ -1,9 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
-import mealSplitReducer from './waketabeSlice';
+import itemSplitReducer from './itemSplitSlice';
 
-const reducer = { mealSplit: mealSplitReducer };
+const reducer = { itemSplit: itemSplitReducer };
 export const mealSplitStore = configureStore({ reducer });
 export const potluckSplitStore = configureStore({ reducer });
 
-export type MealSplitRootState = ReturnType<typeof mealSplitStore.getState>;
-export type MealSplitDispatch = typeof mealSplitStore.dispatch;
+export type ItemSplitRootState = ReturnType<typeof mealSplitStore.getState>;
+export type ItemSplitDispatch = typeof mealSplitStore.dispatch;

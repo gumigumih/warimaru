@@ -3,10 +3,10 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import { ParticipantInputStep } from '../item-split/pages/ParticipantInputStep';
 import { ItemSplitResult } from '../components/ItemSplitResult';
-import { MealSplitHeader } from '../item-split/components/molecules/WaketabeHeader';
+import { ItemSplitHeader } from '../item-split/components/molecules/ItemSplitHeader';
 import type { Participant, Dish, SplitOptions } from '../item-split/domain/entities';
-import { mealSplitStore, potluckSplitStore, type MealSplitRootState } from '../item-split/store/store';
-import { resetMealSplit, setParticipants, setDishes, setOptions, setLegacy } from '../item-split/store/waketabeSlice';
+import { mealSplitStore, potluckSplitStore, type ItemSplitRootState } from '../item-split/store/store';
+import { resetItemSplit, setParticipants, setDishes, setOptions, setLegacy } from '../item-split/store/itemSplitSlice';
 import { decodeMealShareData } from '../item-split/domain/usecases/shareData';
 
 type ItemInputStepProps = {
@@ -40,7 +40,7 @@ const decodeMealSplitShareData = (search: string) => {
 
 const ItemSplitRoutesInner = ({ basePath, potluck, version, potluckBasePath, inputStep: InputStep }: ItemSplitRoutesProps) => {
   const dispatch = useDispatch();
-  const stored = useSelector((state: MealSplitRootState) => state.mealSplit);
+  const stored = useSelector((state: ItemSplitRootState) => state.itemSplit);
   const navigate = useNavigate();
   const location = useLocation();
   const hasShareData = new URLSearchParams(location.search).has('data');
@@ -89,7 +89,7 @@ const ItemSplitRoutesInner = ({ basePath, potluck, version, potluckBasePath, inp
   };
 
   const handleClear = () => {
-    dispatch(resetMealSplit());
+    dispatch(resetItemSplit());
     navigate(`${basePath}/participants`);
   };
 
@@ -101,20 +101,20 @@ const ItemSplitRoutesInner = ({ basePath, potluck, version, potluckBasePath, inp
     <Routes>
       <Route path="/participants" element={
         <div className="space-y-4">
-          <MealSplitHeader potluck={potluck} />
+          <ItemSplitHeader potluck={potluck} />
           <ParticipantInputStep key={location.search} potluck={potluck} onComplete={handleParticipantsComplete} initialParticipants={participants} onClear={handleClear} />
         </div>
       } />
       <Route path="/dishes" element={hasInvalidShareData || (participants.length === 0 && !hasShareData) ? <Navigate to={`${basePath}/participants`} /> : (
         <div className="space-y-4">
-          <MealSplitHeader potluck={potluck} />
+          <ItemSplitHeader potluck={potluck} />
           <InputStep participants={participants} options={options} onComplete={handleDishesComplete} onBack={handleBackToParticipantInput} initialDishes={dishes} onClear={handleClear} />
         </div>
       )} />
       <Route path="/options" element={<Navigate to={`${basePath}/result${location.search}`} replace />} />
       <Route path="/result" element={hasInvalidShareData || ((participants.length === 0 || dishes.length === 0) && !hasShareData) ? <Navigate to={`${basePath}/participants`} /> : (
         <div className="space-y-4">
-          <MealSplitHeader potluck={potluck} />
+          <ItemSplitHeader potluck={potluck} />
           <ItemSplitResult key={location.search} basePath={basePath} potluck={potluck} participants={participants} dishes={dishes} options={options} legacy={legacy} onAdjust={handleAdjustment} onBack={() => navigate(`${basePath}/dishes`)} onClear={handleClear} />
         </div>
       )} />

@@ -26,7 +26,7 @@ try {
   const { PotluckSplitRoutes: PotluckToolRoutes } = await server.ssrLoadModule('/src/tools/potluck-split/Routes.tsx');
   const { Landing } = await server.ssrLoadModule('/src/pages/Landing.tsx');
   const { mealSplitStore, potluckSplitStore } = await server.ssrLoadModule('/src/shared/item-split/store/store.ts');
-  const { setParticipants, setDishes, resetMealSplit } = await server.ssrLoadModule('/src/shared/item-split/store/waketabeSlice.ts');
+  const { setParticipants, setDishes, resetItemSplit } = await server.ssrLoadModule('/src/shared/item-split/store/itemSplitSlice.ts');
   const { getDishPayments } = await server.ssrLoadModule('/src/shared/item-split/domain/usecases/dishPayments.ts');
   const { SettlementRouteList } = await server.ssrLoadModule('/src/tools/equal-split/components/molecules/SettlementRouteList.tsx');
   const colors = { backgrounds: ['blue'], text: ['blue'] };
@@ -370,15 +370,15 @@ try {
   assert.equal((flatMarkup.match(/<span>料理名<\/span>/g) ?? []).length, 2);
   assert.doesNotMatch(flatMarkup, /費目を登録/);
 
-  mealSplitStore.dispatch(resetMealSplit());
-  potluckSplitStore.dispatch(resetMealSplit());
+  mealSplitStore.dispatch(resetItemSplit());
+  potluckSplitStore.dispatch(resetItemSplit());
   mealSplitStore.dispatch(setParticipants([member('レストラン用') ]));
   potluckSplitStore.dispatch(setParticipants(seven));
   potluckSplitStore.dispatch(setDishes(categories));
-  assert.deepEqual(mealSplitStore.getState().mealSplit.participants.map(p => p.name), ['レストラン用']);
-  assert.equal(mealSplitStore.getState().mealSplit.dishes.length, 0);
-  assert.equal(potluckSplitStore.getState().mealSplit.participants.length, 7);
-  assert.equal(potluckSplitStore.getState().mealSplit.dishes.length, 5);
+  assert.deepEqual(mealSplitStore.getState().itemSplit.participants.map(p => p.name), ['レストラン用']);
+  assert.equal(mealSplitStore.getState().itemSplit.dishes.length, 0);
+  assert.equal(potluckSplitStore.getState().itemSplit.participants.length, 7);
+  assert.equal(potluckSplitStore.getState().itemSplit.dishes.length, 5);
   const routeMarkup = (basePath, potluck, path) => renderToStaticMarkup(createElement(MemoryRouter, { initialEntries: [path] },
     createElement(Routes, null, createElement(Route, { path: basePath + '/*', element: createElement(MealSplitRoutes, { basePath, potluck }) }))));
   const mealRoute = routeMarkup('/meal-split', false, '/meal-split/participants');
@@ -409,9 +409,9 @@ try {
   const landingMarkup = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(Landing)));
   assert.equal((landingMarkup.match(/計算する/g) ?? []).length, 4);
   assert.match(landingMarkup, /お酒を飲まない人がいる飲み会/);
-  potluckSplitStore.dispatch(resetMealSplit());
-  assert.equal(mealSplitStore.getState().mealSplit.participants.length, 1);
-  mealSplitStore.dispatch(resetMealSplit());
+  potluckSplitStore.dispatch(resetItemSplit());
+  assert.equal(mealSplitStore.getState().itemSplit.participants.length, 1);
+  mealSplitStore.dispatch(resetItemSplit());
   console.log('レストラン入力・持ち寄り入力・ツール別データ分離: 検証OK');
   console.log('7人・5費目・複数立替・費目別参加者・v3共有データ: 検証OK');
   console.log('配分・端数・精算・旧/新共有データ: 検証OK');

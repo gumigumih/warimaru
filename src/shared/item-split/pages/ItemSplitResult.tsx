@@ -11,7 +11,7 @@ import { parseAmount, roundingLabels } from '../../domain/split';
 import { decodeMealShareData } from '../domain/usecases/shareData';
 import { getDishPayments } from '../domain/usecases/dishPayments';
 
-interface MealSettlementResultProps {
+interface ItemSplitResultProps {
   basePath: string;
   potluck?: boolean;
   participants: Participant[];
@@ -23,7 +23,7 @@ interface MealSettlementResultProps {
   onAdjust: (participants: Participant[], options: SplitOptions) => void;
 }
 
-export const MealSettlementResult = ({ basePath, potluck = false, participants: initialParticipants, dishes, options: initialOptions, legacy: initialLegacy = false, onBack, onClear, onAdjust }: MealSettlementResultProps) => {
+export const ItemSplitResult = ({ basePath, potluck = false, participants: initialParticipants, dishes, options: initialOptions, legacy: initialLegacy = false, onBack, onClear, onAdjust }: ItemSplitResultProps) => {
   const toolTitle = potluck ? '持ち寄り飲み会を精算する' : 'レストランで食べた分だけ割る';
   const accentGradient = potluck ? 'from-emerald-500 via-teal-500 to-cyan-500' : 'from-orange-500 via-amber-500 to-yellow-500';
   const accentBorder = potluck ? 'border-emerald-500' : 'border-orange-500';

@@ -4,22 +4,22 @@ import type { Participant, Dish } from '../domain/entities';
 import type { SplitOptions } from '../domain/entities';
 import { defaultSplitOptions } from '../../domain/split';
 
-type MealSplitState = {
+type ItemSplitState = {
   participants: Participant[];
   dishes: Dish[];
   options: SplitOptions;
   legacy: boolean;
 };
 
-const initialState: MealSplitState = {
+const initialState: ItemSplitState = {
   participants: [],
   dishes: [],
   options: defaultSplitOptions,
   legacy: false,
 };
 
-export const mealSplitSlice = createSlice({
-  name: 'mealSplit',
+export const itemSplitSlice = createSlice({
+  name: 'itemSplit',
   initialState,
   reducers: {
     setParticipants: (state, action: PayloadAction<Participant[]>) => {
@@ -34,9 +34,9 @@ export const mealSplitSlice = createSlice({
     setLegacy: (state, action: PayloadAction<boolean>) => {
       state.legacy = action.payload;
     },
-    resetMealSplit: () => initialState,
+    resetItemSplit: () => initialState,
   },
 });
 
-export const { setParticipants, setDishes, setOptions, setLegacy, resetMealSplit } = mealSplitSlice.actions;
-export default mealSplitSlice.reducer;
+export const { setParticipants, setDishes, setOptions, setLegacy, resetItemSplit } = itemSplitSlice.actions;
+export default itemSplitSlice.reducer;

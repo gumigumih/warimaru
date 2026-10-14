@@ -1,7 +1,7 @@
 import { faRoute, faUtensils } from "@fortawesome/free-solid-svg-icons";
 import { BrandHeader } from "../../../components";
 
-export const MealSplitHeader = ({ potluck = false }: { potluck?: boolean }) => {
+export const ItemSplitHeader = ({ potluck = false }: { potluck?: boolean }) => {
   return (
     <BrandHeader
     icon={potluck ? faRoute : faUtensils}
