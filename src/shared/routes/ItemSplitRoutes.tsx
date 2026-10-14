@@ -1,13 +1,13 @@
 import { useEffect, useMemo, type ComponentType } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { Provider, useDispatch, useSelector } from 'react-redux';
-import { ParticipantInputStep } from '../../waketabe/pages/ParticipantInputStep';
+import { ParticipantInputStep } from '../item-split/pages/ParticipantInputStep';
 import { ItemSplitResult } from '../components/ItemSplitResult';
-import { MealSplitHeader } from '../../waketabe/components/molecules/WaketabeHeader';
-import type { Participant, Dish, SplitOptions } from '../../waketabe/domain/entities';
-import { mealSplitStore, potluckSplitStore, type MealSplitRootState } from '../../waketabe/store/store';
-import { resetMealSplit, setParticipants, setDishes, setOptions, setLegacy } from '../../waketabe/store/waketabeSlice';
-import { decodeMealShareData } from '../../waketabe/domain/usecases/shareData';
+import { MealSplitHeader } from '../item-split/components/molecules/WaketabeHeader';
+import type { Participant, Dish, SplitOptions } from '../item-split/domain/entities';
+import { mealSplitStore, potluckSplitStore, type MealSplitRootState } from '../item-split/store/store';
+import { resetMealSplit, setParticipants, setDishes, setOptions, setLegacy } from '../item-split/store/waketabeSlice';
+import { decodeMealShareData } from '../item-split/domain/usecases/shareData';
 
 type ItemInputStepProps = {
   participants: Participant[];

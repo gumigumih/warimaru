@@ -1,6 +1,6 @@
 import { ItemSplitRoutes } from '../shared/routes/ItemSplitRoutes';
-import { DishInputStep } from './pages/DishInputStep';
-import { PotluckInputStep } from './pages/PotluckInputStep';
+import { DishInputStep } from '../tools/meal-split/pages/DishInputStep';
+import { PotluckInputStep } from '../tools/potluck-split/pages/PotluckInputStep';
 
 type MealSplitRoutesProps = {
   basePath: string;
