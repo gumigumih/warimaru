@@ -1,5 +1,5 @@
-import { adjustedAmount, allocateAmount, decodeOptions, defaultSplitOptions, parseAmount, roundAmount } from '../domain/split';
-import type { SplitOptions } from '../domain/split';
+import { adjustedAmount, allocateAmount, decodeOptions, defaultSplitOptions, parseAmount, roundAmount } from '../shared/domain/split';
+import type { SplitOptions } from '../shared/domain/split';
 
 export interface SimpleWarikanData {
   totalAmount: string;

@@ -8,14 +8,11 @@ import {
   faDownload,
   faShareAlt,
 } from '@fortawesome/free-solid-svg-icons';
-import { BrandHeader } from '../components/templates/BrandHeader';
-import { AmountInput } from '../components/atoms/AmountInput';
-import { StepIntro } from '../components/templates/StepIntro';
-import { DownloadBanner } from '../components/templates/DownloadBanner';
+import { AmountInput, BrandHeader, DownloadBanner, StepIntro } from '../shared/components';
 import { captureElementToImage } from '../infrastructure/html2canvas';
 import { withDownloadBanner } from '../infrastructure/downloadBanner';
-import { defaultSplitOptions, roundingLabels } from '../domain/split';
-import { AccountingSettings, RoundingSettings } from '../components/molecules/SplitSettings';
+import { defaultSplitOptions, roundingLabels } from '../shared/domain/split';
+import { AccountingSettings, RoundingSettings } from '../shared/components';
 import { calculateSimpleResult, decodeSimpleData } from './calculation';
 import type { SimpleWarikanData } from './calculation';
 

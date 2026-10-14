@@ -6,8 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload, faShareAlt, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { captureElementToImage } from "../../infrastructure/html2canvas";
 import { withDownloadBanner } from "../../infrastructure/downloadBanner";
-import { DownloadBanner } from "../../components/templates/DownloadBanner";
-import { StepIntro } from "../../components/templates/StepIntro";
+import { DownloadBanner, ParticipantAdjustment, RoundingSettings, StepIntro } from '../../shared/components';
 import { PaymentStatusSummary } from "../components/organisms/PaymentStatusSummary";
 import { SettlementRouteList } from "../components/molecules/SettlementRouteList";
 import { PaymentDetailsSection } from "../components/organisms/PaymentDetailsSection";
@@ -19,9 +18,7 @@ import {
 import { calculateEqualSettlement, equalMembers } from '../domain/usecases/settlement';
 import type { EqualShareData } from '../domain/usecases/shareData';
 import { setMembers, setRounding, setLegacyEqual } from '../store/peopleSlice';
-import { ParticipantAdjustment } from '../../components/molecules/ParticipantAdjustment';
-import { RoundingSettings } from '../../components/molecules/SplitSettings';
-import { roundingLabels, roundAmount } from '../../domain/split';
+import { roundingLabels, roundAmount } from '../../shared/domain/split';
 
 interface SettlementResultProps {
   onBack: () => void;

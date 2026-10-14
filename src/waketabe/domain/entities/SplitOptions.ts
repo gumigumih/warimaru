@@ -1,1 +1,1 @@
-export type { SplitOptions } from '../../../domain/split';
+export type { SplitOptions } from '../../../shared/domain/split';

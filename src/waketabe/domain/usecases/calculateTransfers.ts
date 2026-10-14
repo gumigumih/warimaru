@@ -1,5 +1,5 @@
 import type { CalculationResult, Transfer } from '../entities';
-import { settleBalances } from '../../../domain/split';
+import { settleBalances } from '../../../shared/domain/split';
 
 export const calculateTransfers = (calculationResult: CalculationResult): Transfer[] => {
   const { participants } = calculationResult;

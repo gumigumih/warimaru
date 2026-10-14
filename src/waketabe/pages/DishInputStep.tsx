@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faPlus, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import type { Participant, Dish, SplitOptions } from '../domain/entities';
-import { AmountInput } from '../../components/atoms/AmountInput';
-import { StepIntro } from '../../components/templates/StepIntro';
-import { parseAmount, adjustedAmount, defaultSplitOptions } from '../../domain/split';
+import { AmountInput, StepIntro } from '../../shared/components';
+import { parseAmount, adjustedAmount, defaultSplitOptions } from '../../shared/domain/split';
 import { getDishPayments } from '../domain/usecases/dishPayments';
 
 export const DishInputStep = ({ participants, options = defaultSplitOptions, onComplete, onBack, initialDishes = [], onClear }: {

@@ -6,11 +6,8 @@ import { calculatePayments, calculateTransfers } from "../domain/usecases";
 import { formatCurrency } from "../domain/usecases/formatCurrency";
 import { captureElementToImage } from "../../infrastructure/html2canvas";
 import { withDownloadBanner } from "../../infrastructure/downloadBanner";
-import { DownloadBanner } from "../../components/templates/DownloadBanner";
-import { StepIntro } from "../../components/templates/StepIntro";
-import { parseAmount, roundingLabels } from '../../domain/split';
-import { ParticipantAdjustment } from '../../components/molecules/ParticipantAdjustment';
-import { AccountingSettings, RoundingSettings } from '../../components/molecules/SplitSettings';
+import { DownloadBanner, ParticipantAdjustment, StepIntro, AccountingSettings, RoundingSettings } from '../../shared/components';
+import { parseAmount, roundingLabels } from '../../shared/domain/split';
 import { decodeMealShareData } from '../domain/usecases/shareData';
 import { getDishPayments } from '../domain/usecases/dishPayments';
 

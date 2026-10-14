@@ -1,5 +1,5 @@
-import { decodeOptions } from '../../../domain/split';
-import type { SplitMember, RoundingOptions } from '../../../domain/split';
+import { decodeOptions } from '../../../shared/domain/split';
+import type { SplitMember, RoundingOptions } from '../../../shared/domain/split';
 import type { PersonInterface } from '../entities/Person';
 import { equalMembers } from './settlement';
 

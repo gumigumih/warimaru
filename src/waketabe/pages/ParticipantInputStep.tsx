@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDice, faUserPlus, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import type { Participant } from '../domain/entities';
-import { StepIntro } from '../../components/templates/StepIntro';
+import { StepIntro } from '../../shared/components';
 import { getRandomName } from '../../utils/randomName';
-import { ParticipantAdjustment } from '../../components/molecules/ParticipantAdjustment';
+import { ParticipantAdjustment } from '../../shared/components';
 
 const createBlankParticipant = (): Participant => ({
   id: crypto.randomUUID(),
@@ -13,10 +13,11 @@ const createBlankParticipant = (): Participant => ({
   burdenRate: 1,
 });
 
-export const ParticipantInputStep = ({ onComplete, initialParticipants = [], onClear }: { 
+export const ParticipantInputStep = ({ onComplete, initialParticipants = [], onClear, potluck = false }: {
   onComplete?: (participants: Participant[]) => void;
   initialParticipants?: Participant[];
   onClear?: () => void;
+  potluck?: boolean;
 }) => {
   const [participants, setParticipants] = useState<Participant[]>(
     initialParticipants.length > 0 ? initialParticipants : [createBlankParticipant()]
@@ -121,7 +122,7 @@ export const ParticipantInputStep = ({ onComplete, initialParticipants = [], onC
       </div>
       {onComplete && (
         <button
-          className="btn btn-meal-split w-full text-lg"
+          className={`btn ${potluck ? 'btn-potluck-split' : 'btn-meal-split'} w-full text-lg`}
           onClick={() => onComplete(validParticipants)}
           disabled={validParticipants.length === 0 || validParticipants.length > 300 ||
             validParticipants.some(p => !Number.isFinite(p.burdenRate) || p.burdenRate < 0 || p.burdenRate > 100) ||

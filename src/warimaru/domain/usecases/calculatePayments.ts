@@ -1,5 +1,5 @@
 import type { PersonInterface } from '../entities/Person';
-import { settleBalances } from '../../../domain/split';
+import { settleBalances } from '../../../shared/domain/split';
 
 export function calculateTotalAmount(people: PersonInterface[]): number {
   return people.reduce(

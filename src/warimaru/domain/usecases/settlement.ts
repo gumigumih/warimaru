@@ -1,5 +1,5 @@
-import { allocateAmount, defaultSplitOptions, settleBalances } from '../../../domain/split';
-import type { RoundingOptions, SplitMember } from '../../../domain/split';
+import { allocateAmount, defaultSplitOptions, settleBalances } from '../../../shared/domain/split';
+import type { RoundingOptions, SplitMember } from '../../../shared/domain/split';
 import type { PersonInterface } from '../entities/Person';
 import { calculatePaymentStatus, calculateTotalAmount, calculateTransfers } from './calculatePayments';
 

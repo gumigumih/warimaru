@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faPlus, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import type { Participant, Dish, DishPayment, SplitOptions } from '../domain/entities';
-import { AmountInput } from '../../components/atoms/AmountInput';
-import { StepIntro } from '../../components/templates/StepIntro';
-import { parseAmount, adjustedAmount, defaultSplitOptions } from '../../domain/split';
+import { AmountInput, StepIntro } from '../../shared/components';
+import { parseAmount, adjustedAmount, defaultSplitOptions } from '../../shared/domain/split';
 import { getDishPayments } from '../domain/usecases/dishPayments';
 import { decodeMealShareData } from '../domain/usecases/shareData';
 
@@ -179,7 +178,7 @@ export const PotluckInputStep = ({ participants, options = defaultSplitOptions, 
       </section>}
 
       {error && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      {onComplete && <button className="btn btn-meal-split w-full text-lg" onClick={handleComplete} disabled={dishes.length === 0}>計算結果へ</button>}
+      {onComplete && <button className="btn btn-potluck-split w-full text-lg" onClick={handleComplete} disabled={dishes.length === 0}>計算結果へ</button>}
     </div>
   );
 };

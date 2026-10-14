@@ -5,7 +5,7 @@ import { faUserPlus } from '@fortawesome/free-solid-svg-icons';
 import type { RootState, AppDispatch } from '../store/store';
 import { addPerson, deletePerson, setDetailMode, updatePersonName } from '../store/peopleSlice';
 import { PayerInputCard } from '../components/molecules/PayerInputCard';
-import { StepIntro } from '../../components/templates/StepIntro';
+import { StepIntro } from '../../shared/components';
 import { getRandomName } from '../../utils/randomName';
 
 interface PaymentInputStepProps {

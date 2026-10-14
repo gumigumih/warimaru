@@ -1,1 +1,1 @@
-export type { SplitMember as Participant } from '../../../domain/split';
+export type { SplitMember as Participant } from '../../../shared/domain/split';

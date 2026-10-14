@@ -1,5 +1,5 @@
 import { faCalculator } from "@fortawesome/free-solid-svg-icons";
-import { BrandHeader } from "../../components/templates/BrandHeader";
+import { BrandHeader } from "../../shared/components";
 
 export const Header = () => {
   return (

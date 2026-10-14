@@ -1,4 +1,4 @@
-import { AmountInput } from '../../../components/atoms/AmountInput';
+import { AmountInput } from '../../../shared/components';
 
 interface SimplePaymentInputProps {
   value: string;

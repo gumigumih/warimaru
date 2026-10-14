@@ -1,5 +1,5 @@
 import type { PersonInterface } from './Person';
-import type { RoundingOptions, SplitMember } from '../../../domain/split';
+import type { RoundingOptions, SplitMember } from '../../../shared/domain/split';
  
 export interface PeopleState {
   people: PersonInterface[];

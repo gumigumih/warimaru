@@ -1,6 +1,4 @@
-import { TextInput } from '../../../components/atoms/TextInput';
-import { Checkbox } from '../../../components/atoms/Checkbox';
-import { AmountInput } from '../../../components/atoms/AmountInput';
+import { AmountInput, Checkbox, TextInput } from '../../../shared/components';
 import type { Participant } from '../../domain/entities';
 
 interface DishFormProps {

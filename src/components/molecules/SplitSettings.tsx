@@ -1,5 +1,5 @@
-import type { RoundingOptions, SplitOptions } from '../../domain/split';
-import { allocateAmount, roundAmount, roundingLabels } from '../../domain/split';
+import type { RoundingOptions, SplitOptions } from '../../shared/domain/split';
+import { allocateAmount, roundAmount, roundingLabels } from '../../shared/domain/split';
 import { AmountInput } from '../atoms/AmountInput';
 
 const fieldClass = 'h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-base font-normal text-slate-900';

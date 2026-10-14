@@ -1,4 +1,4 @@
-import { adjustedAmount, allocateAmount, allocateSignedAmount, defaultSplitOptions, parseAmount } from '../../../domain/split';
+import { adjustedAmount, allocateAmount, allocateSignedAmount, defaultSplitOptions, parseAmount } from '../../../shared/domain/split';
 import type { Dish, Participant, CalculationResult, ParticipantPayment, SplitOptions } from '../entities';
 import { getDishPayments } from './dishPayments';
 

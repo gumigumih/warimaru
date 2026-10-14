@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { Participant, Dish } from '../domain/entities';
 import type { SplitOptions } from '../domain/entities';
-import { defaultSplitOptions } from '../../domain/split';
+import { defaultSplitOptions } from '../../shared/domain/split';
 
 type MealSplitState = {
   participants: Participant[];

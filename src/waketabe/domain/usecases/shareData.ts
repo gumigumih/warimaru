@@ -1,4 +1,4 @@
-import { adjustedAmount, decodeOptions, parseAmount } from '../../../domain/split';
+import { adjustedAmount, decodeOptions, parseAmount } from '../../../shared/domain/split';
 import type { Participant, Dish, DishPayment, SplitOptions } from '../entities';
 
 export interface MealShareData {

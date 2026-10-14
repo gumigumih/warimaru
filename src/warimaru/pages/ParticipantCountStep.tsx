@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import type { RootState, AppDispatch } from '../store/store';
 import { setTotalParticipants, setMembers, setLegacyEqual } from '../store/peopleSlice';
-import { StepIntro } from '../../components/templates/StepIntro';
+import { StepIntro } from '../../shared/components';
 import { equalMembers } from '../domain/usecases/settlement';
 
 interface ParticipantCountStepProps {

@@ -2,8 +2,8 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { PaymentItem } from '../domain/entities/PaymentItem';
 import type { PeopleState } from '../domain/entities/PeopleState';
-import { defaultSplitOptions } from '../../domain/split';
-import type { RoundingOptions, SplitMember } from '../../domain/split';
+import { defaultSplitOptions } from '../../shared/domain/split';
+import type { RoundingOptions, SplitMember } from '../../shared/domain/split';
 
 const createInitialState = (): PeopleState => ({
   people: [
