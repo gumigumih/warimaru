@@ -43,9 +43,8 @@ jobs:
           LATEST_VERSION=${LATEST_TAG#v}
 
           if [ "$CURRENT_VERSION" = "$LATEST_VERSION" ]; then
-            echo "❌ Version not updated! Current: $CURRENT_VERSION, Latest tag: $LATEST_VERSION"
-            echo "Please update the version in package.json before deploying"
-            exit 1
+            echo "✅ Version unchanged; deploy only. Current: $CURRENT_VERSION, Latest tag: $LATEST_VERSION"
+            echo "should_create_tag=false" >> $GITHUB_OUTPUT
           else
             echo "✅ Version updated! Current: $CURRENT_VERSION, Latest tag: $LATEST_VERSION"
             echo "should_create_tag=true" >> $GITHUB_OUTPUT
