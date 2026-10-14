@@ -28,6 +28,9 @@ interface MealSettlementResultProps {
 
 export const MealSettlementResult = ({ basePath, potluck = false, participants: initialParticipants, dishes, options: initialOptions, legacy: initialLegacy = false, onBack, onClear, onAdjust }: MealSettlementResultProps) => {
   const toolTitle = potluck ? '持ち寄り飲み会を精算する' : 'レストランで食べた分だけ割る';
+  const accentGradient = potluck ? 'from-emerald-500 via-teal-500 to-cyan-500' : 'from-orange-500 via-amber-500 to-yellow-500';
+  const accentBorder = potluck ? 'border-emerald-500' : 'border-orange-500';
+  const actionButtonClass = potluck ? 'btn btn-potluck-split' : 'btn btn-meal-split';
   const [applied, setApplied] = useState({ participants: initialParticipants, options: initialOptions, legacy: initialLegacy });
   const { participants, options, legacy } = applied;
   const [draftParticipants, setDraftParticipants] = useState(initialParticipants);
@@ -59,7 +62,7 @@ export const MealSettlementResult = ({ basePath, potluck = false, participants: 
       '[data-download-highlight="transfers"]'
     ) as HTMLElement;
     if (transferListElement) {
-      transferListElement.classList.add("border-2", "border-orange-500");
+      transferListElement.classList.add("border-2", accentBorder);
     }
 
     const resultElement = resultRef.current;
@@ -90,7 +93,7 @@ export const MealSettlementResult = ({ basePath, potluck = false, participants: 
     } finally {
       resultElement.style.background = originalBackground;
       if (transferListElement) {
-        transferListElement.classList.remove("border-2", "border-orange-500");
+        transferListElement.classList.remove("border-2", accentBorder);
       }
     }
   };
@@ -130,7 +133,7 @@ export const MealSettlementResult = ({ basePath, potluck = false, participants: 
         totalSteps={3}
         title="結果を見る"
         description={potluck ? '費目ごとの立替と参加者別の負担をまとめて精算し、必要なら調整して共有できます。' : '料理ごとの負担額を確認し、必要なら調整して共有できます。'}
-        accentClassName="bg-gradient-to-b from-orange-500 via-amber-500 to-yellow-500"
+        accentClassName={`bg-gradient-to-b ${accentGradient}`}
         action={
           <button
             onClick={onBack}
@@ -165,14 +168,14 @@ export const MealSettlementResult = ({ basePath, potluck = false, participants: 
           <AccountingSettings options={draftOptions} onChange={setDraftOptions} />
           <RoundingSettings options={draftOptions} onChange={rounding => setDraftOptions({ ...draftOptions, ...rounding })} />
           {!adjustedData && <p role="alert" className="text-sm text-red-700">各項目に負担する対象者を1人以上残してください。負担率・税率・サービス料は0〜10000%、割引額は0以上の整数で入力してください。</p>}
-          <button className="btn btn-meal-split w-full" disabled={!adjustedData} onClick={applyAdjustment}>結果に反映</button>
+          <button className={`${actionButtonClass} w-full`} disabled={!adjustedData} onClick={applyAdjustment}>結果に反映</button>
         </div>
       </details>
 
       {hasUnappliedChanges && <p role="status" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">変更はまだ反映されていません。下の負担額・精算金額は変更前の結果です。「結果に反映」を押してください。反映するまで共有・画像保存はできません。</p>}
 
       <div ref={resultRef} className="glass-card p-0 overflow-hidden shadow-2xl">
-        <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-white px-5 py-4 sm:px-6 sm:py-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className={`bg-gradient-to-r ${accentGradient} text-white px-5 py-4 sm:px-6 sm:py-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`}>
           <div className="space-y-1">
             <p className="text-xs uppercase tracking-[0.08em] opacity-90">item split report</p>
             <h2 className="text-xl sm:text-2xl font-bold leading-tight">計算結果を共有しましょう</h2>
@@ -291,11 +294,11 @@ export const MealSettlementResult = ({ basePath, potluck = false, participants: 
 
       <div className="flex flex-col gap-3 justify-center items-center bg-white/80 border border-slate-200 rounded-2xl p-4 shadow-sm">
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <button onClick={handleDownloadImage} disabled={hasUnappliedChanges} className="btn btn-meal-split w-full text-base sm:text-lg">
+          <button onClick={handleDownloadImage} disabled={hasUnappliedChanges} className={`${actionButtonClass} w-full text-base sm:text-lg`}>
             <FontAwesomeIcon icon={faDownload} className="mr-2" />
             画像保存
           </button>
-          <button onClick={handleShareUrl} disabled={hasUnappliedChanges} className="btn btn-meal-split w-full text-base sm:text-lg">
+          <button onClick={handleShareUrl} disabled={hasUnappliedChanges} className={`${actionButtonClass} w-full text-base sm:text-lg`}>
             <FontAwesomeIcon icon={faShareAlt} className="mr-2" />
             {isWebShareSupported ? 'シェア' : 'URLコピー'}
           </button>
