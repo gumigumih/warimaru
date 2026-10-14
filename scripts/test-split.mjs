@@ -6,27 +6,41 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 const server = await createServer({ configFile: false, server: { middlewareMode: true }, appType: 'custom' });
 try {
-  const { allocateAmount, allocateSignedAmount, adjustedAmount, defaultSplitOptions: defaults, parseAmount, settleBalances, roundAmount, decodeOptions } = await server.ssrLoadModule('/src/domain/split.ts');
-  const { calculatePayments } = await server.ssrLoadModule('/src/waketabe/domain/usecases/calculatePayments.ts');
-  const { calculateTransfers } = await server.ssrLoadModule('/src/waketabe/domain/usecases/calculateTransfers.ts');
-  const { decodeMealShareData } = await server.ssrLoadModule('/src/waketabe/domain/usecases/shareData.ts');
-  const { calculateEqualSettlement, equalMembers } = await server.ssrLoadModule('/src/warimaru/domain/usecases/settlement.ts');
-  const { decodeEqualShareData } = await server.ssrLoadModule('/src/warimaru/domain/usecases/shareData.ts');
-  const { calculateSimpleResult, decodeSimpleData } = await server.ssrLoadModule('/src/simple-warikan/calculation.ts');
-  const { ParticipantInputStep } = await server.ssrLoadModule('/src/waketabe/pages/ParticipantInputStep.tsx');
-  const { DishInputStep } = await server.ssrLoadModule('/src/waketabe/pages/DishInputStep.tsx');
-  const { PotluckInputStep } = await server.ssrLoadModule('/src/waketabe/pages/PotluckInputStep.tsx');
+  const { allocateAmount, allocateSignedAmount, adjustedAmount, defaultSplitOptions: defaults, parseAmount, settleBalances, roundAmount, decodeOptions } = await server.ssrLoadModule('/src/shared/domain/split.ts');
+  const sharedSplit = await server.ssrLoadModule('/src/shared/domain/split.ts');
+  const sharedComponents = await server.ssrLoadModule('/src/shared/components/index.ts');
+  const { AmountInput } = await server.ssrLoadModule('/src/shared/components/atoms/AmountInput.tsx');
+  const { BrandHeader } = await server.ssrLoadModule('/src/shared/components/templates/BrandHeader.tsx');
+  const { StepIntro } = await server.ssrLoadModule('/src/shared/components/templates/StepIntro.tsx');
+  const { calculatePayments } = await server.ssrLoadModule('/src/shared/item-split/domain/usecases/calculatePayments.ts');
+  const { calculateTransfers } = await server.ssrLoadModule('/src/shared/item-split/domain/usecases/calculateTransfers.ts');
+  const { decodeMealShareData } = await server.ssrLoadModule('/src/shared/item-split/domain/usecases/shareData.ts');
+  const { calculateEqualSettlement, equalMembers } = await server.ssrLoadModule('/src/tools/equal-split/domain/usecases/settlement.ts');
+  const { decodeEqualShareData } = await server.ssrLoadModule('/src/tools/equal-split/domain/usecases/shareData.ts');
+  const { calculateSimpleResult, decodeSimpleData } = await server.ssrLoadModule('/src/tools/simple-split/calculation.ts');
+  const { ParticipantInputStep } = await server.ssrLoadModule('/src/shared/item-split/pages/ParticipantInputStep.tsx');
+  const { DishInputStep } = await server.ssrLoadModule('/src/tools/meal-split/pages/DishInputStep.tsx');
+  const { PotluckInputStep } = await server.ssrLoadModule('/src/tools/potluck-split/pages/PotluckInputStep.tsx');
   const { MealSplitRoutes } = await server.ssrLoadModule('/src/waketabe/Routes.tsx');
+  const { MealSplitRoutes: MealToolRoutes } = await server.ssrLoadModule('/src/tools/meal-split/Routes.tsx');
+  const { PotluckSplitRoutes: PotluckToolRoutes } = await server.ssrLoadModule('/src/tools/potluck-split/Routes.tsx');
   const { Landing } = await server.ssrLoadModule('/src/pages/Landing.tsx');
-  const { mealSplitStore, potluckSplitStore } = await server.ssrLoadModule('/src/waketabe/store/store.ts');
-  const { setParticipants, setDishes, resetMealSplit } = await server.ssrLoadModule('/src/waketabe/store/waketabeSlice.ts');
-  const { getDishPayments } = await server.ssrLoadModule('/src/waketabe/domain/usecases/dishPayments.ts');
-  const { SettlementRouteList } = await server.ssrLoadModule('/src/warimaru/components/molecules/SettlementRouteList.tsx');
+  const { mealSplitStore, potluckSplitStore } = await server.ssrLoadModule('/src/shared/item-split/store/store.ts');
+  const { setParticipants, setDishes, resetItemSplit } = await server.ssrLoadModule('/src/shared/item-split/store/itemSplitSlice.ts');
+  const { getDishPayments } = await server.ssrLoadModule('/src/shared/item-split/domain/usecases/dishPayments.ts');
+  const { SettlementRouteList } = await server.ssrLoadModule('/src/tools/equal-split/components/molecules/SettlementRouteList.tsx');
   const colors = { backgrounds: ['blue'], text: ['blue'] };
   const member = (id, burdenRate = 1, displayOnly = false) => ({ id, name: id, burdenRate, displayOnly });
   const payment = (id, amount) => ({ id, name: id, payments: [{ id: `${id}-pay`, amount, description: '' }] });
   const item = (id, price, eaters, paidBy = '') => ({ id, name: id, price: String(price), eaters, paidBy });
   const sum = values => values.reduce((total, value) => total + value, 0);
+
+  // 共通公開口と既存互換パスは同じ計算・UI部品を参照する。
+  assert.equal(sharedSplit.allocateAmount, allocateAmount);
+  assert.equal(sharedSplit.settleBalances, settleBalances);
+  assert.equal(sharedComponents.AmountInput, AmountInput);
+  assert.equal(sharedComponents.BrandHeader, BrandHeader);
+  assert.equal(sharedComponents.StepIntro, StepIntro);
 
   assert.deepEqual(allocateAmount(1001, [1, 1, 1]), [334, 334, 333]);
   assert.deepEqual(allocateAmount(900, [1, 0.5, 0]), [600, 300, 0]);
@@ -338,6 +352,8 @@ try {
   assert.equal((inputMarkup.match(/立替者（/g) ?? []).length, 2);
   assert.equal((inputMarkup.match(/aria-pressed=/g) ?? []).length, 7);
   assert.match(inputMarkup, /value="温泉代"/);
+  const potluckParticipantMarkup = renderToStaticMarkup(createElement(ParticipantInputStep, { initialParticipants: seven, potluck: true, onComplete() {} }));
+  assert.match(potluckParticipantMarkup, /btn-potluck-split/);
   const migratedMarkup = renderToStaticMarkup(createElement(PotluckInputStep, { participants: seven, initialDishes: [oldSingle], onComplete() {} }));
   assert.equal((migratedMarkup.match(/立替者（/g) ?? []).length, 1);
   assert.match(migratedMarkup, /1,001円/);
@@ -354,15 +370,15 @@ try {
   assert.equal((flatMarkup.match(/<span>料理名<\/span>/g) ?? []).length, 2);
   assert.doesNotMatch(flatMarkup, /費目を登録/);
 
-  mealSplitStore.dispatch(resetMealSplit());
-  potluckSplitStore.dispatch(resetMealSplit());
+  mealSplitStore.dispatch(resetItemSplit());
+  potluckSplitStore.dispatch(resetItemSplit());
   mealSplitStore.dispatch(setParticipants([member('レストラン用') ]));
   potluckSplitStore.dispatch(setParticipants(seven));
   potluckSplitStore.dispatch(setDishes(categories));
-  assert.deepEqual(mealSplitStore.getState().mealSplit.participants.map(p => p.name), ['レストラン用']);
-  assert.equal(mealSplitStore.getState().mealSplit.dishes.length, 0);
-  assert.equal(potluckSplitStore.getState().mealSplit.participants.length, 7);
-  assert.equal(potluckSplitStore.getState().mealSplit.dishes.length, 5);
+  assert.deepEqual(mealSplitStore.getState().itemSplit.participants.map(p => p.name), ['レストラン用']);
+  assert.equal(mealSplitStore.getState().itemSplit.dishes.length, 0);
+  assert.equal(potluckSplitStore.getState().itemSplit.participants.length, 7);
+  assert.equal(potluckSplitStore.getState().itemSplit.dishes.length, 5);
   const routeMarkup = (basePath, potluck, path) => renderToStaticMarkup(createElement(MemoryRouter, { initialEntries: [path] },
     createElement(Routes, null, createElement(Route, { path: basePath + '/*', element: createElement(MealSplitRoutes, { basePath, potluck }) }))));
   const mealRoute = routeMarkup('/meal-split', false, '/meal-split/participants');
@@ -373,6 +389,14 @@ try {
   assert.match(potluckRoute, /酒代は飲む人だけ、料理代は全員/);
   assert.match(potluckRoute, /入力する費目/);
   assert.match(potluckRoute, /立替を追加/);
+  const dedicatedRouteMarkup = (path, routePath, element) => renderToStaticMarkup(createElement(MemoryRouter, { initialEntries: [path] },
+    createElement(Routes, null, createElement(Route, { path: routePath, element }))));
+  const mealToolRoute = dedicatedRouteMarkup('/meal-split/participants', '/meal-split/*', createElement(MealToolRoutes));
+  const potluckToolRoute = dedicatedRouteMarkup('/potluck-split/participants', '/potluck-split/*', createElement(PotluckToolRoutes));
+  assert.match(mealToolRoute, /レストランで食べた分だけ割る/);
+  assert.doesNotMatch(mealToolRoute, /持ち寄り飲み会を精算する/);
+  assert.match(potluckToolRoute, /持ち寄り飲み会を精算する/);
+  assert.doesNotMatch(potluckToolRoute, /レストランで食べた分だけ割る/);
   const restaurantLink = encodeURIComponent(btoa(encodeURIComponent(JSON.stringify({ version: 2, participants: seven, dishes: [oldSingle], options: defaults }))));
   const restaurantResult = routeMarkup('/meal-split', false, '/meal-split/result?data=' + restaurantLink);
   assert.match(restaurantResult, /レストランで食べた分だけ割る/);
@@ -385,9 +409,9 @@ try {
   const landingMarkup = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(Landing)));
   assert.equal((landingMarkup.match(/計算する/g) ?? []).length, 4);
   assert.match(landingMarkup, /お酒を飲まない人がいる飲み会/);
-  potluckSplitStore.dispatch(resetMealSplit());
-  assert.equal(mealSplitStore.getState().mealSplit.participants.length, 1);
-  mealSplitStore.dispatch(resetMealSplit());
+  potluckSplitStore.dispatch(resetItemSplit());
+  assert.equal(mealSplitStore.getState().itemSplit.participants.length, 1);
+  mealSplitStore.dispatch(resetItemSplit());
   console.log('レストラン入力・持ち寄り入力・ツール別データ分離: 検証OK');
   console.log('7人・5費目・複数立替・費目別参加者・v3共有データ: 検証OK');
   console.log('配分・端数・精算・旧/新共有データ: 検証OK');

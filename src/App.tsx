@@ -1,14 +1,14 @@
-import { Footer } from './components/templates/Footer';
-import { Background } from './components/templates/Background';
+import { Background, Footer } from './shared/components';
 import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { setPeople, setMembers, setRounding, setLegacyEqual, setTotalParticipants } from './warimaru/store/peopleSlice';
-import { decodeEqualShareData } from './warimaru/domain/usecases/shareData';
+import { setPeople, setMembers, setRounding, setLegacyEqual, setTotalParticipants } from './tools/equal-split/store/peopleSlice';
+import { decodeEqualShareData } from './tools/equal-split/domain/usecases/shareData';
 import { Landing } from './pages/Landing';
-import { SimpleWarikanRoutes } from './simple-warikan/SimpleWarikanRoutes';
-import { MealSplitRoutes } from './waketabe/Routes';
-import { EqualSplitRoutes } from './warimaru/Routes';
+import { SimpleWarikanRoutes } from './tools/simple-split/SimpleWarikanRoutes';
+import { MealSplitRoutes } from './tools/meal-split/Routes';
+import { PotluckSplitRoutes } from './tools/potluck-split/Routes';
+import { EqualSplitRoutes } from './tools/equal-split/Routes';
 
 type LegacyToolRedirectProps = {
   from: string;
@@ -31,8 +31,8 @@ const AppRoutes = () => (
       <Route path="/simple/*" element={<SimpleWarikanRoutes />} />
       <Route path="/equal-split/*" element={<EqualSplitRoutes basePath="/equal-split" />} />
       <Route path="/meal-split" element={<Navigate to="/meal-split/participants" replace />} />
-      <Route path="/meal-split/*" element={<MealSplitRoutes basePath="/meal-split" />} />
-      <Route path="/potluck-split/*" element={<MealSplitRoutes basePath="/potluck-split" potluck />} />
+      <Route path="/meal-split/*" element={<MealSplitRoutes />} />
+      <Route path="/potluck-split/*" element={<PotluckSplitRoutes />} />
       {/* 旧リンク互換 */}
       <Route path="/result" element={<LegacyToolRedirect from="/result" to="/equal-split/result" />} />
       <Route path="/warimaru/*" element={<LegacyToolRedirect from="/warimaru" to="/equal-split" />} />
