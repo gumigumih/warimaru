@@ -107,6 +107,17 @@ body {
   filter: brightness(1.05);
 }
 
+.btn-potluck-split {
+  background: linear-gradient(90deg, #10b981, #14b8a6, #06b6d4);
+  color: #fff;
+  border: none;
+  box-shadow: 0 12px 30px rgba(16, 185, 129, 0.28);
+}
+
+.btn-potluck-split:hover {
+  filter: brightness(1.05);
+}
+
 .btn-simple {
   background: linear-gradient(135deg, #334155, #64748b);
   color: #fff;

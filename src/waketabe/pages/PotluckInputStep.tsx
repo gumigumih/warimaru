@@ -8,7 +8,7 @@ import { parseAmount, adjustedAmount, defaultSplitOptions } from '../../domain/s
 import { getDishPayments } from '../domain/usecases/dishPayments';
 import { decodeMealShareData } from '../domain/usecases/shareData';
 
-const fieldClass = 'h-12 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm focus:border-amber-400 focus:ring-amber-200';
+const fieldClass = 'h-12 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm focus:border-emerald-400 focus:ring-emerald-200';
 const createPayment = (): DishPayment => ({ id: crypto.randomUUID(), paidBy: '', amount: '' });
 
 export const PotluckInputStep = ({ participants, options = defaultSplitOptions, onComplete, onBack, initialDishes = [], onClear }: {
@@ -144,11 +144,11 @@ export const PotluckInputStep = ({ participants, options = defaultSplitOptions, 
           <div className="flex flex-wrap gap-2">
             {eligible.map(p => <button key={p.id} type="button" aria-pressed={dish.eaters.includes(p.id)}
               onClick={() => updateDish({ eaters: dish.eaters.includes(p.id) ? dish.eaters.filter(id => id !== p.id) : [...dish.eaters, p.id] })}
-              className={'px-3 py-2 rounded-full border text-sm font-medium transition-colors ' + (dish.eaters.includes(p.id) ? 'bg-amber-50 border-amber-300 text-amber-700' : 'bg-white border-slate-200 text-slate-700 hover:border-amber-200')}>
+              className={'px-3 py-2 rounded-full border text-sm font-medium transition-colors ' + (dish.eaters.includes(p.id) ? 'bg-emerald-50 border-emerald-300 text-emerald-700' : 'bg-white border-slate-200 text-slate-700 hover:border-emerald-200')}>
               {p.name || '名前未入力'}{p.burdenRate !== 1 ? ' (' + Math.round(p.burdenRate * 100) + '%)' : ''}
             </button>)}
           </div>
-          <button type="button" className="text-sm font-semibold text-amber-700" onClick={() => updateDish({ eaters: eligible.map(p => p.id) })}>全員を選ぶ</button>
+          <button type="button" className="text-sm font-semibold text-emerald-700" onClick={() => updateDish({ eaters: eligible.map(p => p.id) })}>全員を選ぶ</button>
           {participants.some(p => p.displayOnly) && <p className="text-xs text-slate-500">表示のみの参加者は負担する人から除外されます。</p>}
         </div>
 
